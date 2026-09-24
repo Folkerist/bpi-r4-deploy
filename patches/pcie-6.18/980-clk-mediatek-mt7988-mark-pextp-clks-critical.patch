@@ -1,7 +1,7 @@
 From: OpenWrt BPI-R4 Pro PCIe debugging (vendor-derived, NOT upstream)
 Subject: [PATCH] clk: mediatek: mt7988: mark pextp_p0..p3_sel clocks as critical
 
-DIAGNOSTIC / VENDOR-DERIVED PATCH. Not upstream, not in 6.18.y.
+VENDOR-DERIVED FIX. Not upstream, not in 6.18.y.
 
 Port of the pextp part of MediaTek's SDK patch
 "999-clk-03-clk-mediatek-mt7988-mark-spi0-and-pextp-clks-as-critical.patch"
@@ -20,10 +20,15 @@ marks these clocks critical in their SDK (and in a later SDK commit also
 adds them as "pextp_clk" to the PCIe nodes, "to fix the PCIe issue
 happened in PCIe L1ss mode").
 
-Whether this is the root cause of the random "PCIe link down, LTSSM
-detect.quiet" on all four ports of BPI-R4 Pro is UNVERIFIED. Test first
-with the "clk_ignore_unused" kernel command line argument; keep this
-patch only if that measurably helps.
+Verified on BPI-R4 Pro 8X (BE14 on pcie0/1, NVMe on pcie2/3), OpenWrt
+r36531, kernel 6.18.52, 2026-09-24:
+  - stock clocks:             2/6 boots with all 4 links up
+  - clk_ignore_unused:       17/17
+  - this patch (no cmdline): 16/16 (10 warm, 5 cold, 1 after sysupgrade),
+    although "clk: Disabling unused clocks" still fires 50..500 ms after
+    the PCIe probe starts, i.e. inside the reset/link-training window.
+Failures without it were "PCIe link down, LTSSM detect.active (0x1000001)"
+or "detect.quiet (0x0)", probe -110, on any subset of the four ports.
 
 Keeping the clocks ungated costs a negligible amount of power.
 ---
