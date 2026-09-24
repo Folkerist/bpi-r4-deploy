@@ -11,7 +11,7 @@ if ping -c2 -W5 -I wwan0 8.8.8.8 >/dev/null 2>&1 || ping -c2 -W5 -I wwan0 1.1.1.
 		rm -f "$F"
 		min=$(( ($(date +%s) - start) / 60 ))
 		logger -t wwan-watchdog "link restored after $n failed checks (~$min min)"
-		/usr/bin/tg-send.sh "LTE восстановлен: связи не было ~$min мин, неудачных проверок: $n" &
+		/usr/bin/mail-send.sh "LTE restored" "LTE восстановлен: связи не было ~$min мин, неудачных проверок: $n" &
 	fi
 	exit 0
 fi
