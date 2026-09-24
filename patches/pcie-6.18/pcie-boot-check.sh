@@ -10,6 +10,9 @@ EXPECTED=${EXPECTED:-3}
 LOG=/root/pcie-boots.log
 
 sleep 15
+# boot type: before rebooting run  echo warm > /root/next-boot; reboot
+#                               or  echo cold > /root/next-boot; poweroff
+BT=$(cat /root/next-boot 2>/dev/null || echo '?'); rm -f /root/next-boot
 N=$(ls /sys/bus/pci/devices 2>/dev/null | grep -c ':01:00.0$')
 DEVS=$(ls /sys/bus/pci/devices 2>/dev/null | grep ':01:00.0$' | cut -c1-4 | tr '\n' ',')
 CIU=$(grep -q clk_ignore_unused /proc/cmdline && echo ciu || echo -)
@@ -18,7 +21,7 @@ if [ "$N" -ge "$EXPECTED" ]; then RES=OK; else RES=FAIL; fi
 DOWN=$(dmesg | grep -oE '11[23][0-9]0000\.pcie: PCIe link down.*' | sed 's/PCIe link down, current LTSSM state: //' | tr '\n' ';')
 CLKT=$(dmesg | grep -m1 -E 'clk: (Disabling|Not disabling) unused clocks' | cut -d']' -f1 | tr -d '[ ')
 PCIT=$(dmesg | grep -E 'mtk-pcie-gen3 .*: host bridge' | tail -1 | cut -d']' -f1 | tr -d '[ ')
-echo "$(date '+%F %T') $RES eps=$N/$EXPECTED [$DEVS] $CIU clk_unused@${CLKT:-?} pcie_probe@${PCIT:-?} down=[$DOWN] k=[$KVER]" >> $LOG
+echo "$(date '+%F %T') $RES $BT eps=$N/$EXPECTED [$DEVS] $CIU clk_unused@${CLKT:-?} pcie_probe@${PCIT:-?} down=[$DOWN] k=[$KVER]" >> $LOG
 
 if [ "$RES" = FAIL ]; then
 	F=/root/pcie-fail-$(date +%Y%m%d-%H%M%S).txt
