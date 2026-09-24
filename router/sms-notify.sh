@@ -8,11 +8,13 @@ trap 'rmdir "$LOCK"' EXIT
 
 for s in $(mmcli -m any --messaging-list-sms 2>/dev/null | grep -o '/org/freedesktop/ModemManager1/SMS/[0-9]*'); do
 	info=$(mmcli -s "$s" -K 2>/dev/null) || continue
-	get() { echo "$info" | sed -n "s/^$1 *: //p" | head -1; }
+	get() { printf '%s\n' "$info" | sed -n "s/^$1 *: //p" | head -1; }
+	# mmcli -K prints non-ASCII bytes as octal escapes (\320\222) and CR/LF as \r\n
+	dec() { printf '%b' "$(printf '%s\n' "$1" | sed 's/\\\([0-7][0-7][0-7]\)/\\0\1/g')" | tr -d '\r'; }
 	[ "$(get sms.properties.state)" = received ] || continue
-	num=$(get sms.content.number)
+	num=$(dec "$(get sms.content.number)")
 	ts=$(get sms.properties.timestamp)
-	text=$(get sms.content.text)
+	text=$(dec "$(get sms.content.text)")
 	if /usr/bin/mail-send.sh "SMS from $num" "SMS от $num
 $ts
 
