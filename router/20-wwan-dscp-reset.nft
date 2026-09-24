@@ -1,0 +1,9 @@
+## Included into table inet fw4 from /etc/nftables.d/.
+## The LTE operator (Yota) marks all downstream packets DSCP AF11 (tos 0x28). mac80211 maps
+## that to priority 1 = WMM Background (AC_BK), which capped LTE -> Wi-Fi traffic at ~20 Mbit/s
+## while wired clients got ~100. Clear the mark on packets arriving from the modem.
+chain wwan_dscp_reset {
+	type filter hook prerouting priority mangle; policy accept;
+	iifname "wwan*" ip dscp set cs0 counter
+	iifname "wwan*" ip6 dscp set cs0 counter
+}
