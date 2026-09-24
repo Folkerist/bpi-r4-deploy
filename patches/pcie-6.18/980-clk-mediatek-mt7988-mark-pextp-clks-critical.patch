@@ -1,0 +1,58 @@
+From: OpenWrt BPI-R4 Pro PCIe debugging (vendor-derived, NOT upstream)
+Subject: [PATCH] clk: mediatek: mt7988: mark pextp_p0..p3_sel clocks as critical
+
+DIAGNOSTIC / VENDOR-DERIVED PATCH. Not upstream, not in 6.18.y.
+
+Port of the pextp part of MediaTek's SDK patch
+"999-clk-03-clk-mediatek-mt7988-mark-spi0-and-pextp-clks-as-critical.patch"
+(mtk-openwrt-feeds, 25.12 branch) to Linux 6.18. The SPI0 part of the
+vendor patch is intentionally NOT included (OpenWrt's
+255-clk-mediatek-mt7988-infracfg-SPI0-clocks-are-not-critical.patch
+deliberately does the opposite).
+
+CLK_TOP_PEXTP_P0_SEL..CLK_TOP_PEXTP_P3_SEL (topckgen CLK_CFG_13/14) have no
+consumer in the mainline MT7988 device tree, so clk_disable_unused()
+(late_initcall_sync) gates them if they were left enabled by the boot ROM /
+bootloader. The mtk-pcie-gen3 driver probes asynchronously
+(PROBE_PREFER_ASYNCHRONOUS) and on BPI-R4 Pro its probe is deferred to the
+late_initcall stage, i.e. it may race with clk_disable_unused(). MediaTek
+marks these clocks critical in their SDK (and in a later SDK commit also
+adds them as "pextp_clk" to the PCIe nodes, "to fix the PCIe issue
+happened in PCIe L1ss mode").
+
+Whether this is the root cause of the random "PCIe link down, LTSSM
+detect.quiet" on all four ports of BPI-R4 Pro is UNVERIFIED. Test first
+with the "clk_ignore_unused" kernel command line argument; keep this
+patch only if that measurably helps.
+
+Keeping the clocks ungated costs a negligible amount of power.
+---
+ drivers/clk/mediatek/clk-mt7988-topckgen.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+--- a/drivers/clk/mediatek/clk-mt7988-topckgen.c
++++ b/drivers/clk/mediatek/clk-mt7988-topckgen.c
+@@ -225,15 +225,15 @@ static const struct mtk_mux top_muxes[] = {
+ 				   0x0d0, 0x0d4, 0x0d8, 0, 2, 7, 0x1C4, 21, CLK_IS_CRITICAL),
+ 	MUX_GATE_CLR_SET_UPD_FLAGS(CLK_TOP_INFRA_F26M_SEL, "csw_infra_f26m_sel", sspxtp_parents,
+ 				   0x0d0, 0x0d4, 0x0d8, 8, 1, 15, 0x1C4, 22, CLK_IS_CRITICAL),
+-	MUX_GATE_CLR_SET_UPD(CLK_TOP_PEXTP_P0_SEL, "pextp_p0_sel", sspxtp_parents, 0x0d0, 0x0d4,
+-			     0x0d8, 16, 1, 23, 0x1C4, 23),
+-	MUX_GATE_CLR_SET_UPD(CLK_TOP_PEXTP_P1_SEL, "pextp_p1_sel", sspxtp_parents, 0x0d0, 0x0d4,
+-			     0x0d8, 24, 1, 31, 0x1C4, 24),
++	MUX_GATE_CLR_SET_UPD_FLAGS(CLK_TOP_PEXTP_P0_SEL, "pextp_p0_sel", sspxtp_parents, 0x0d0,
++				   0x0d4, 0x0d8, 16, 1, 23, 0x1C4, 23, CLK_IS_CRITICAL),
++	MUX_GATE_CLR_SET_UPD_FLAGS(CLK_TOP_PEXTP_P1_SEL, "pextp_p1_sel", sspxtp_parents, 0x0d0,
++				   0x0d4, 0x0d8, 24, 1, 31, 0x1C4, 24, CLK_IS_CRITICAL),
+ 	/* CLK_CFG_14 */
+-	MUX_GATE_CLR_SET_UPD(CLK_TOP_PEXTP_P2_SEL, "pextp_p2_sel", sspxtp_parents, 0x0e0, 0x0e4,
+-			     0x0e8, 0, 1, 7, 0x1C4, 25),
+-	MUX_GATE_CLR_SET_UPD(CLK_TOP_PEXTP_P3_SEL, "pextp_p3_sel", sspxtp_parents, 0x0e0, 0x0e4,
+-			     0x0e8, 8, 1, 15, 0x1C4, 26),
++	MUX_GATE_CLR_SET_UPD_FLAGS(CLK_TOP_PEXTP_P2_SEL, "pextp_p2_sel", sspxtp_parents, 0x0e0,
++				   0x0e4, 0x0e8, 0, 1, 7, 0x1C4, 25, CLK_IS_CRITICAL),
++	MUX_GATE_CLR_SET_UPD_FLAGS(CLK_TOP_PEXTP_P3_SEL, "pextp_p3_sel", sspxtp_parents, 0x0e0,
++				   0x0e4, 0x0e8, 8, 1, 15, 0x1C4, 26, CLK_IS_CRITICAL),
+ 	MUX_GATE_CLR_SET_UPD(CLK_TOP_DA_XTP_GLB_P0_SEL, "da_xtp_glb_p0_sel", da_xtp_glb_p0_parents,
+ 			     0x0e0, 0x0e4, 0x0e8, 16, 1, 23, 0x1C4, 27),
+ 	MUX_GATE_CLR_SET_UPD(CLK_TOP_DA_XTP_GLB_P1_SEL, "da_xtp_glb_p1_sel", da_xtp_glb_p0_parents,
