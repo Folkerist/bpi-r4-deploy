@@ -301,3 +301,29 @@ MediaTek в SDK подключает к каждому узлу PCIe именн�
 PCIe MT7988 нужны, но не заявлены в DT; это происходит во время асинхронной отложенной пробы
 `mtk-pcie-gen3`. Тайминг PERST# (22fc8822) и `.shutdown` (7a0e17e7) здесь ни при чём, 979 для
 этой платы не нужен. Итоговое решение: **980** (или без пересборки: `clk_ignore_unused`).
+
+## Переход на официальный snapshot (24.09.2026)
+
+Самосборка ломает `apk add kmod-*`: на сервере нет модулей под её хеш ядра. Поэтому система
+переведена на официальный snapshot, а вместо 980 используется `clk_ignore_unused`
+(17/17, см. выше). Параметр хранится в окружении U-Boot, sysupgrade его не стирает.
+
+1. `fw_setenv bootargs "console=ttyS0,115200n1 pci=pcie_bus_perf root=/dev/fit0 rootwait clk_ignore_unused"`
+2. Образ собран в firmware-selector (SNAPSHOT, `bananapi_bpi-r4-pro-8x`). Поверх пакетов по
+   умолчанию добавлены:
+   ```
+   luci-ssl luci-i18n-base-ru luci-i18n-firewall-ru luci-i18n-package-manager-ru luci-app-attendedsysupgrade modemmanager luci-proto-modemmanager kmod-usb-net-qmi-wwan kmod-usb-net-cdc-mbim kmod-usb-serial-option kmod-usb-wdm kmod-mt7996e block-mount kmod-fs-ext4 kmod-fs-exfat kmod-usb-storage nvme-cli
+   ```
+   Остальное железо платы (MxL862xx, SFP, AS21xxx, прошивки MT7996/WO, NVMe, USB3, вентилятор,
+   RTC) уже есть в профиле устройства.
+3. `sysupgrade -T` и затем `sysupgrade -v` с сохранением настроек.
+4. Модем Quectel RM520N-GL: в `network.mm.device` нужен путь sysfs, а не путь D-Bus
+   (`/org/freedesktop/ModemManager1/Modem/N` меняется, отсюда `couldn't find modem`):
+   ```sh
+   uci set network.mm.device="$(mmcli -m any -K | sed -n 's/^modem\.generic\.device *: *//p')"
+   uci commit network; ifup mm
+   ```
+
+Результат на r36539 (ядро 6.18.52): PCIe `eps=4/4`, оба SSD, 3 радио Wi-Fi, модем LTE поднимается
+сам после перезагрузки, `apk add` (включая kmod) работает. Когда 980 примут в OpenWrt,
+`clk_ignore_unused` можно будет убрать.
