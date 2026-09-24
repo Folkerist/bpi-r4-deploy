@@ -3,10 +3,11 @@
 # Install:  cp pcie-boot-check.sh /root/ && chmod +x /root/pcie-boot-check.sh
 #           add line  "/root/pcie-boot-check.sh &"  to /etc/rc.local BEFORE "exit 0"
 # Result:   one line per boot in /root/pcie-boots.log, dmesg of failed boots in /root/pcie-fail-*.txt
+#           on a failed boot also an e-mail via /usr/bin/mail-send.sh (router/mail-send.sh), if installed
 #
 # EXPECTED = number of PCIe endpoints that must be present
-# (BE14 = 2 links: 0000 + 0001, plus 1 NVMe SSD = 3). Adjust if your setup differs.
-EXPECTED=${EXPECTED:-3}
+# (BE14 = 2 links: 0000 + 0001, plus 2 NVMe SSDs = 4). Adjust if your setup differs.
+EXPECTED=${EXPECTED:-4}
 LOG=/root/pcie-boots.log
 
 sleep 15
@@ -33,4 +34,20 @@ if [ "$RES" = FAIL ]; then
 		echo "--- gpio ---"
 		grep -iE 'gpio-(63|79) ' /sys/kernel/debug/gpio 2>/dev/null
 	} > "$F" 2>&1
+fi
+
+# Mail the failure; LTE may not be up yet this early in boot, so retry for ~10 minutes.
+if [ "$RES" = FAIL ] && [ -x /usr/bin/mail-send.sh ]; then
+	BODY="$(tail -1 $LOG)
+
+Ожидалось PCIe-устройств: $EXPECTED, найдено: $N [$DEVS].
+cmdline: $(cat /proc/cmdline)
+$([ "$CIU" = - ] && echo "ВНИМАНИЕ: в bootargs нет clk_ignore_unused (без патча 980 это и есть причина сбоя).")
+Подробности: $F
+
+$(head -60 "$F")"
+	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
+		/usr/bin/mail-send.sh "PCIe FAIL on $(uci -q get system.@system[0].hostname)" "$BODY" && break
+		sleep 30
+	done
 fi
