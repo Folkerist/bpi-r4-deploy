@@ -269,3 +269,18 @@ sysupgrade в статистику не включать (её обслужив�
 `pextp_sel`, `sspxtp_sel`…), ещё предстоит установить по `clk_summary` удачной загрузки
 (клоки с `hardware_enable = Y` и `enable_cnt = 0`), и только после этого делать точечный
 патч вместо 980.
+
+### clk_summary удачной загрузки с `clk_ignore_unused`
+
+Включены аппаратно (`hardware_enable = Y`), но без потребителей (`enable_cnt = 0`), т. е. именно
+их погасил бы `clk_disable_unused()`:
+
+- `pextp_p0_sel` … `pextp_p3_sel` (26 МГц, по одному на порт)
+- `da_xtp_glb_p0_sel` … `da_xtp_glb_p3_sel` (100 МГц)
+- `pextp_sel` (20 МГц), `pcie_mbist_250m_sel` (250 МГц)
+
+Все клоки, заявленные узлами PCIe в DT (`infra_pcie_pipe_ck_p*`, `infra_pcie_gfmux_tl_ck_p*`,
+`infra_133m_pcie_ck_p*`, `infra_pcie_peri_ck_26m_ck_p*`), имеют `enable_cnt >= 1`, их гасить не будут.
+MediaTek в SDK подключает к каждому узлу PCIe именно `pextp_pN_sel` (`pextp_clk`) и помечает их
+критичными, поэтому первый кандидат — `pextp_p*_sel`, это и делает патч 980. Если с 980 без
+`clk_ignore_unused` сбои останутся, следующий кандидат — `da_xtp_glb_p*_sel`.
