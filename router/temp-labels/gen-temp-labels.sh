@@ -19,11 +19,18 @@ for s in $(uci -q show wireless | sed -n "s/^wireless\.\([^.]*\)=wifi-device$/\1
 	add "mt7996_phy0.$n / temp1" "Wi-Fi $b"
 done
 
-# Ethernet PHYs with a temperature sensor: map mdio_bus:X_mii:YY to the port using it
-for d in /sys/class/net/*; do
-	[ -e "$d/phydev" ] || continue
-	p=$(readlink -f "$d/phydev")
-	add "$(basename "$p" | tr '-' '_') / temp1" "Port $(basename "$d") PHY"
+# Ethernet PHYs with a temperature sensor: the PHY device links to its port via attached_dev
+# (fallback: the port's phydev link)
+for h in /sys/class/hwmon/hwmon*; do
+	case "$(cat $h/name)" in mdio*) ;; *) continue ;; esac
+	port=""
+	[ -e $h/device/attached_dev ] && port=$(basename "$(readlink -f $h/device/attached_dev)")
+	if [ -z "$port" ]; then
+		for d in /sys/class/net/*; do
+			[ -e "$d/phydev" ] && [ "$(readlink -f "$d/phydev")" = "$(readlink -f $h/device)" ] && port=$(basename "$d")
+		done
+	fi
+	[ -n "$port" ] && add "$(cat $h/name) / temp1" "Port $port PHY" || add "$(cat $h/name) / temp1" "Switch PHY ${h##*hwmon}"
 done
 
 # SFP cages
