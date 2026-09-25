@@ -11,7 +11,6 @@ services:
       - TZ=Europe/Moscow
     volumes:
       - /mnt/nvme/homeassistant/config:/config
-      - /etc/localtime:/etc/localtime:ro
     depends_on:
       - matter-server
 
