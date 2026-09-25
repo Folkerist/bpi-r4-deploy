@@ -22,7 +22,8 @@ services:
     container_name: nextcloud-redis
     network_mode: host
     restart: unless-stopped
-    command: redis-server --bind 127.0.0.1 --port 6379 --save "" --appendonly no
+    # persistence is off (pure cache), so the ARM64 COW self-test that fails on this kernel is moot
+    command: redis-server --bind 127.0.0.1 --port 6379 --save "" --appendonly no --ignore-warnings ARM64-COW-BUG
 
   nextcloud:
     image: nextcloud:stable-apache
