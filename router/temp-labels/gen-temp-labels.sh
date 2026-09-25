@@ -20,7 +20,7 @@ for s in $(uci -q show wireless | sed -n "s/^wireless\.\([^.]*\)=wifi-device$/\1
 done
 
 # Ethernet PHYs with a temperature sensor: the PHY device links to its port via attached_dev
-# (fallback: the port's phydev link)
+# (fallback: the port's phydev link, then the port's DT phy-handle == the PHY's DT phandle)
 for h in /sys/class/hwmon/hwmon*; do
 	case "$(cat $h/name)" in mdio*) ;; *) continue ;; esac
 	port=""
@@ -28,6 +28,12 @@ for h in /sys/class/hwmon/hwmon*; do
 	if [ -z "$port" ]; then
 		for d in /sys/class/net/*; do
 			[ -e "$d/phydev" ] && [ "$(readlink -f "$d/phydev")" = "$(readlink -f $h/device)" ] && port=$(basename "$d")
+		done
+	fi
+	ph=$(hexdump -v -e '/1 "%02x"' $h/device/of_node/phandle 2>/dev/null)
+	if [ -z "$port" ] && [ -n "$ph" ]; then
+		for d in /sys/class/net/*; do
+			[ "$(hexdump -v -e '/1 "%02x"' "$d/of_node/phy-handle" 2>/dev/null)" = "$ph" ] && port=$(basename "$d")
 		done
 	fi
 	[ -n "$port" ] && add "$(cat $h/name) / temp1" "Port $port PHY" || add "$(cat $h/name) / temp1" "Switch PHY ${h##*hwmon}"
