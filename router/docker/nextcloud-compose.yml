@@ -31,11 +31,13 @@ services:
     network_mode: host
     restart: unless-stopped
     depends_on: [nextcloud-db, nextcloud-redis]
-    # uhttpd holds :80, so Apache listens on :8080 (idempotent: safe on every restart)
+    # uhttpd holds :80, so Apache listens on :8080 (idempotent: safe on every restart).
+    # PHP JIT is off: on this ARM64 box it made every Apache child segfault after a while.
     entrypoint:
       - sh
       - -c
       - |
+        printf 'opcache.jit=disable\nopcache.jit_buffer_size=0\n' > /usr/local/etc/php/conf.d/zz-no-jit.ini
         sed -i 's/^Listen 80$$/Listen 8080/' /etc/apache2/ports.conf
         sed -i 's/<VirtualHost \*:80>/<VirtualHost *:8080>/' /etc/apache2/sites-enabled/000-default.conf
         exec /entrypoint.sh apache2-foreground
