@@ -84,8 +84,8 @@ function relabel() {
 	}
 }
 
-/* Colour coding: green / yellow / red with per-sensor-type thresholds [warm, hot] in °C.
- * The tinted fill behind each item shows how close the sensor is to its "hot" level. */
+/* Colour coding: each value becomes a bar (like the memory bars) coloured green / yellow / red
+ * by per-sensor-type thresholds [warm, hot] in °C; the fill shows how close it is to "hot". */
 var LEVELS = [
 	[ /^CPU/,           70, 85 ],
 	[ /SSD|NVMe/,       55, 70 ],
@@ -97,22 +97,19 @@ var DEFAULT_LEVEL = [ 60, 80 ];
 var CLASSES = [ 'tl-green', 'tl-yellow', 'tl-red' ];
 
 var CSS = [
-	'.tl-green  { --tl-c: #22c55e; --tl-bg: rgba(34, 197, 94, 0.14); }',
-	'.tl-yellow { --tl-c: #eab308; --tl-bg: rgba(234, 179, 8, 0.18); }',
-	'.tl-red    { --tl-c: #ef4444; --tl-bg: rgba(239, 68, 68, 0.22); }',
-	'.temp-status-list-item.tl-green, .temp-status-list-item.tl-yellow, .temp-status-list-item.tl-red {',
-	'	border-left: 4px solid var(--tl-c) !important;',
-	'	background: linear-gradient(90deg, var(--tl-bg) var(--tl-pct, 0%), transparent var(--tl-pct, 0%)) !important;',
-	'	transition: background .6s ease, border-color .6s ease; }',
-	'tr.tl-green > td:first-child, tr.tl-yellow > td:first-child, tr.tl-red > td:first-child {',
-	'	box-shadow: inset 4px 0 0 var(--tl-c); }',
-	'tr.tl-green, tr.tl-yellow, tr.tl-red {',
-	'	background: linear-gradient(90deg, var(--tl-bg) var(--tl-pct, 0%), transparent var(--tl-pct, 0%)) !important; }',
-	'.tl-green .temp-status-temp-value, .tl-yellow .temp-status-temp-value, .tl-red .temp-status-temp-value,',
-	'tr.tl-green > td:nth-child(2), tr.tl-yellow > td:nth-child(2), tr.tl-red > td:nth-child(2) {',
-	'	color: var(--tl-c) !important; font-weight: 600; font-variant-numeric: tabular-nums; }',
-	'.tl-red .temp-status-temp-value, tr.tl-red > td:nth-child(2) { animation: tl-pulse 1.6s ease-in-out infinite; }',
-	'@keyframes tl-pulse { 50% { opacity: .45; } }'
+	'.tl-green  { --tl-a: #16a34a; --tl-b: #4ade80; --tl-t: rgba(34, 197, 94, 0.16); --tl-g: rgba(34, 197, 94, 0); }',
+	'.tl-yellow { --tl-a: #ca8a04; --tl-b: #facc15; --tl-t: rgba(234, 179, 8, 0.18); --tl-g: rgba(234, 179, 8, 0); }',
+	'.tl-red    { --tl-a: #dc2626; --tl-b: #f87171; --tl-t: rgba(239, 68, 68, 0.20); --tl-g: rgba(239, 68, 68, 0.55); }',
+	'.tl-bar {',
+	'	display: block; box-sizing: border-box; min-width: 7em; height: 1.75em; line-height: 1.75em;',
+	'	border-radius: 999px; overflow: hidden; text-align: center; white-space: nowrap;',
+	'	color: #fff !important; font-weight: 600; font-variant-numeric: tabular-nums;',
+	'	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);',
+	'	background: linear-gradient(90deg, var(--tl-a), var(--tl-b)) 0 0 / var(--tl-pct, 0%) 100% no-repeat, var(--tl-t);',
+	'	transition: background-size .8s ease; }',
+	'.temp-status-temp-value.tl-bar { display: inline-block; width: 7em; margin-right: .25em; vertical-align: middle; }',
+	'.tl-red .tl-bar, .tl-bar.tl-red { animation: tl-glow 1.6s ease-in-out infinite; }',
+	'@keyframes tl-glow { 0%, 100% { box-shadow: 0 0 0 0 var(--tl-g); } 50% { box-shadow: 0 0 10px 2px var(--tl-g); } }'
 ].join('\n');
 
 function level(name) {
@@ -123,18 +120,29 @@ function level(name) {
 
 function paintItem(box, nameEl, valEl) {
 	if (!box || !nameEl || !valEl) return;
-	var t = parseFloat(valEl.textContent), lv = level(nameEl.textContent.trim()), c;
+	var bar = valEl, t = parseFloat(valEl.textContent), lv = level(nameEl.textContent.trim()), c, i;
+	/* table view: wrap the value into a bar; list view: the value span becomes the bar */
+	if (valEl.tagName == 'TD') {
+		bar = valEl.querySelector('.tl-bar');
+		if (!bar) {
+			if (isNaN(t)) return;
+			bar = E('span', { 'class': 'tl-bar' }, valEl.textContent.trim());
+			valEl.textContent = '';
+			valEl.appendChild(bar);
+		}
+	}
 	if (isNaN(t)) {
-		box.classList.remove.apply(box.classList, CLASSES);
+		bar.classList.remove.apply(bar.classList, CLASSES.concat([ 'tl-bar' ]));
 		return;
 	}
 	c = (t >= lv[2]) ? 2 : (t >= lv[1]) ? 1 : 0;
-	for (var i = 0; i < CLASSES.length; i++)
-		box.classList.toggle(CLASSES[i], i == c);
+	bar.classList.add('tl-bar');
+	for (i = 0; i < CLASSES.length; i++)
+		bar.classList.toggle(CLASSES[i], i == c);
 	/* fill: 25 °C = empty, 10 °C above "hot" = full */
 	var pct = Math.max(4, Math.min(100, (t - 25) * 100 / (lv[2] + 10 - 25)));
-	box.style.setProperty('--tl-pct', pct.toFixed(0) + '%');
-	valEl.title = 'норма < ' + lv[1] + ' °C, тепло ' + lv[1] + '–' + lv[2] + ' °C, горячо ≥ ' + lv[2] + ' °C';
+	bar.style.setProperty('--tl-pct', pct.toFixed(0) + '%');
+	bar.title = 'норма < ' + lv[1] + ' °C, тепло ' + lv[1] + '–' + lv[2] + ' °C, горячо ≥ ' + lv[2] + ' °C';
 }
 
 function paint() {
