@@ -1,7 +1,7 @@
 #!/bin/sh
 # /usr/bin/gen-temp-labels.sh - builds human-readable names for the luci-app-temp-status widget
 # (Status -> Overview -> Temperature) from the actual hardware, and writes them as a LuCI status
-# include that relabels the widget in the browser. Run at boot (rc.local): hwmon numbers can change.
+# include that relabels the widget in the browser and colours each sensor green/yellow/red. Run at boot (rc.local): hwmon numbers can change.
 OUT=/www/luci-static/resources/view/status/include/28_temp_labels.js
 
 map=""
@@ -84,16 +84,84 @@ function relabel() {
 	}
 }
 
+/* Colour coding: green / yellow / red with per-sensor-type thresholds [warm, hot] in °C.
+ * The tinted fill behind each item shows how close the sensor is to its "hot" level. */
+var LEVELS = [
+	[ /^CPU/,           70, 85 ],
+	[ /SSD|NVMe/,       55, 70 ],
+	[ /PHY/,            70, 90 ],
+	[ /^SFP/,           60, 75 ],
+	[ /^Wi-Fi/,         70, 90 ]
+];
+var DEFAULT_LEVEL = [ 60, 80 ];
+var CLASSES = [ 'tl-green', 'tl-yellow', 'tl-red' ];
+
+var CSS = [
+	'.tl-green  { --tl-c: #22c55e; --tl-bg: rgba(34, 197, 94, 0.14); }',
+	'.tl-yellow { --tl-c: #eab308; --tl-bg: rgba(234, 179, 8, 0.18); }',
+	'.tl-red    { --tl-c: #ef4444; --tl-bg: rgba(239, 68, 68, 0.22); }',
+	'.temp-status-list-item.tl-green, .temp-status-list-item.tl-yellow, .temp-status-list-item.tl-red {',
+	'	border-left: 4px solid var(--tl-c) !important;',
+	'	background: linear-gradient(90deg, var(--tl-bg) var(--tl-pct, 0%), transparent var(--tl-pct, 0%)) !important;',
+	'	transition: background .6s ease, border-color .6s ease; }',
+	'tr.tl-green > td:first-child, tr.tl-yellow > td:first-child, tr.tl-red > td:first-child {',
+	'	box-shadow: inset 4px 0 0 var(--tl-c); }',
+	'tr.tl-green, tr.tl-yellow, tr.tl-red {',
+	'	background: linear-gradient(90deg, var(--tl-bg) var(--tl-pct, 0%), transparent var(--tl-pct, 0%)) !important; }',
+	'.tl-green .temp-status-temp-value, .tl-yellow .temp-status-temp-value, .tl-red .temp-status-temp-value,',
+	'tr.tl-green > td:nth-child(2), tr.tl-yellow > td:nth-child(2), tr.tl-red > td:nth-child(2) {',
+	'	color: var(--tl-c) !important; font-weight: 600; font-variant-numeric: tabular-nums; }',
+	'.tl-red .temp-status-temp-value, tr.tl-red > td:nth-child(2) { animation: tl-pulse 1.6s ease-in-out infinite; }',
+	'@keyframes tl-pulse { 50% { opacity: .45; } }'
+].join('\n');
+
+function level(name) {
+	for (var i = 0; i < LEVELS.length; i++)
+		if (LEVELS[i][0].test(name)) return LEVELS[i];
+	return [ null, DEFAULT_LEVEL[0], DEFAULT_LEVEL[1] ];
+}
+
+function paintItem(box, nameEl, valEl) {
+	if (!box || !nameEl || !valEl) return;
+	var t = parseFloat(valEl.textContent), lv = level(nameEl.textContent.trim()), c;
+	if (isNaN(t)) {
+		box.classList.remove.apply(box.classList, CLASSES);
+		return;
+	}
+	c = (t >= lv[2]) ? 2 : (t >= lv[1]) ? 1 : 0;
+	for (var i = 0; i < CLASSES.length; i++)
+		box.classList.toggle(CLASSES[i], i == c);
+	/* fill: 25 °C = empty, 10 °C above "hot" = full */
+	var pct = Math.max(4, Math.min(100, (t - 25) * 100 / (lv[2] + 10 - 25)));
+	box.style.setProperty('--tl-pct', pct.toFixed(0) + '%');
+	valEl.title = 'норма < ' + lv[1] + ' °C, тепло ' + lv[1] + '–' + lv[2] + ' °C, горячо ≥ ' + lv[2] + ' °C';
+}
+
+function paint() {
+	var i, l = document.querySelectorAll('.temp-status-list-item');
+	for (i = 0; i < l.length; i++)
+		paintItem(l[i], l[i].querySelector('.temp-status-sensor-name'), l[i].querySelector('.temp-status-temp-value'));
+	l = document.querySelectorAll('tr[data-path]');
+	for (i = 0; i < l.length; i++)
+		paintItem(l[i], l[i].children[0], l[i].children[1]);
+}
+
+function update() {
+	relabel();
+	paint();
+}
+
 var observer = null;
 
 return baseclass.extend({
 	title: null,
 	render: function() {
 		if (!observer) {
-			observer = new MutationObserver(relabel);
+			document.head.appendChild(E('style', { 'type': 'text/css' }, CSS));
+			observer = new MutationObserver(update);
 			observer.observe(document.body, { childList: true, subtree: true });
 		}
-		relabel();
+		update();
 		return null;
 	}
 });
