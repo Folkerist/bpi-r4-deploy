@@ -1,0 +1,66 @@
+# Nextcloud on the BPI-R4 Pro: app + PostgreSQL + Redis on /mnt/nvme, user files on /mnt/ssd2.
+# Host network like HA (no Docker bridge/fw4 plumbing): Apache is moved to :8080 because
+# uhttpd (LuCI) owns :80; PostgreSQL and Redis listen on 127.0.0.1 only.
+# Passwords come from /mnt/nvme/nextcloud/.env (created by nextcloud-install.sh).
+# Web UI: http://192.168.1.1:8080  (not reachable from the Internet: fw4 rejects wan input)
+services:
+  nextcloud-db:
+    image: postgres:16-alpine
+    container_name: nextcloud-db
+    network_mode: host
+    restart: unless-stopped
+    command: -c listen_addresses=127.0.0.1 -c port=5432
+    environment:
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - /mnt/nvme/nextcloud/db:/var/lib/postgresql/data
+
+  nextcloud-redis:
+    image: redis:7-alpine
+    container_name: nextcloud-redis
+    network_mode: host
+    restart: unless-stopped
+    command: redis-server --bind 127.0.0.1 --port 6379 --save "" --appendonly no
+
+  nextcloud:
+    image: nextcloud:stable-apache
+    container_name: nextcloud
+    network_mode: host
+    restart: unless-stopped
+    depends_on: [nextcloud-db, nextcloud-redis]
+    # uhttpd holds :80, so Apache listens on :8080 (idempotent: safe on every restart)
+    entrypoint:
+      - sh
+      - -c
+      - |
+        sed -i 's/^Listen 80$$/Listen 8080/' /etc/apache2/ports.conf
+        sed -i 's/<VirtualHost \*:80>/<VirtualHost *:8080>/' /etc/apache2/sites-enabled/000-default.conf
+        exec /entrypoint.sh apache2-foreground
+    environment:
+      - TZ=Europe/Moscow
+      - POSTGRES_HOST=127.0.0.1
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=127.0.0.1
+      - NEXTCLOUD_TRUSTED_DOMAINS=192.168.1.1 192.168.1.1:8080
+      - PHP_MEMORY_LIMIT=1024M
+      - PHP_UPLOAD_LIMIT=16G
+    volumes:
+      - /mnt/nvme/nextcloud/html:/var/www/html
+      - /mnt/ssd2/nextcloud-data:/var/www/html/data
+
+  nextcloud-cron:
+    image: nextcloud:stable-apache
+    container_name: nextcloud-cron
+    network_mode: host
+    restart: unless-stopped
+    depends_on: [nextcloud]
+    entrypoint: /cron.sh
+    environment:
+      - TZ=Europe/Moscow
+    volumes:
+      - /mnt/nvme/nextcloud/html:/var/www/html
+      - /mnt/ssd2/nextcloud-data:/var/www/html/data
