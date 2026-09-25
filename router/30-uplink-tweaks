@@ -1,0 +1,32 @@
+#!/bin/sh
+# /etc/hotplug.d/iface/30-uplink-tweaks - runs when an uplink interface comes up.
+#
+# 1. Clear upstream DSCP marks at netdev ingress. Yota LTE marks AF11, the wired uplink marks CS1;
+#    mac80211 maps both to WMM Background (AC_BK), which capped Internet -> Wi-Fi at ~20-40 Mbit/s.
+#    The ingress hook runs before the fw4 flowtable, so flow offloading can't bypass it
+#    (a rule in the fw4 prerouting chain is skipped for offloaded flows).
+# 2. Disable GRO on the wired WAN port: 64 KB GRO super-packets forwarded to Wi-Fi cut
+#    WAN -> Wi-Fi throughput ~4x (32 -> 141 Mbit/s single stream).
+[ "$ACTION" = ifup ] || exit 0
+case "$INTERFACE" in wan|mm) ;; *) exit 0 ;; esac
+
+[ "$INTERFACE" = wan ] && ethtool -K "$DEVICE" gro off 2>/dev/null
+
+devs=""
+for d in wan wwan0; do
+	[ -d "/sys/class/net/$d" ] && devs="$devs${devs:+, }\"$d\""
+done
+[ -n "$devs" ] || exit 0
+
+nft -f - <<NFT
+table netdev uplink_dscp
+delete table netdev uplink_dscp
+table netdev uplink_dscp {
+	chain ingress {
+		type filter hook ingress devices = { $devs } priority -500; policy accept;
+		meta protocol ip ip dscp set cs0 counter
+		meta protocol ip6 ip6 dscp set cs0 counter
+	}
+}
+NFT
+logger -t uplink-tweaks "ifup $INTERFACE ($DEVICE): DSCP clear on { $devs }"
