@@ -1,0 +1,25 @@
+# Home Assistant + Matter Server on the BPI-R4 Pro (OpenWrt + dockerd, data on /mnt/nvme).
+# Both use the host network: HA needs mDNS/SSDP discovery, Matter needs IPv6 link-local on the LAN.
+# Ports are not exposed to the Internet: fw4 rejects input from the wan zone.
+services:
+  homeassistant:
+    image: homeassistant/home-assistant:stable
+    container_name: homeassistant
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Moscow
+    volumes:
+      - /mnt/nvme/homeassistant/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - matter-server
+
+  matter-server:
+    image: ghcr.io/home-assistant-libs/python-matter-server:stable
+    container_name: matter-server
+    network_mode: host
+    restart: unless-stopped
+    command: --storage-path /data --paa-root-cert-dir /data/credentials --primary-interface br-lan
+    volumes:
+      - /mnt/nvme/matter-server/data:/data
