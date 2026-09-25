@@ -26,6 +26,17 @@ function list(d, key) {
 		.map(function(k) { return d[k]; }).filter(val);
 }
 
+function cache() {
+	return L.resolveDefault(fs.read('/tmp/modem-signal'), '').then(function(t) {
+		var r = {};
+		(t || '').split('\n').forEach(function(l) {
+			var m = l.match(/^([A-Z0-9_]+)='?(.*?)'?$/);
+			if (m) r[m[1]] = m[2];
+		});
+		return r;
+	});
+}
+
 function mmcli(args) {
 	return fs.exec('/usr/bin/mmcli', args).then(function(r) { return kv(r.stdout); }).catch(function() { return {}; });
 }
@@ -95,13 +106,14 @@ return view.extend({
 				m,
 				mmcli(['-m', 'any', '--signal-get', '-K']),
 				mmcli(['-m', 'any', '--location-get', '-K']),
-				bearer ? mmcli(['-b', bearer, '-K']) : {}
+				bearer ? mmcli(['-b', bearer, '-K']) : {},
+				cache()
 			]);
 		});
 	},
 
 	build: function(data) {
-		var m = data[0], s = data[1], l = data[2], b = data[3];
+		var m = data[0], s = data[1], l = data[2], b = data[3], c = data[4] || {};
 
 		if (!val(m['modem.generic.model']))
 			return E('div', { 'class': 'alert-message warning' }, _('No modem found (mmcli -L is empty).'));
@@ -111,7 +123,7 @@ return view.extend({
 			var p = 'modem.signal.' + t[0] + '.';
 			[['rssi', 'RSSI', ' dBm'], ['rsrp', 'RSRP', ' dBm'], ['rsrq', 'RSRQ', ' dB'], ['snr', 'SINR', ' dB']].forEach(function(f) {
 				var v = val(s[p + f[0]]);
-				if (v != null) sig.push([t[1] + ' ' + f[1] + ' (' + f[2].trim() + ')', badge(f[0], v)]);
+				if (v != null && parseFloat(v) > -3000) sig.push([t[1] + ' ' + f[1] + ' (' + f[2].trim() + ')', badge(f[0], v)]);
 			});
 		});
 		if (!sig.length)
@@ -138,12 +150,14 @@ return view.extend({
 				['MCC / MNC', [val(l['modem.location.3gpp.mcc']), val(l['modem.location.3gpp.mnc'])].filter(Boolean).join(' / ') || null],
 				['TAC / LAC', tac ? tac + ' (' + parseInt(tac, 16) + ')' : null],
 				['Cell ID', cid ? cid + ' (eNB ' + (parseInt(cid, 16) >> 8) + ', sector ' + (parseInt(cid, 16) & 255) + ')' : null],
-				[_('Current bands'), list(m, 'modem.generic.current-bands').join(', ') || null]
+				[_('Active bands'), c.BANDS || null],
+				[_('Enabled bands'), list(m, 'modem.generic.current-bands').join(', ') || null]
 			]),
 			table(_('Modem'), [
 				[_('Model'), [val(m['modem.generic.manufacturer']), val(m['modem.generic.model'])].filter(Boolean).join(' ')],
 				[_('Firmware'), val(m['modem.generic.revision'])],
 				[_('Power state'), val(m['modem.generic.power-state'])],
+				[_('Temperature'), c.MODEM_TEMP ? c.MODEM_TEMP + ' °C' + (c.MODEM_TEMP_MAX && c.MODEM_TEMP_MAX != c.MODEM_TEMP ? ' (' + _('hottest sensor') + ' ' + c.MODEM_TEMP_MAX + ' °C)' : '') : null],
 				[_('Own number'), list(m, 'modem.generic.own-numbers').join(', ') || null],
 				[_('Device'), val(m['modem.generic.device'])]
 			])

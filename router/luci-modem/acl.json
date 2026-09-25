@@ -4,7 +4,8 @@
 		"read": {
 			"file": {
 				"/usr/bin/mmcli": [ "exec" ],
-				"/usr/bin/mmcli *": [ "exec" ]
+				"/usr/bin/mmcli *": [ "exec" ],
+				"/tmp/modem-signal": [ "read" ]
 			}
 		}
 	}
