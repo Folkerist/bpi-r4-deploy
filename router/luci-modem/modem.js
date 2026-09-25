@@ -8,7 +8,7 @@ return baseclass.extend({
 
 	rrdargs(graph, host, plugin, plugin_instance, dtype) {
 		if (plugin_instance == 'status')
-			return {
+			return [ {
 				title: "%H: Modem signal quality",
 				vlabel: "%",
 				y_min: "0",
@@ -20,7 +20,20 @@ return baseclass.extend({
 						percent_quality: { title: "Quality", color: "0000ff", noarea: true }
 					}
 				}
-			};
+			}, {
+				title: "%H: Modem temperature",
+				vlabel: "°C",
+				alt_autoscale: true,
+				number_format: "%3.0lf °C",
+				data: {
+					types: [ "temperature" ],
+					instances: { temperature: [ "modem", "modem_max" ] },
+					options: {
+						temperature_modem: { title: "Ambient", color: "ff8000", overlay: true, noarea: true },
+						temperature_modem_max: { title: "Hottest sensor", color: "ff0000", overlay: true, noarea: true }
+					}
+				}
+			} ];
 
 		const power = {
 			title: "%H: %pi RSRP / RSSI",

@@ -9,7 +9,7 @@ put() { [ -n "$3" ] && echo "PUTVAL \"$HOST/modem-$1/$2\" interval=$INT N:$3"; }
 
 while sleep "$INT"; do
 	[ -r "$F" ] || continue
-	unset TS LTE_RSSI LTE_RSRP LTE_RSRQ LTE_SNR NR_RSSI NR_RSRP NR_RSRQ NR_SNR QUALITY
+	unset TS LTE_RSSI LTE_RSRP LTE_RSRQ LTE_SNR NR_RSSI NR_RSRP NR_RSRQ NR_SNR QUALITY MODEM_TEMP MODEM_TEMP_MAX
 	. "$F"
 	[ $(( $(date +%s) - ${TS:-0} )) -gt 180 ] && continue
 	put lte signal_power-rssi "$LTE_RSSI"
@@ -21,4 +21,6 @@ while sleep "$INT"; do
 	put nr signal_power-rsrq "$NR_RSRQ"
 	put nr gauge-sinr "$NR_SNR"
 	put status percent-quality "$QUALITY"
+	put status temperature-modem "$MODEM_TEMP"
+	put status temperature-modem_max "$MODEM_TEMP_MAX"
 done

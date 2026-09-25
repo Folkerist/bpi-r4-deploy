@@ -4,6 +4,21 @@
 # allowed to talk to ModemManager over D-Bus, so modem_collectd.sh (as nobody) only reads this file.
 OUT=/tmp/modem-signal
 
+# Modem temperature via AT+QTEMP. ModemManager talks QMI to this modem and keeps the AT ports
+# mostly idle, so a single short query per sample is safe. Prefer the secondary AT port.
+qtemp() {
+	for p in /dev/ttyUSB3 /dev/ttyUSB2; do
+		[ -c "$p" ] || continue
+		r=$( { printf 'AT+QTEMP\r' >&3; timeout 2 cat <&3; } 3<>"$p" 2>/dev/null )
+		echo "$r" | grep -q QTEMP || continue
+		echo "$r" | sed -n 's/.*"\([^"]*\)","\([0-9]*\)".*/\1 \2/p' | awk '
+			$1 == "modem-ambient-usr" { amb = $2 }
+			$2 > 0 && $2 > max { max = $2 }
+			END { if (max != "") printf "MODEM_TEMP=%s\nMODEM_TEMP_MAX=%s\n", (amb != "" ? amb : max), max }'
+		return
+	done
+}
+
 num() { printf '%s\n' "$1" | sed -n "s/^$2 *: *//p" | head -1 | grep -E '^-?[0-9]+(\.[0-9]+)?$'; }
 
 sample() {
@@ -19,6 +34,7 @@ sample() {
 		done
 		v=$(num "$m" "modem.generic.signal-quality.value")
 		[ -n "$v" ] && echo "QUALITY=$v"
+		qtemp
 	} > "$OUT.tmp" && mv "$OUT.tmp" "$OUT"
 }
 

@@ -5,6 +5,18 @@ F=/tmp/wwan-watchdog.fails
 read up _ < /proc/uptime
 [ "${up%.*}" -lt 300 ] && exit 0
 
+# SIM lost (seen after power sag / overheating): resets don't help, only a full power cycle does.
+# Mail once per occurrence (retried every run until it is sent, e.g. once a wired uplink works).
+reason=$(mmcli -m any -K 2>/dev/null | sed -n 's/^modem.generic.state-failed-reason *: *//p')
+if [ "$reason" = sim-missing ]; then
+	logger -t wwan-watchdog "modem reports sim-missing, power-cycle the router"
+	[ -f /tmp/sim-missing.sent ] || /usr/bin/mail-send.sh "Modem: SIM missing" \
+"Модем RM520N не видит SIM-карту (sim-missing). Сброс модема не помогает: полностью обесточьте роутер на 30 секунд.
+Вероятная причина: просадка питания (USB-C PD) или перегрев." && touch /tmp/sim-missing.sent
+	exit 0
+fi
+rm -f /tmp/sim-missing.sent
+
 if ping -c2 -W5 -I wwan0 8.8.8.8 >/dev/null 2>&1 || ping -c2 -W5 -I wwan0 1.1.1.1 >/dev/null 2>&1; then
 	if [ -f "$F" ]; then
 		read n start < "$F"

@@ -123,6 +123,7 @@ return view.extend({
 		return E([], [
 			table(_('Connection'), [
 				[_('State'), val(m['modem.generic.state'])],
+				[_('Failure reason'), val(m['modem.generic.state-failed-reason'])],
 				[_('Operator'), [val(m['modem.3gpp.operator-name']), val(m['modem.3gpp.operator-code'])].filter(Boolean).join(' / ') || null],
 				[_('Registration'), val(m['modem.3gpp.registration-state'])],
 				[_('Access technology'), list(m, 'modem.generic.access-technologies').join(', ') || null],
