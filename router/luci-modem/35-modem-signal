@@ -1,0 +1,7 @@
+#!/bin/sh
+# /etc/hotplug.d/iface/35-modem-signal - on "mm" up, enable extended signal polling (RSRP/RSRQ/SINR)
+# and 3GPP location (cell ID, TAC) in ModemManager, used by the LuCI Status -> Modem page.
+[ "$ACTION" = ifup ] && [ "$INTERFACE" = mm ] || exit 0
+mmcli -m any --signal-setup=10 >/dev/null 2>&1
+mmcli -m any --location-enable-3gpp >/dev/null 2>&1
+exit 0
