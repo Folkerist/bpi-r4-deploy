@@ -51,3 +51,15 @@ services:
       - 'c 166:* rmw'
     depends_on:
       - mosquitto
+
+  # Cameras: Xiaomi C700 (chuangmi.camera.81ac1) via go2rtc's xiaomi source -> rtsp://127.0.0.1:8554/<name>.
+  # Web UI http://<router>:1985 (LAN only; fw4 rejects wan input).
+  go2rtc:
+    image: alexxit/go2rtc:latest
+    container_name: go2rtc
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Moscow
+    volumes:
+      - /mnt/nvme/go2rtc:/config

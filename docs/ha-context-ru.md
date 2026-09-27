@@ -66,6 +66,9 @@
   через HACS-интеграцию Xiaomi Gateway 3 (AlexxIT), локально; принимает и BLE-датчики Xiaomi.
   Термометр LYWSD03MMC «Температура гостинная» (uid a4c13843f704) → `sensor.zal_temperature`,
   `sensor.zal_humidity` (Зал), на карте — подписи под «Зал».
+- Камеры: Xiaomi C700 (`chuangmi.camera.81ac1`, 192.168.88.52) — через отдельный go2rtc (compose, порт UI 1985,
+  RTSP 8554, конфиг `/mnt/nvme/go2rtc/go2rtc.yaml`, источник xiaomi, нужен go2rtc ≥ 1.9.13) → Generic Camera в HA.
+  Видео HEVC+opus. Botslab/360 (`360IPC-C221`, .221) — только облако, все порты закрыты, в HA не подключить.
 - Имена в Z2M: латиница, «тип_комната» (switch_kitchen, sensor_bath, motion_hall). Клавишам/сущностям даём
   постоянные entity_id правкой реестра (HA остановлен), в Z2M при переименовании снимать «обновить ID в HA».
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.
