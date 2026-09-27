@@ -34,14 +34,18 @@
   prikhozhaia|Прихожая, koridor|Коридор, vannaia|Ванная, tualet|Туалет, kladovka|Кладовка, balkon|Балкон.
   Созданы правкой `.storage/core.area_registry` при остановленном HA (бэкап `.bak` рядом).
 - Zigbee: SONOFF ZBDongle-E V2 (EFR32MG21, USB 1a86:55d4) в USB-хабе роутера → `/dev/ttyACM0`
-  (нужен `kmod-usb-acm`, поставлен через apk). Прошит EmberZNet 8.0.2 (было 7.3, EZSP 12 — Z2M не принимал).
+  (нужен `kmod-usb-acm`, поставлен через apk). Прошит EmberZNet 8.2.2 (было 7.3 → 8.0.2 → 8.2.2; 7.3/EZSP 12 Z2M не принимал).
   Zigbee2MQTT 2.x (`adapter: ember`, канал 25, фронтенд :8099) + Mosquitto (только 127.0.0.1:1883, без пароля)
   в том же compose `/mnt/nvme/compose/homeassistant/docker-compose.yml`; данные `/mnt/nvme/zigbee2mqtt/data`
   (в `configuration.yaml` и `coordinator_backup.json` ключи сети — не публиковать), `/mnt/nvme/mosquitto`.
   Второй донгл — ретранслятор (Zigbee Router), питается от зарядки; перепрошит через dongle.sonoff.tech и
   добавлен в Z2M. На Mac порт донгла держал WiFi Explorer Pro 3 («Device Unresponsive»/«Resource busy») —
   закрывать перед прошивкой. Альтернатива веб-прошивальщику: `universal-silabs-flasher --bootloader-reset rts_dtr`.
-  Для координатора есть EmberZNet 8.2.2 (Nerivec) — обновить позже, после бэкапа.
+  Обновление координатора прямо на роутере, без вынимания (сеть сохраняется, «network matches config»):
+  `docker stop zigbee2mqtt`, бэкап `tar czf /mnt/nvme/zigbee2mqtt-backup-DATE.tgz -C /mnt/nvme zigbee2mqtt`,
+  gbl (Nerivec, `sonoff_zbdonglee_zigbee_ncp_*_115200_sw_flow.gbl`) в `/mnt/nvme/zigbee2mqtt-fw`, затем
+  `docker run --rm --device /dev/ttyACM0 -v $PWD:/fw --entrypoint python3 homeassistant/home-assistant:stable
+  -m universal_silabs_flasher --device /dev/ttyACM0 flash --firmware /fw/<file>.gbl` (или `probe`).
 - Выключатель Aqara E1 без нуля, 2 клавиши (QBKG39LM, IEEE 0x54ef4410005e7527, в Z2M `switch_bath_corridor`), в малом коридоре у ванной:
   левая → `switch.light_bath` (Ванная), правая → `switch.light_corridor` (малый коридор до арки).
   На карте: подсветка `fp-light-*.svg` + нажатие по комнате (card.yaml). В Z2M при переименовании
