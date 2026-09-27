@@ -1,6 +1,59 @@
-# Карта квартиры. SVG кладутся в /config/www/ → доступны как /local/...
+# Панель «Карта»: Настройки → Панели → Карта → ✏️ → ⋮ → Редактор кода.
+# SVG кладутся в /config/www/ → доступны как /local/...
 # Светлая/тёмная версия переключается вместе с темой HA (dark_mode_image).
-type: picture-elements
-image: /local/floorplan-light.svg
-dark_mode_image: /local/floorplan-dark.svg
-elements: []
+# Позиции в % от картинки: viewBox 80 465 440 395 (x% = (x-80)/4.4, y% = (y-465)/3.95).
+views:
+  - title: Карта
+    path: map
+    icon: mdi:floor-plan
+    panel: true
+    cards:
+      - type: picture-elements
+        image: /local/floorplan-light.svg
+        dark_mode_image: /local/floorplan-dark.svg
+        elements:
+          # Подсветка комнаты, когда свет включён (на всю картинку, клики пропускает).
+          - type: image
+            entity: switch.light_bath
+            image: /local/fp-empty.svg
+            state_image:
+              "on": /local/fp-light-vannaia.svg
+              "off": /local/fp-empty.svg
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
+          - type: image
+            entity: switch.light_corridor
+            image: /local/fp-empty.svg
+            state_image:
+              "on": /local/fp-light-koridor.svg
+              "off": /local/fp-empty.svg
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
+          # Нажатие на комнату — переключить свет, долгое — карточка объекта.
+          - type: image
+            entity: switch.light_bath
+            image: /local/fp-empty.svg
+            tap_action: {action: toggle}
+            hold_action: {action: more-info}
+            style: {left: 58.2%, top: 14.9%, width: 16.4%, height: 22.3%}
+          - type: image
+            entity: switch.light_corridor
+            image: /local/fp-empty.svg
+            tap_action: {action: toggle}
+            hold_action: {action: more-info}
+            style: {left: 58.2%, top: 32%, width: 16.4%, height: 11.9%}
+          # Значки ламп.
+          - type: state-icon
+            entity: switch.light_bath
+            icon: mdi:ceiling-light
+            tap_action: {action: toggle}
+            hold_action: {action: more-info}
+            style: {left: 58.2%, top: 9%, --mdc-icon-size: 22px}
+          - type: state-icon
+            entity: switch.light_corridor
+            icon: mdi:ceiling-light
+            tap_action: {action: toggle}
+            hold_action: {action: more-info}
+            style: {left: 58.2%, top: 32%, --mdc-icon-size: 22px}

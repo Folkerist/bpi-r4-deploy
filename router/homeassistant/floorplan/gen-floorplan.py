@@ -66,3 +66,12 @@ for name,c in themes.items():
         o.append(f'<text x="{x}" y="{y+fs*0.35:.0f}" font-size="{fs}" font-weight="500" fill="{c["text"]}" text-anchor="middle">{label}</text>')
     o.append('</svg>')
     open(f"floorplan-{name}.svg","w").write("\n".join(o))
+
+# Room light overlays for picture-elements (same viewBox as the plan, shown on top when a light is on).
+HEAD = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 465 440 395">'
+glow = {"bath": "vannaia", "corridor2": "koridor"}
+open("fp-empty.svg", "w").write(HEAD + '</svg>')
+for rid, name in glow.items():
+    pts = next(r[3] for r in rooms if r[0] == rid)
+    open(f"fp-light-{name}.svg", "w").write(
+        HEAD + f'<polygon points="{pts}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')

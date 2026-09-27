@@ -42,6 +42,10 @@
   добавлен в Z2M. На Mac порт донгла держал WiFi Explorer Pro 3 («Device Unresponsive»/«Resource busy») —
   закрывать перед прошивкой. Альтернатива веб-прошивальщику: `universal-silabs-flasher --bootloader-reset rts_dtr`.
   Для координатора есть EmberZNet 8.2.2 (Nerivec) — обновить позже, после бэкапа.
+- Выключатель Aqara E1 без нуля, 2 клавиши (QBKG39LM, IEEE 0x54ef4410005e7527), в малом коридоре у ванной:
+  левая → `switch.light_bath` (Ванная), правая → `switch.light_corridor` (малый коридор до арки).
+  На карте: подсветка `fp-light-*.svg` + нажатие по комнате (card.yaml). В Z2M при переименовании
+  снимать галочку «обновить ID в HA», иначе entity_id уйдут от light_bath/light_corridor.
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.
 - Nextcloud пробовали и удалили (грузил CPU, segfault PHP JIT на ARM64).
 
