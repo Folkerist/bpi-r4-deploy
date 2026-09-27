@@ -36,6 +36,9 @@ apply() {
 	uci -q delete network.lan.ip6assign
 	uci set network.wg0.auto='0'
 	uci set network.mm.peerdns='0'
+	# LTE stays up (SMS, backup) but must not win the default route over RB5009,
+	# otherwise HA/Docker traffic and mihomo FakeIP (198.18.0.0/15) would go out via LTE.
+	uci set network.mm.metric='100'
 	uci set dhcp.lan.ignore='1'
 	uci set dhcp.lan.ra='disabled'
 	uci set dhcp.lan.dhcpv6='disabled'
