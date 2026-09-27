@@ -60,6 +60,8 @@
 - Выключатель кухни `switch_kitchen`: левая → `switch.light_kitchen_main` (центральный свет),
   правая → `switch.light_kitchen_perimeter` (подсветка по периметру — светит на всю кухню). Центр = люстра над
   столом (на карте — пятно у стола, TABLE в gen-floorplan.py); нажатие на кухню — периметр.
+- После переноса сети пропал мост docker0: временные `docker run` для правки реестра запускать с
+  `--network none` (постоянные контейнеры — host network, им не нужен). Вернётся после `dockerd restart`/ребута.
 - Имена в Z2M: латиница, «тип_комната» (switch_kitchen, sensor_bath, motion_hall). Клавишам/сущностям даём
   постоянные entity_id правкой реестра (HA остановлен), в Z2M при переименовании снимать «обновить ID в HA».
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.
