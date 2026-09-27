@@ -72,3 +72,11 @@ for rid, name in glow.items():
     pts = next(r[3] for r in rooms if r[0] == rid)
     open(f"fp-light-{name}.svg", "w").write(
         HEAD + f'<polygon points="{pts}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+
+# Main corridor (11,2): chandelier = room fill, perimeter lights = glowing inset outline.
+cor = next(r[3] for r in rooms if r[0] == "corridor")
+open("fp-light-koridor-main.svg", "w").write(
+    HEAD + f'<polygon points="{cor}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+open("fp-light-koridor-perim.svg", "w").write(
+    HEAD + '<rect x="307" y="622" width="58" height="91" rx="4" fill="none" stroke="#ffc107" stroke-opacity=".25" stroke-width="7"/>'
+    '<rect x="307" y="622" width="58" height="91" rx="4" fill="none" stroke="#ffd54f" stroke-width="2"/></svg>')

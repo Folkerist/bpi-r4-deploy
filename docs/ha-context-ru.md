@@ -46,6 +46,8 @@
   левая → `switch.light_bath` (Ванная), правая → `switch.light_corridor` (малый коридор до арки).
   На карте: подсветка `fp-light-*.svg` + нажатие по комнате (card.yaml). В Z2M при переименовании
   снимать галочку «обновить ID в HA», иначе entity_id уйдут от light_bath/light_corridor.
+- Второй Aqara-выключатель — в основном коридоре (11,2): левая → `switch.light_hall_main` (люстра),
+  правая → `switch.light_hall_perimeter` (подсветка по периметру). На карте: заливка / контур по периметру.
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.
 - Nextcloud пробовали и удалили (грузил CPU, segfault PHP JIT на ARM64).
 

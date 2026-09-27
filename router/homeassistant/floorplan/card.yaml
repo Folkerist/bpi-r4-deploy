@@ -39,7 +39,25 @@ views:
             tap_action: {action: none}
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
-          # Нажатие на комнату — переключить свет, долгое — карточка объекта.
+          - type: image
+            entity: switch.light_hall_main
+            image: /local/fp-empty.svg
+            state_image:
+              "on": /local/fp-light-koridor-main.svg
+              "off": /local/fp-empty.svg
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
+          - type: image
+            entity: switch.light_hall_perimeter
+            image: /local/fp-empty.svg
+            state_image:
+              "on": /local/fp-light-koridor-perim.svg
+              "off": /local/fp-empty.svg
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
+          # Нажатие на комнату — переключить свет (в основном коридоре — люстру), долгое — карточка.
           - type: image
             entity: switch.light_bath
             image: /local/fp-empty.svg
@@ -52,7 +70,13 @@ views:
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 58.2%, top: 32%, width: 16.4%, height: 11.9%}
-          # Значки ламп.
+          - type: image
+            entity: switch.light_hall_main
+            image: /local/fp-empty.svg
+            tap_action: {action: toggle}
+            hold_action: {action: more-info}
+            style: {left: 58.2%, top: 51.3%, width: 16.4%, height: 26.6%}
+          # Значки: лампы, люстра и подсветка по периметру.
           - type: state-icon
             entity: switch.light_bath
             icon: mdi:ceiling-light
@@ -65,3 +89,15 @@ views:
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 58.2%, top: 32%, --mdc-icon-size: 36px}
+          - type: state-icon
+            entity: switch.light_hall_main
+            icon: mdi:chandelier
+            tap_action: {action: toggle}
+            hold_action: {action: more-info}
+            style: {left: 58.2%, top: 44.3%, --mdc-icon-size: 36px}
+          - type: state-icon
+            entity: switch.light_hall_perimeter
+            icon: mdi:led-strip-variant
+            tap_action: {action: toggle}
+            hold_action: {action: more-info}
+            style: {left: 58.2%, top: 59.5%, --mdc-icon-size: 36px}
