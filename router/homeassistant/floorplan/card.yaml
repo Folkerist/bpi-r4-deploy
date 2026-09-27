@@ -11,8 +11,8 @@ views:
     panel: true
     cards:
       - type: picture-elements
-        image: /local/floorplan-light.svg?v=3
-        dark_mode_image: /local/floorplan-dark.svg?v=3
+        image: /local/floorplan-light.svg?v=4
+        dark_mode_image: /local/floorplan-dark.svg?v=4
         # card-mod (HACS): план целиком по высоте экрана; 1.114 = 440/395 — пропорции SVG.
         card_mod:
           style: |
@@ -108,7 +108,7 @@ views:
             entity: switch.light_kitchen_main
             image: /local/fp-empty.svg?v=2
             state_image:
-              "on": /local/fp-light-kukhnia-main.svg?v=3
+              "on": /local/fp-light-kukhnia-main.svg?v=4
               "off": /local/fp-empty.svg?v=2
             tap_action: {action: none}
             hold_action: {action: none}
@@ -166,7 +166,7 @@ views:
             image: /local/fp-empty.svg?v=2
             tap_action: {action: toggle}
             hold_action: {action: more-info}
-            style: {left: 14.8%, top: 83.5%, width: 11.4%, height: 12.7%}
+            style: {left: 26.1%, top: 83.5%, width: 11.4%, height: 12.7%}
           # Значки: лампы, люстра и подсветка по периметру.
           - type: state-icon
             entity: switch.light_bath
@@ -221,10 +221,10 @@ views:
             icon: mdi:chandelier
             tap_action: {action: toggle}
             hold_action: {action: more-info}
-            style: {left: 14.8%, top: 83.5%, --mdc-icon-size: 36px}
+            style: {left: 26.1%, top: 83.5%, --mdc-icon-size: 36px}
           - type: state-icon
             entity: switch.light_kitchen_perimeter
             icon: mdi:led-strip-variant
             tap_action: {action: toggle}
             hold_action: {action: more-info}
-            style: {left: 27.3%, top: 84.8%, --mdc-icon-size: 36px}
+            style: {left: 11.4%, top: 84.8%, --mdc-icon-size: 36px}
