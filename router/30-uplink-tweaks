@@ -7,13 +7,19 @@
 #    (a rule in the fw4 prerouting chain is skipped for offloaded flows).
 # 2. Disable GRO on the wired WAN port: 64 KB GRO super-packets forwarded to Wi-Fi cut
 #    WAN -> Wi-Fi throughput ~4x (32 -> 141 Mbit/s single stream).
+# LAN ports that face an upstream router (e.g. RB5009 plugged into lan1) get the same treatment:
+# list them in /etc/uplink-lan-ports (space separated), default "lan1".
 [ "$ACTION" = ifup ] || exit 0
-case "$INTERFACE" in wan|mm) ;; *) exit 0 ;; esac
+case "$INTERFACE" in wan|mm|lan) ;; *) exit 0 ;; esac
 
-[ "$INTERFACE" = wan ] && ethtool -K "$DEVICE" gro off 2>/dev/null
+LANPORTS=$(cat /etc/uplink-lan-ports 2>/dev/null || echo lan1)
+
+for d in wan $LANPORTS; do
+	[ -d "/sys/class/net/$d" ] && ethtool -K "$d" gro off 2>/dev/null
+done
 
 devs=""
-for d in wan wwan0; do
+for d in wan wwan0 $LANPORTS; do
 	[ -d "/sys/class/net/$d" ] && devs="$devs${devs:+, }\"$d\""
 done
 [ -n "$devs" ] || exit 0
