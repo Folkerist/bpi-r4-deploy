@@ -58,6 +58,15 @@ views:
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           - type: image
+            entity: switch.light_entry_main
+            image: /local/fp-empty.svg
+            state_image:
+              "on": /local/fp-light-prikhozhaia-main.svg
+              "off": /local/fp-empty.svg
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
+          - type: image
             entity: switch.light_entry_perimeter
             image: /local/fp-empty.svg
             state_image:
@@ -75,7 +84,7 @@ views:
             tap_action: {action: none}
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
-          # Нажатие на комнату — переключить свет (в основном коридоре — люстру), долгое — карточка.
+          # Нажатие на комнату — переключить свет (в коридоре и прихожей — люстру), долгое — карточка.
           - type: image
             entity: switch.light_bath
             image: /local/fp-empty.svg
@@ -95,11 +104,17 @@ views:
             hold_action: {action: more-info}
             style: {left: 58.2%, top: 51.3%, width: 16.4%, height: 26.6%}
           - type: image
-            entity: switch.light_entry_perimeter
+            entity: switch.light_entry_main
             image: /local/fp-empty.svg
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 50%, top: 71.5%, width: 31.8%, height: 13.9%}
+          - type: image
+            entity: switch.light_entry_main
+            image: /local/fp-empty.svg
+            tap_action: {action: toggle}
+            hold_action: {action: more-info}
+            style: {left: 60.2%, top: 84.8%, width: 11.4%, height: 12.7%}
           - type: image
             entity: switch.light_wc
             image: /local/fp-empty.svg
@@ -143,3 +158,9 @@ views:
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 50.5%, top: 83.3%, --mdc-icon-size: 28px}
+          - type: state-icon
+            entity: switch.light_entry_main
+            icon: mdi:chandelier
+            tap_action: {action: toggle}
+            hold_action: {action: more-info}
+            style: {left: 60.2%, top: 83.5%, --mdc-icon-size: 36px}

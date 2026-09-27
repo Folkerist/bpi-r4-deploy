@@ -89,3 +89,8 @@ open("fp-light-prikhozhaia-perim.svg", "w").write(
 wc = next(r[3] for r in rooms if r[0] == "wc")
 open("fp-light-tualet.svg", "w").write(
     HEAD + f'<polygon points="{wc}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+
+# Entry hall chandelier = fill of the whole hall.
+ent = next(r[3] for r in rooms if r[0] == "entry")
+open("fp-light-prikhozhaia-main.svg", "w").write(
+    HEAD + f'<polygon points="{ent}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
