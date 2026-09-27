@@ -73,7 +73,7 @@
   бэкап старых настроек `/root/pre-rb5009`, откат `sh /root/move-behind-rb5009.sh undo`). Шлюз/DNS — RB5009
   (metric 5), LTE остался запасным (metric 100), forkop и wg0 выключены, dnsmasq без DHCP, DNS через
   resolv.conf.auto (сервер forkop 127.0.0.42 убран). Кабель RB5009 → lan1. HA: `http://192.168.88.2:8123`.
-- Xiaomi AX3600 (главный узел mesh) за BPI-R4 не завёлся: lan2 мигал Up/Down — петля через mesh
+- Xiaomi AX3600 (главный узел mesh) за BPI-R4 не завёлся: lan2 мигал Up/Down — вероятно, петля через mesh
   (к BPI были подключены и AX3600, и ещё одно устройство сети). Решение: Xiaomi и прочие — прямо в RB5009,
   в BPI-R4 только один кабель от RB5009. STP на br-lan выключен.
 - Доступ к HA снаружи нужен: через Back To Home или пир WireGuard на RB5009 (не проброс порта).
