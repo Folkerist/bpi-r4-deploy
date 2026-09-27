@@ -40,6 +40,10 @@ apply() {
 	# otherwise HA/Docker traffic and mihomo FakeIP (198.18.0.0/15) would go out via LTE.
 	uci set network.mm.metric='100'
 	uci set dhcp.lan.ignore='1'
+	# forkop points dnsmasq at its own resolver (server 127.0.0.42, noresolv=1); with forkop off
+	# the router would lose DNS. Go back to resolv.conf.auto, i.e. network.lan.dns = RB5009.
+	uci -q del_list dhcp.@dnsmasq[0].server='127.0.0.42'
+	uci set dhcp.@dnsmasq[0].noresolv='0'
 	uci set dhcp.lan.ra='disabled'
 	uci set dhcp.lan.dhcpv6='disabled'
 	uci commit network; uci commit dhcp
