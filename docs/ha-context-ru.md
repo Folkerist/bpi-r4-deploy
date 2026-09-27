@@ -38,7 +38,10 @@
   Zigbee2MQTT 2.x (`adapter: ember`, канал 25, фронтенд :8099) + Mosquitto (только 127.0.0.1:1883, без пароля)
   в том же compose `/mnt/nvme/compose/homeassistant/docker-compose.yml`; данные `/mnt/nvme/zigbee2mqtt/data`
   (в `configuration.yaml` и `coordinator_backup.json` ключи сети — не публиковать), `/mnt/nvme/mosquitto`.
-  Второй донгл — ретранслятор (прошивка Zigbee Router), питается от зарядки.
+  Второй донгл — ретранслятор (Zigbee Router), питается от зарядки; перепрошит через dongle.sonoff.tech и
+  добавлен в Z2M. На Mac порт донгла держал WiFi Explorer Pro 3 («Device Unresponsive»/«Resource busy») —
+  закрывать перед прошивкой. Альтернатива веб-прошивальщику: `universal-silabs-flasher --bootloader-reset rts_dtr`.
+  Для координатора есть EmberZNet 8.2.2 (Nerivec) — обновить позже, после бэкапа.
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.
 - Nextcloud пробовали и удалили (грузил CPU, segfault PHP JIT на ARM64).
 
