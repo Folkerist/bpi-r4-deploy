@@ -76,6 +76,12 @@
 - Xiaomi AX3600 (главный узел mesh) за BPI-R4 не завёлся: lan2 мигал Up/Down — вероятно, петля через mesh
   (к BPI были подключены и AX3600, и ещё одно устройство сети). Решение: Xiaomi и прочие — прямо в RB5009,
   в BPI-R4 только один кабель от RB5009. STP на br-lan выключен.
+- Скорость Wi-Fi BPI-R4 после переноса упала до ~21 Мбит/с: RB5009 помечает трафик DSCP CS1 (`tos 0x20`,
+  подтверждено tcpdump на lan1), Wi-Fi кладёт его в AC_BK. Исправление — `router/30-uplink-tweaks`
+  (/etc/hotplug.d/iface/): сброс DSCP в netdev ingress и GRO off теперь и на lan1 (список портов —
+  `/etc/uplink-lan-ports`, по умолчанию `lan1`). Проверка: `nft list table netdev uplink_dscp | grep devices`
+  (есть lan1), счётчики растут. tcpdump на lan1 всё равно показывает tos 0x20 — он видит пакеты до правила.
+  Установлено ли на роутере и какая скорость после — не подтверждено.
 - Доступ к HA снаружи нужен: через Back To Home или пир WireGuard на RB5009 (не проброс порта).
 
 ## Как работаем
