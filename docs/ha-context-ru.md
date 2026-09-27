@@ -81,7 +81,7 @@
   (/etc/hotplug.d/iface/): сброс DSCP в netdev ingress и GRO off теперь и на lan1 (список портов —
   `/etc/uplink-lan-ports`, по умолчанию `lan1`). Проверка: `nft list table netdev uplink_dscp | grep devices`
   (есть lan1), счётчики растут. tcpdump на lan1 всё равно показывает tos 0x20 — он видит пакеты до правила.
-  Установлено 27.09.2026: скорость по Wi-Fi 21 → ~357 Мбит/с (curl 100 МБ с speedtest.selectel.ru).
+  Установлено 27.09.2026: скорость по Wi-Fi 21 → ~357–470 Мбит/с (curl 100 МБ с speedtest.selectel.ru; Mac на «Home» 5 ГГц, 80 МГц).
 - Доступ к HA снаружи нужен: через Back To Home или пир WireGuard на RB5009 (не проброс порта).
 
 ## Как работаем
