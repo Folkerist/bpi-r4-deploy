@@ -30,6 +30,10 @@
   `card.yaml`). На роутере лежит в `config/www/` → `/local/floorplan-*.svg`; отдельная панель «Карта»
   (panel view, `picture-elements` с `dark_mode_image`). Устройства на карту пока не добавлены.
   Комнаты: зал, спальня, кухня, детская, прихожая, коридор, ванная, WC, кладовка, балкон.
+- Пространства HA (area_id | имя): gostinaia|Зал, kukhnia|Кухня, spalnia|Спальня, detskaia|Детская,
+  prikhozhaia|Прихожая, koridor|Коридор, vannaia|Ванная, tualet|Туалет, kladovka|Кладовка, balkon|Балкон.
+  Созданы правкой `.storage/core.area_registry` при остановленном HA (бэкап `.bak` рядом).
+- Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.
 - Nextcloud пробовали и удалили (грузил CPU, segfault PHP JIT на ARM64).
 
 ## Сеть
