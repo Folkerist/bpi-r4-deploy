@@ -11,6 +11,11 @@ services:
       - TZ=Europe/Moscow
     volumes:
       - /mnt/nvme/homeassistant/config:/config
+      # Zigbee: SONOFF ZBDongle-E V2 → /dev/ttyACM0 (cdc_acm, needs kmod-usb-acm; ttyUSB0-3 are the modem).
+      # /dev + cgroup rule instead of `devices:` so HA still starts with the dongle unplugged and sees a replug.
+      - /dev:/dev
+    device_cgroup_rules:
+      - 'c 166:* rmw'
     depends_on:
       - matter-server
 
