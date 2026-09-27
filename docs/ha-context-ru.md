@@ -25,6 +25,11 @@
   перезагрузке (раньше при жёсткой остановке портился `.storage/bluetooth.passive_update_processor`).
 - HACS: предлагалась установка `docker exec homeassistant bash -c 'wget -qO - https://get.hacs.xyz | bash -'`;
   состояние не подтверждено — проверить `ls /mnt/nvme/homeassistant/config/custom_components/`.
+- HACS установлен (подтверждено пользователем).
+- Карта квартиры: `router/homeassistant/floorplan/` (SVG тёмный/светлый, генератор `gen-floorplan.py`,
+  `card.yaml`). На роутере лежит в `config/www/` → `/local/floorplan-*.svg`; отдельная панель «Карта»
+  (panel view, `picture-elements` с `dark_mode_image`). Устройства на карту пока не добавлены.
+  Комнаты: зал, спальня, кухня, детская, прихожая, коридор, ванная, WC, кладовка, балкон.
 - Nextcloud пробовали и удалили (грузил CPU, segfault PHP JIT на ARM64).
 
 ## Сеть
