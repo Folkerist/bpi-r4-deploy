@@ -6,7 +6,7 @@ rooms = [
  ("corridor","Коридор","18,2","300,615 372,615 372,720 300,720",(336,665),False),
  ("bedroom","Спальня","22,0","372,512 505,512 505,615 372,615",(438,563),False),
  ("hall","Зал","28,2","125,615 300,615 300,720 125,720",(212,667),False),
- ("kitchen","Кухня","21,3","125,720 230,720 230,825 95,825 95,750",(162,772),False),
+ ("kitchen","Кухня","21,3","125,720 230,720 230,825 95,825 95,750",(188,764),False),
  ("storage","Кладовка","3,6","230,775 285,775 285,825 230,825",(257,810),False),
  ("wc","WC","1,4","285,775 320,775 320,825 285,825",(302,810),False),
  ("entry","Прихожая","15,4","230,720 370,720 370,825 320,825 320,775 230,775",(345,803),False),
@@ -100,11 +100,17 @@ st = next(r[3] for r in rooms if r[0] == "storage")
 open("fp-light-kladovka.svg", "w").write(
     HEAD + f'<polygon points="{st}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
 
-# Kitchen: central light = room fill, perimeter lights = glowing inset outline.
+# Kitchen: chandelier over the table = small glow at the table (TABLE), perimeter lights light the whole
+# kitchen = room fill + glowing inset outline.
 kit = next(r[3] for r in rooms if r[0] == "kitchen")
+TABLE = (145, 795)
+tx, ty = TABLE
 open("fp-light-kukhnia-main.svg", "w").write(
-    HEAD + f'<polygon points="{kit}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+    HEAD + f'<circle cx="{tx}" cy="{ty}" r="26" fill="#ffc107" fill-opacity=".18"/>'
+    f'<circle cx="{tx}" cy="{ty}" r="17" fill="#ffc107" fill-opacity=".3"/>'
+    f'<circle cx="{tx}" cy="{ty}" r="9" fill="#ffd54f" fill-opacity=".45"/></svg>')
 kit_in = "130,727 223,727 223,818 102,818 102,754"
 open("fp-light-kukhnia-perim.svg", "w").write(
-    HEAD + f'<polygon points="{kit_in}" fill="none" stroke="#ffc107" stroke-opacity=".25" stroke-width="7" stroke-linejoin="round"/>'
+    HEAD + f'<polygon points="{kit}" fill="#ffc107" fill-opacity=".3"/>'
+    f'<polygon points="{kit_in}" fill="none" stroke="#ffc107" stroke-opacity=".25" stroke-width="7" stroke-linejoin="round"/>'
     f'<polygon points="{kit_in}" fill="none" stroke="#ffd54f" stroke-width="2" stroke-linejoin="round"/></svg>')

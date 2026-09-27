@@ -11,8 +11,8 @@ views:
     panel: true
     cards:
       - type: picture-elements
-        image: /local/floorplan-light.svg?v=2
-        dark_mode_image: /local/floorplan-dark.svg?v=2
+        image: /local/floorplan-light.svg?v=3
+        dark_mode_image: /local/floorplan-dark.svg?v=3
         # card-mod (HACS): план целиком по высоте экрана; 1.114 = 440/395 — пропорции SVG.
         card_mod:
           style: |
@@ -95,24 +95,24 @@ views:
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           - type: image
-            entity: switch.light_kitchen_main
-            image: /local/fp-empty.svg?v=2
-            state_image:
-              "on": /local/fp-light-kukhnia-main.svg?v=2
-              "off": /local/fp-empty.svg?v=2
-            tap_action: {action: none}
-            hold_action: {action: none}
-            style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
-          - type: image
             entity: switch.light_kitchen_perimeter
             image: /local/fp-empty.svg?v=2
             state_image:
-              "on": /local/fp-light-kukhnia-perim.svg?v=2
+              "on": /local/fp-light-kukhnia-perim.svg?v=3
               "off": /local/fp-empty.svg?v=2
             tap_action: {action: none}
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           # Нажатие на комнату — переключить свет (в коридоре и прихожей — люстру), долгое — карточка.
+          - type: image
+            entity: switch.light_kitchen_main
+            image: /local/fp-empty.svg?v=2
+            state_image:
+              "on": /local/fp-light-kukhnia-main.svg?v=3
+              "off": /local/fp-empty.svg?v=2
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           - type: image
             entity: switch.light_bath
             image: /local/fp-empty.svg?v=2
@@ -156,11 +156,17 @@ views:
             hold_action: {action: more-info}
             style: {left: 40.3%, top: 84.8%, width: 12.5%, height: 12.7%}
           - type: image
-            entity: switch.light_kitchen_main
+            entity: switch.light_kitchen_perimeter
             image: /local/fp-empty.svg?v=2
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 18.8%, top: 77.8%, width: 30.7%, height: 26.6%}
+          - type: image
+            entity: switch.light_kitchen_main
+            image: /local/fp-empty.svg?v=2
+            tap_action: {action: toggle}
+            hold_action: {action: more-info}
+            style: {left: 14.8%, top: 83.5%, width: 11.4%, height: 12.7%}
           # Значки: лампы, люстра и подсветка по периметру.
           - type: state-icon
             entity: switch.light_bath
@@ -212,13 +218,13 @@ views:
             style: {left: 40.2%, top: 83.3%, --mdc-icon-size: 28px}
           - type: state-icon
             entity: switch.light_kitchen_main
-            icon: mdi:ceiling-light
+            icon: mdi:chandelier
             tap_action: {action: toggle}
             hold_action: {action: more-info}
-            style: {left: 15.9%, top: 72.2%, --mdc-icon-size: 36px}
+            style: {left: 14.8%, top: 83.5%, --mdc-icon-size: 36px}
           - type: state-icon
             entity: switch.light_kitchen_perimeter
             icon: mdi:led-strip-variant
             tap_action: {action: toggle}
             hold_action: {action: more-info}
-            style: {left: 18.6%, top: 84.8%, --mdc-icon-size: 36px}
+            style: {left: 27.3%, top: 84.8%, --mdc-icon-size: 36px}

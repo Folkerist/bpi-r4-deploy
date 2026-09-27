@@ -58,7 +58,8 @@
   На карте нажатие на прихожую — люстра, значок ленты — подсветка по периметру.
 - Выключатель кладовки `switch_storage` → `switch.light_storage` (Кладовка).
 - Выключатель кухни `switch_kitchen`: левая → `switch.light_kitchen_main` (центральный свет),
-  правая → `switch.light_kitchen_perimeter` (подсветка по периметру).
+  правая → `switch.light_kitchen_perimeter` (подсветка по периметру — светит на всю кухню). Центр = люстра над
+  столом (на карте — пятно у стола, TABLE в gen-floorplan.py); нажатие на кухню — периметр.
 - Имена в Z2M: латиница, «тип_комната» (switch_kitchen, sensor_bath, motion_hall). Клавишам/сущностям даём
   постоянные entity_id правкой реестра (HA остановлен), в Z2M при переименовании снимать «обновить ID в HA».
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.
