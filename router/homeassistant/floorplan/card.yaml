@@ -1,0 +1,6 @@
+# Карта квартиры. SVG кладутся в /config/www/ → доступны как /local/...
+# Светлая/тёмная версия переключается вместе с темой HA (dark_mode_image).
+type: picture-elements
+image: /local/floorplan-light.svg
+dark_mode_image: /local/floorplan-dark.svg
+elements: []
