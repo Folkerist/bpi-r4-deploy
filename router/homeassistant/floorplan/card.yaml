@@ -2,6 +2,7 @@
 # SVG кладутся в /config/www/ → доступны как /local/...
 # Нужен card-mod из HACS (иначе card_mod просто игнорируется).
 # Светлая/тёмная версия переключается вместе с темой HA (dark_mode_image).
+# После изменения SVG увеличивать ?v= у картинок (браузер кэширует /local/).
 # Позиции в % от картинки: viewBox 80 465 440 395 (x% = (x-80)/4.4, y% = (y-465)/3.95).
 views:
   - title: Карта
@@ -10,8 +11,8 @@ views:
     panel: true
     cards:
       - type: picture-elements
-        image: /local/floorplan-light.svg
-        dark_mode_image: /local/floorplan-dark.svg
+        image: /local/floorplan-light.svg?v=2
+        dark_mode_image: /local/floorplan-dark.svg?v=2
         # card-mod (HACS): план целиком по высоте экрана; 1.114 = 440/395 — пропорции SVG.
         card_mod:
           style: |
@@ -23,101 +24,101 @@ views:
           # Подсветка комнаты, когда свет включён (на всю картинку, клики пропускает).
           - type: image
             entity: switch.light_bath
-            image: /local/fp-empty.svg
+            image: /local/fp-empty.svg?v=2
             state_image:
-              "on": /local/fp-light-vannaia.svg
-              "off": /local/fp-empty.svg
+              "on": /local/fp-light-vannaia.svg?v=2
+              "off": /local/fp-empty.svg?v=2
             tap_action: {action: none}
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           - type: image
             entity: switch.light_corridor
-            image: /local/fp-empty.svg
+            image: /local/fp-empty.svg?v=2
             state_image:
-              "on": /local/fp-light-koridor.svg
-              "off": /local/fp-empty.svg
+              "on": /local/fp-light-koridor.svg?v=2
+              "off": /local/fp-empty.svg?v=2
             tap_action: {action: none}
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           - type: image
             entity: switch.light_hall_main
-            image: /local/fp-empty.svg
+            image: /local/fp-empty.svg?v=2
             state_image:
-              "on": /local/fp-light-koridor-main.svg
-              "off": /local/fp-empty.svg
+              "on": /local/fp-light-koridor-main.svg?v=2
+              "off": /local/fp-empty.svg?v=2
             tap_action: {action: none}
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           - type: image
             entity: switch.light_hall_perimeter
-            image: /local/fp-empty.svg
+            image: /local/fp-empty.svg?v=2
             state_image:
-              "on": /local/fp-light-koridor-perim.svg
-              "off": /local/fp-empty.svg
+              "on": /local/fp-light-koridor-perim.svg?v=2
+              "off": /local/fp-empty.svg?v=2
             tap_action: {action: none}
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           - type: image
             entity: switch.light_entry_main
-            image: /local/fp-empty.svg
+            image: /local/fp-empty.svg?v=2
             state_image:
-              "on": /local/fp-light-prikhozhaia-main.svg
-              "off": /local/fp-empty.svg
+              "on": /local/fp-light-prikhozhaia-main.svg?v=2
+              "off": /local/fp-empty.svg?v=2
             tap_action: {action: none}
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           - type: image
             entity: switch.light_entry_perimeter
-            image: /local/fp-empty.svg
+            image: /local/fp-empty.svg?v=2
             state_image:
-              "on": /local/fp-light-prikhozhaia-perim.svg
-              "off": /local/fp-empty.svg
+              "on": /local/fp-light-prikhozhaia-perim.svg?v=2
+              "off": /local/fp-empty.svg?v=2
             tap_action: {action: none}
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           - type: image
             entity: switch.light_wc
-            image: /local/fp-empty.svg
+            image: /local/fp-empty.svg?v=2
             state_image:
-              "on": /local/fp-light-tualet.svg
-              "off": /local/fp-empty.svg
+              "on": /local/fp-light-tualet.svg?v=2
+              "off": /local/fp-empty.svg?v=2
             tap_action: {action: none}
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           # Нажатие на комнату — переключить свет (в коридоре и прихожей — люстру), долгое — карточка.
           - type: image
             entity: switch.light_bath
-            image: /local/fp-empty.svg
+            image: /local/fp-empty.svg?v=2
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 58.2%, top: 14.9%, width: 16.4%, height: 22.3%}
           - type: image
             entity: switch.light_corridor
-            image: /local/fp-empty.svg
+            image: /local/fp-empty.svg?v=2
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 58.2%, top: 32%, width: 16.4%, height: 11.9%}
           - type: image
             entity: switch.light_hall_main
-            image: /local/fp-empty.svg
+            image: /local/fp-empty.svg?v=2
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 58.2%, top: 51.3%, width: 16.4%, height: 26.6%}
           - type: image
             entity: switch.light_entry_main
-            image: /local/fp-empty.svg
+            image: /local/fp-empty.svg?v=2
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 50%, top: 71.5%, width: 31.8%, height: 13.9%}
           - type: image
             entity: switch.light_entry_main
-            image: /local/fp-empty.svg
+            image: /local/fp-empty.svg?v=2
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 60.2%, top: 84.8%, width: 11.4%, height: 12.7%}
           - type: image
             entity: switch.light_wc
-            image: /local/fp-empty.svg
+            image: /local/fp-empty.svg?v=2
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 50.6%, top: 84.8%, width: 8%, height: 12.7%}
@@ -151,7 +152,7 @@ views:
             icon: mdi:led-strip-variant
             tap_action: {action: toggle}
             hold_action: {action: more-info}
-            style: {left: 60.2%, top: 84.8%, --mdc-icon-size: 36px}
+            style: {left: 46.6%, top: 70.1%, --mdc-icon-size: 36px}
           - type: state-icon
             entity: switch.light_wc
             icon: mdi:toilet
@@ -163,4 +164,4 @@ views:
             icon: mdi:chandelier
             tap_action: {action: toggle}
             hold_action: {action: more-info}
-            style: {left: 60.2%, top: 71.5%, --mdc-icon-size: 36px}
+            style: {left: 60.2%, top: 70.9%, --mdc-icon-size: 36px}

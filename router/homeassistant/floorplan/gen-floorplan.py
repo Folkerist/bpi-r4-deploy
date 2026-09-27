@@ -9,7 +9,7 @@ rooms = [
  ("kitchen","Кухня","21,3","125,720 230,720 230,825 95,825 95,750",(162,772),False),
  ("storage","Кладовка","3,6","230,775 285,775 285,825 230,825",(257,810),False),
  ("wc","WC","1,4","285,775 320,775 320,825 285,825",(302,810),False),
- ("entry","Прихожая","15,4","230,720 370,720 370,825 320,825 320,775 230,775",(292,741),False),
+ ("entry","Прихожая","15,4","230,720 370,720 370,825 320,825 320,775 230,775",(345,803),False),
 ]
 themes = {
  "dark": dict(bg="#1c1c1c", room="#262a31", balcony="#1a1d22", wall="#4a505c", text="#e6e6e6", sub="#8b919c", win="#5aa9e6"),
@@ -56,7 +56,7 @@ for name,c in themes.items():
     for rid,label,area,pts,(x,y),balc in rooms:
         if not label: continue
         small = rid in ("wc","storage","bath","balcony")
-        fs = 7 if small else 11
+        fs = 7 if small else 9 if rid=="entry" else 11  # entry label sits in the narrow leg of the L
         if rid=="balcony":
             o.append(f'<text x="{x}" y="{y}" font-size="7" fill="{c["sub"]}" text-anchor="middle" transform="rotate(-90 {x} {y})">{label}</text>')
             continue
