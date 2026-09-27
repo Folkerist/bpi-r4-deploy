@@ -57,6 +57,8 @@
 - Четвёртый выключатель `switch_entry2` — в прихожей, одна клавиша → `switch.light_entry_main` (люстра прихожей).
   На карте нажатие на прихожую — люстра, значок ленты — подсветка по периметру.
 - Выключатель кладовки `switch_storage` → `switch.light_storage` (Кладовка).
+- Выключатель кухни `switch_kitchen`: левая → `switch.light_kitchen_main` (центральный свет),
+  правая → `switch.light_kitchen_perimeter` (подсветка по периметру).
 - Имена в Z2M: латиница, «тип_комната» (switch_kitchen, sensor_bath, motion_hall). Клавишам/сущностям даём
   постоянные entity_id правкой реестра (HA остановлен), в Z2M при переименовании снимать «обновить ID в HA».
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.

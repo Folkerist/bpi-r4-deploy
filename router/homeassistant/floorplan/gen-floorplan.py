@@ -99,3 +99,12 @@ open("fp-light-prikhozhaia-main.svg", "w").write(
 st = next(r[3] for r in rooms if r[0] == "storage")
 open("fp-light-kladovka.svg", "w").write(
     HEAD + f'<polygon points="{st}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+
+# Kitchen: central light = room fill, perimeter lights = glowing inset outline.
+kit = next(r[3] for r in rooms if r[0] == "kitchen")
+open("fp-light-kukhnia-main.svg", "w").write(
+    HEAD + f'<polygon points="{kit}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+kit_in = "130,727 223,727 223,818 102,818 102,754"
+open("fp-light-kukhnia-perim.svg", "w").write(
+    HEAD + f'<polygon points="{kit_in}" fill="none" stroke="#ffc107" stroke-opacity=".25" stroke-width="7" stroke-linejoin="round"/>'
+    f'<polygon points="{kit_in}" fill="none" stroke="#ffd54f" stroke-width="2" stroke-linejoin="round"/></svg>')

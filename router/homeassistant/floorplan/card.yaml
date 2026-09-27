@@ -94,6 +94,24 @@ views:
             tap_action: {action: none}
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
+          - type: image
+            entity: switch.light_kitchen_main
+            image: /local/fp-empty.svg?v=2
+            state_image:
+              "on": /local/fp-light-kukhnia-main.svg?v=2
+              "off": /local/fp-empty.svg?v=2
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
+          - type: image
+            entity: switch.light_kitchen_perimeter
+            image: /local/fp-empty.svg?v=2
+            state_image:
+              "on": /local/fp-light-kukhnia-perim.svg?v=2
+              "off": /local/fp-empty.svg?v=2
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           # Нажатие на комнату — переключить свет (в коридоре и прихожей — люстру), долгое — карточка.
           - type: image
             entity: switch.light_bath
@@ -137,6 +155,12 @@ views:
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 40.3%, top: 84.8%, width: 12.5%, height: 12.7%}
+          - type: image
+            entity: switch.light_kitchen_main
+            image: /local/fp-empty.svg?v=2
+            tap_action: {action: toggle}
+            hold_action: {action: more-info}
+            style: {left: 18.8%, top: 77.8%, width: 30.7%, height: 26.6%}
           # Значки: лампы, люстра и подсветка по периметру.
           - type: state-icon
             entity: switch.light_bath
@@ -186,3 +210,15 @@ views:
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 40.2%, top: 83.3%, --mdc-icon-size: 28px}
+          - type: state-icon
+            entity: switch.light_kitchen_main
+            icon: mdi:ceiling-light
+            tap_action: {action: toggle}
+            hold_action: {action: more-info}
+            style: {left: 15.9%, top: 72.2%, --mdc-icon-size: 36px}
+          - type: state-icon
+            entity: switch.light_kitchen_perimeter
+            icon: mdi:led-strip-variant
+            tap_action: {action: toggle}
+            hold_action: {action: more-info}
+            style: {left: 18.6%, top: 84.8%, --mdc-icon-size: 36px}
