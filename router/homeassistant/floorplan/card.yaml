@@ -228,3 +228,14 @@ views:
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 11.4%, top: 84.8%, --mdc-icon-size: 36px}
+          # Климат: температура и влажность под названием комнаты, нажатие — график.
+          - type: state-label
+            entity: sensor.zal_temperature
+            prefix: "🌡 "
+            tap_action: {action: more-info}
+            style: {left: 26.5%, top: 56.5%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}
+          - type: state-label
+            entity: sensor.zal_humidity
+            prefix: "💧 "
+            tap_action: {action: more-info}
+            style: {left: 35.5%, top: 56.5%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}

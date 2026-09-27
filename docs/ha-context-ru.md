@@ -62,6 +62,10 @@
   столом (на карте — пятно у стола, TABLE в gen-floorplan.py); нажатие на кухню — периметр.
 - После переноса сети пропал мост docker0: временные `docker run` для правки реестра запускать с
   `--network none` (постоянные контейнеры — host network, им не нужен). Вернётся после `dockerd restart`/ребута.
+- Шлюз Xiaomi Smart Home Hub 2 (`lumi.gateway.mgl001`, fw 1.0.5, 192.168.88.19, статическая аренда на RB5009)
+  через HACS-интеграцию Xiaomi Gateway 3 (AlexxIT), локально; принимает и BLE-датчики Xiaomi.
+  Термометр LYWSD03MMC «Температура гостинная» (uid a4c13843f704) → `sensor.zal_temperature`,
+  `sensor.zal_humidity` (Зал), на карте — подписи под «Зал».
 - Имена в Z2M: латиница, «тип_комната» (switch_kitchen, sensor_bath, motion_hall). Клавишам/сущностям даём
   постоянные entity_id правкой реестра (HA остановлен), в Z2M при переименовании снимать «обновить ID в HA».
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.
