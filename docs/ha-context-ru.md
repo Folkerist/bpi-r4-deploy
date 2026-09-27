@@ -52,6 +52,8 @@
   снимать галочку «обновить ID в HA», иначе entity_id уйдут от light_bath/light_corridor.
 - Второй Aqara-выключатель `switch_hall` (имя в Z2M) — в основном коридоре (11,2): левая → `switch.light_hall_main` (люстра),
   правая → `switch.light_hall_perimeter` (подсветка по периметру). На карте: заливка / контур по периметру.
+- Третий Aqara-выключатель `switch_entry` — в прихожей: левая → `switch.light_entry_perimeter` (подсветка
+  по периметру прихожей), правая → `switch.light_wc` (туалет).
 - Имена в Z2M: латиница, «тип_комната» (switch_kitchen, sensor_bath, motion_hall). Клавишам/сущностям даём
   постоянные entity_id правкой реестра (HA остановлен), в Z2M при переименовании снимать «обновить ID в HA».
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.

@@ -80,3 +80,12 @@ open("fp-light-koridor-main.svg", "w").write(
 open("fp-light-koridor-perim.svg", "w").write(
     HEAD + '<rect x="307" y="622" width="58" height="91" rx="4" fill="none" stroke="#ffc107" stroke-opacity=".25" stroke-width="7"/>'
     '<rect x="307" y="622" width="58" height="91" rx="4" fill="none" stroke="#ffd54f" stroke-width="2"/></svg>')
+
+# Entry hall (L-shaped): perimeter lights = glowing inset outline; WC = room fill.
+ent_in = "237,727 363,727 363,818 327,818 327,768 237,768"
+open("fp-light-prikhozhaia-perim.svg", "w").write(
+    HEAD + f'<polygon points="{ent_in}" fill="none" stroke="#ffc107" stroke-opacity=".25" stroke-width="7" stroke-linejoin="round"/>'
+    f'<polygon points="{ent_in}" fill="none" stroke="#ffd54f" stroke-width="2" stroke-linejoin="round"/></svg>')
+wc = next(r[3] for r in rooms if r[0] == "wc")
+open("fp-light-tualet.svg", "w").write(
+    HEAD + f'<polygon points="{wc}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
