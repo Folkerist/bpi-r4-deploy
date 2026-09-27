@@ -1,8 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="80 465 440 395" font-family="Roboto, Segoe UI, sans-serif">
-<defs><pattern id="h" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#4a505c" stroke-width="1" opacity=".5"/></pattern></defs>
 <rect x="80" y="465" width="440" height="395" fill="#1c1c1c"/>
-<polygon id="balcony" points="130,545 175,515 175,605 130,605" fill="#20242a" stroke="#4a505c" stroke-width="4" stroke-linejoin="round"/>
-<polygon points="130,545 175,515 175,605 130,605" fill="url(#h)"/>
+<polygon id="balcony" points="130,545 175,515 175,605 130,605" fill="#1a1d22" stroke="#4a505c" stroke-width="4" stroke-linejoin="round"/>
 <polygon id="kids" points="175,512 300,512 300,615 175,615" fill="#262a31" stroke="#4a505c" stroke-width="4" stroke-linejoin="round"/>
 <polygon id="bath" points="300,512 318,492 336,480 354,492 372,512 372,568 300,568" fill="#262a31" stroke="#4a505c" stroke-width="4" stroke-linejoin="round"/>
 <polygon id="corridor2" points="300,568 372,568 372,615 300,615" fill="#262a31" stroke="#4a505c" stroke-width="4" stroke-linejoin="round"/>

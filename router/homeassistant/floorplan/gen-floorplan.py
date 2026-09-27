@@ -12,8 +12,8 @@ rooms = [
  ("entry","Прихожая","15,4","230,720 370,720 370,825 320,825 320,775 230,775",(335,748),False),
 ]
 themes = {
- "dark": dict(bg="#1c1c1c", room="#262a31", balcony="#20242a", wall="#4a505c", text="#e6e6e6", sub="#8b919c", win="#5aa9e6"),
- "light":dict(bg="#ffffff", room="#f1f3f6", balcony="#f7f8fa", wall="#b8bdc6", text="#1f2328", sub="#6b7280", win="#3b8fd9"),
+ "dark": dict(bg="#1c1c1c", room="#262a31", balcony="#1a1d22", wall="#4a505c", text="#e6e6e6", sub="#8b919c", win="#5aa9e6"),
+ "light":dict(bg="#ffffff", room="#f1f3f6", balcony="#e6e9ee", wall="#b8bdc6", text="#1f2328", sub="#6b7280", win="#3b8fd9"),
 }
 windows = [(130,560,130,595),(175,548,175,600),(505,535,505,590),(125,640,125,695),(95,760,95,815),(100,745,122,724)]
 openings=[
@@ -32,12 +32,9 @@ openings=[
 ]
 for name,c in themes.items():
     o=[f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 465 440 395" font-family="Roboto, Segoe UI, sans-serif">',
-       f'<defs><pattern id="h" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="{c["wall"]}" stroke-width="1" opacity=".5"/></pattern></defs>',
        f'<rect x="80" y="465" width="440" height="395" fill="{c["bg"]}"/>']
     for rid,label,area,pts,(x,y),balc in rooms:
-        fill = f'url(#h)' if balc else c["room"]
         o.append(f'<polygon id="{rid}" points="{pts}" fill="{c["balcony"] if balc else c["room"]}" stroke="{c["wall"]}" stroke-width="4" stroke-linejoin="round"/>')
-        if balc: o.append(f'<polygon points="{pts}" fill="url(#h)"/>')
     for x1,y1,x2,y2 in windows:
         o.append(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{c["win"]}" stroke-width="3" stroke-linecap="round"/>')
     for kind,orient,c0,a,b,d,hg in openings:
