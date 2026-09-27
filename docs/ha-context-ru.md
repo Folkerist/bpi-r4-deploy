@@ -33,6 +33,12 @@
 - Пространства HA (area_id | имя): gostinaia|Зал, kukhnia|Кухня, spalnia|Спальня, detskaia|Детская,
   prikhozhaia|Прихожая, koridor|Коридор, vannaia|Ванная, tualet|Туалет, kladovka|Кладовка, balkon|Балкон.
   Созданы правкой `.storage/core.area_registry` при остановленном HA (бэкап `.bak` рядом).
+- Zigbee: SONOFF ZBDongle-E V2 (EFR32MG21, USB 1a86:55d4) в USB-хабе роутера → `/dev/ttyACM0`
+  (нужен `kmod-usb-acm`, поставлен через apk). Прошит EmberZNet 8.0.2 (было 7.3, EZSP 12 — Z2M не принимал).
+  Zigbee2MQTT 2.x (`adapter: ember`, канал 25, фронтенд :8099) + Mosquitto (только 127.0.0.1:1883, без пароля)
+  в том же compose `/mnt/nvme/compose/homeassistant/docker-compose.yml`; данные `/mnt/nvme/zigbee2mqtt/data`
+  (в `configuration.yaml` и `coordinator_backup.json` ключи сети — не публиковать), `/mnt/nvme/mosquitto`.
+  Второй донгл — ретранслятор (прошивка Zigbee Router), питается от зарядки.
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.
 - Nextcloud пробовали и удалили (грузил CPU, segfault PHP JIT на ARM64).
 
