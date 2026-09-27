@@ -103,6 +103,12 @@ views:
             tap_action: {action: none}
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
+          # Камера C700: поле зрения (статично) — на входную дверь.
+          - type: image
+            image: /local/fp-camera-fov.svg?v=1
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           # Нажатие на комнату — переключить свет (в коридоре и прихожей — люстру), долгое — карточка.
           - type: image
             entity: switch.light_kitchen_main
@@ -179,7 +185,7 @@ views:
             icon: mdi:ceiling-light
             tap_action: {action: toggle}
             hold_action: {action: more-info}
-            style: {left: 58.2%, top: 32%, --mdc-icon-size: 36px}
+            style: {left: 58.2%, top: 30.1%, --mdc-icon-size: 36px}
           - type: state-icon
             entity: switch.light_hall_main
             icon: mdi:chandelier
@@ -228,6 +234,11 @@ views:
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 11.4%, top: 84.8%, --mdc-icon-size: 36px}
+          - type: state-icon
+            entity: camera.c700
+            icon: mdi:cctv
+            tap_action: {action: more-info}
+            style: {left: 58.2%, top: 36.5%, --mdc-icon-size: 28px, color: "#4fc3f7"}
           # Климат: температура и влажность под названием комнаты, нажатие — график.
           - type: state-label
             entity: sensor.zal_temperature
@@ -239,3 +250,13 @@ views:
             prefix: "💧 "
             tap_action: {action: more-info}
             style: {left: 35.5%, top: 56.5%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}
+  - title: Камера
+    path: camera
+    icon: mdi:cctv
+    panel: true
+    cards:
+      - type: picture-entity
+        entity: camera.c700
+        name: Прихожая
+        camera_view: live
+        tap_action: {action: more-info}

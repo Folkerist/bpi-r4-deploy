@@ -114,3 +114,11 @@ open("fp-light-kukhnia-perim.svg", "w").write(
     HEAD + f'<polygon points="{kit}" fill="#ffc107" fill-opacity=".3"/>'
     f'<polygon points="{kit_in}" fill="none" stroke="#ffc107" stroke-opacity=".25" stroke-width="7" stroke-linejoin="round"/>'
     f'<polygon points="{kit_in}" fill="none" stroke="#ffd54f" stroke-width="2" stroke-linejoin="round"/></svg>')
+
+# Camera C700: small corridor next to the bath, looking at the entrance door. Faint field-of-view cone,
+# always shown (static overlay, not tied to a state).
+CAM = (336, 609)
+cx, cy = CAM
+open("fp-camera-fov.svg", "w").write(
+    HEAD + f'<polygon points="{cx},{cy} 330,825 370,825" fill="#4fc3f7" fill-opacity=".10" stroke="#4fc3f7" '
+    f'stroke-opacity=".35" stroke-width="1" stroke-dasharray="3 3"/></svg>')
