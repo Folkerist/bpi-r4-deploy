@@ -151,7 +151,7 @@ views:
             icon: mdi:led-strip-variant
             tap_action: {action: toggle}
             hold_action: {action: more-info}
-            style: {left: 49.5%, top: 70.4%, --mdc-icon-size: 36px}
+            style: {left: 60.2%, top: 84.8%, --mdc-icon-size: 36px}
           - type: state-icon
             entity: switch.light_wc
             icon: mdi:toilet
@@ -163,4 +163,4 @@ views:
             icon: mdi:chandelier
             tap_action: {action: toggle}
             hold_action: {action: more-info}
-            style: {left: 60.2%, top: 83.5%, --mdc-icon-size: 36px}
+            style: {left: 60.2%, top: 71.5%, --mdc-icon-size: 36px}
