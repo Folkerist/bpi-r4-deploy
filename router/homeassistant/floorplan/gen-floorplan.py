@@ -94,3 +94,8 @@ open("fp-light-tualet.svg", "w").write(
 ent = next(r[3] for r in rooms if r[0] == "entry")
 open("fp-light-prikhozhaia-main.svg", "w").write(
     HEAD + f'<polygon points="{ent}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+
+# Storage room light = room fill.
+st = next(r[3] for r in rooms if r[0] == "storage")
+open("fp-light-kladovka.svg", "w").write(
+    HEAD + f'<polygon points="{st}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
