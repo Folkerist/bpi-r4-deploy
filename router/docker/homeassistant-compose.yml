@@ -1,5 +1,5 @@
-# Home Assistant + Matter Server on the BPI-R4 Pro (OpenWrt + dockerd, data on /mnt/nvme).
-# Both use the host network: HA needs mDNS/SSDP discovery, Matter needs IPv6 link-local on the LAN.
+# Home Assistant + Matter Server + Zigbee2MQTT/Mosquitto on the BPI-R4 Pro (OpenWrt + dockerd, data on /mnt/nvme).
+# All use the host network: HA needs mDNS/SSDP discovery, Matter needs IPv6 link-local on the LAN.
 # Ports are not exposed to the Internet: fw4 rejects input from the wan zone.
 services:
   homeassistant:
@@ -11,13 +11,9 @@ services:
       - TZ=Europe/Moscow
     volumes:
       - /mnt/nvme/homeassistant/config:/config
-      # Zigbee: SONOFF ZBDongle-E V2 → /dev/ttyACM0 (cdc_acm, needs kmod-usb-acm; ttyUSB0-3 are the modem).
-      # /dev + cgroup rule instead of `devices:` so HA still starts with the dongle unplugged and sees a replug.
-      - /dev:/dev
-    device_cgroup_rules:
-      - 'c 166:* rmw'
     depends_on:
       - matter-server
+      - mosquitto
 
   matter-server:
     image: ghcr.io/home-assistant-libs/python-matter-server:stable
@@ -27,3 +23,31 @@ services:
     command: --storage-path /data --paa-root-cert-dir /data/credentials --primary-interface br-lan
     volumes:
       - /mnt/nvme/matter-server/data:/data
+
+  # MQTT broker for Zigbee2MQTT <-> HA. Listens on 127.0.0.1 only (see mosquitto/mosquitto.conf).
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - /mnt/nvme/mosquitto/config:/mosquitto/config
+      - /mnt/nvme/mosquitto/data:/mosquitto/data
+
+  # Zigbee: SONOFF ZBDongle-E V2 (EFR32MG21) -> /dev/ttyACM0 (cdc_acm, needs kmod-usb-acm; ttyUSB0-3 are the modem).
+  # /dev + cgroup rule (166 = ttyACM) instead of `devices:` so the container starts with the dongle unplugged
+  # and sees a replug. Frontend: http://<router>:8099
+  zigbee2mqtt:
+    image: ghcr.io/koenkk/zigbee2mqtt:latest
+    container_name: zigbee2mqtt
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Moscow
+    volumes:
+      - /mnt/nvme/zigbee2mqtt/data:/app/data
+      - /dev:/dev
+    device_cgroup_rules:
+      - 'c 166:* rmw'
+    depends_on:
+      - mosquitto
