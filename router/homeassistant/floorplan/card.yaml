@@ -1,5 +1,6 @@
 # Панель «Карта»: Настройки → Панели → Карта → ✏️ → ⋮ → Редактор кода.
 # SVG кладутся в /config/www/ → доступны как /local/...
+# Нужен card-mod из HACS (иначе card_mod просто игнорируется).
 # Светлая/тёмная версия переключается вместе с темой HA (dark_mode_image).
 # Позиции в % от картинки: viewBox 80 465 440 395 (x% = (x-80)/4.4, y% = (y-465)/3.95).
 views:
@@ -11,6 +12,13 @@ views:
       - type: picture-elements
         image: /local/floorplan-light.svg
         dark_mode_image: /local/floorplan-dark.svg
+        # card-mod (HACS): план целиком по высоте экрана; 1.114 = 440/395 — пропорции SVG.
+        card_mod:
+          style: |
+            ha-card {
+              max-width: calc((100vh - 72px) * 1.114);
+              margin: 0 auto;
+            }
         elements:
           # Подсветка комнаты, когда свет включён (на всю картинку, клики пропускает).
           - type: image
@@ -50,10 +58,10 @@ views:
             icon: mdi:ceiling-light
             tap_action: {action: toggle}
             hold_action: {action: more-info}
-            style: {left: 58.2%, top: 9%, --mdc-icon-size: 22px}
+            style: {left: 58.2%, top: 9%, --mdc-icon-size: 36px}
           - type: state-icon
             entity: switch.light_corridor
             icon: mdi:ceiling-light
             tap_action: {action: toggle}
             hold_action: {action: more-info}
-            style: {left: 58.2%, top: 32%, --mdc-icon-size: 22px}
+            style: {left: 58.2%, top: 32%, --mdc-icon-size: 36px}
