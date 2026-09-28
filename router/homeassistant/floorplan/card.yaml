@@ -12,8 +12,8 @@ views:
     panel: true
     cards:
       - type: picture-elements
-        image: /local/floorplan-light.svg?v=5
-        dark_mode_image: /local/floorplan-dark.svg?v=5
+        image: /local/floorplan-light.svg?v=6
+        dark_mode_image: /local/floorplan-dark.svg?v=6
         # card-mod (HACS): план целиком по высоте экрана; 1.114 = 440/395 — пропорции SVG.
         card_mod:
           style: |
@@ -601,12 +601,56 @@ views:
                 params: [{segments: [3], repeat: 1}]
               confirmation: {text: "Пылесос: убрать — Проход к кухне?"}
             style: {left: 3.1%, top: 70.9%, --mdc-icon-size: 20px, color: var(--primary-color)}
+          # Погода: анимированный значок (Basmilius weather-icons, MIT) по состоянию + температура; нажатие — прогноз.
+          - type: image
+            entity: weather.forecast_home_assistant
+            image: /local/weather/not-available.svg
+            state_image:
+              "clear-night": /local/weather/clear-night.svg
+              "cloudy": /local/weather/cloudy.svg
+              "exceptional": /local/weather/not-available.svg
+              "fog": /local/weather/fog.svg
+              "hail": /local/weather/hail.svg
+              "lightning": /local/weather/thunderstorms.svg
+              "lightning-rainy": /local/weather/thunderstorms-rain.svg
+              "partlycloudy": /local/weather/partly-cloudy-day.svg
+              "pouring": /local/weather/rain.svg
+              "rainy": /local/weather/rain.svg
+              "snowy": /local/weather/snow.svg
+              "snowy-rainy": /local/weather/sleet.svg
+              "sunny": /local/weather/clear-day.svg
+              "windy": /local/weather/wind.svg
+              "windy-variant": /local/weather/wind.svg
+            tap_action: {action: more-info}
+            style: {left: 89.7%, top: 13.2%, width: 5.5%}
+          - type: state-label
+            entity: weather.forecast_home_assistant
+            attribute: temperature
+            suffix: " °C"
+            tap_action: {action: more-info}
+            style: {left: 95.5%, top: 13.2%, color: var(--primary-text-color), font-size: 18px, font-weight: 500}
+          # Камера: снимок; при движении (binary_sensor.c700_motion) — красная рамка.
           - type: image
             entity: camera.c700
             camera_image: camera.c700
             camera_view: auto
             tap_action: {action: more-info}
-            style: {left: 92.7%, top: 17.2%, width: 11.94%, border-radius: 6px, overflow: hidden}
+            style: {left: 92.7%, top: 31.6%, width: 11.94%, border-radius: 6px, overflow: hidden}
+          - type: conditional
+            conditions:
+              - entity: binary_sensor.c700_motion
+                state: "on"
+            elements:
+              - type: image
+                image: /local/fp-camera-motion.svg?v=1
+                tap_action: {action: none}
+                style: {left: 92.7%, top: 31.6%, width: 12.9%, pointer-events: none}
+          # Свет: сколько горит (sensor.lights_on — помощник-шаблон) и «Выключить всё».
+          - type: state-label
+            entity: sensor.lights_on
+            prefix: "💡 Горит: "
+            tap_action: {action: none}
+            style: {left: 92.7%, top: 44.8%, color: var(--primary-text-color), font-size: 12px}
           - type: image
             image: /local/fp-empty.svg?v=2
             tap_action:
@@ -627,7 +671,7 @@ views:
                   - light.zal_yeelight_hall
                   - light.spalnia_yeelight_bed
               confirmation: {text: "Выключить весь свет?"}
-            style: {left: 92.7%, top: 35.7%, width: 11.94%, height: 7.09%}
+            style: {left: 92.7%, top: 49.4%, width: 11.94%, height: 7.09%}
           - type: icon
             icon: mdi:lightbulb-group-off
             tap_action:
@@ -648,58 +692,58 @@ views:
                   - light.zal_yeelight_hall
                   - light.spalnia_yeelight_bed
               confirmation: {text: "Выключить весь свет?"}
-            style: {left: 88.5%, top: 35.7%, --mdc-icon-size: 20px, color: var(--primary-color)}
+            style: {left: 88.5%, top: 49.4%, --mdc-icon-size: 20px, color: var(--primary-color)}
           - type: state-label
             entity: sensor.koridor_roborock_qrevo_status
             tap_action: {action: more-info}
-            style: {left: 92.7%, top: 49.6%, color: var(--primary-text-color), font-size: 12px}
+            style: {left: 92.7%, top: 61%, color: var(--primary-text-color), font-size: 12px}
           - type: state-label
             entity: sensor.koridor_roborock_qrevo_battery
             prefix: "🔋 "
             tap_action: {action: more-info}
-            style: {left: 92.7%, top: 53.7%, color: var(--secondary-text-color), font-size: 12px}
+            style: {left: 92.7%, top: 64.8%, color: var(--secondary-text-color), font-size: 12px}
           - type: image
             image: /local/fp-empty.svg?v=2
             tap_action:
               action: perform-action
               perform_action: vacuum.start
               target: {entity_id: vacuum.koridor_roborock_qrevo}
-            style: {left: 92.7%, top: 60.5%, width: 11.94%, height: 7.09%}
+            style: {left: 92.7%, top: 70.1%, width: 11.94%, height: 7.09%}
           - type: icon
             icon: mdi:play
             tap_action:
               action: perform-action
               perform_action: vacuum.start
               target: {entity_id: vacuum.koridor_roborock_qrevo}
-            style: {left: 88.5%, top: 60.5%, --mdc-icon-size: 20px, color: var(--primary-color)}
+            style: {left: 88.5%, top: 70.1%, --mdc-icon-size: 20px, color: var(--primary-color)}
           - type: image
             image: /local/fp-empty.svg?v=2
             tap_action:
               action: perform-action
               perform_action: vacuum.pause
               target: {entity_id: vacuum.koridor_roborock_qrevo}
-            style: {left: 92.7%, top: 68.9%, width: 11.94%, height: 7.09%}
+            style: {left: 92.7%, top: 78.5%, width: 11.94%, height: 7.09%}
           - type: icon
             icon: mdi:pause
             tap_action:
               action: perform-action
               perform_action: vacuum.pause
               target: {entity_id: vacuum.koridor_roborock_qrevo}
-            style: {left: 88.5%, top: 68.9%, --mdc-icon-size: 20px, color: var(--primary-color)}
+            style: {left: 88.5%, top: 78.5%, --mdc-icon-size: 20px, color: var(--primary-color)}
           - type: image
             image: /local/fp-empty.svg?v=2
             tap_action:
               action: perform-action
               perform_action: vacuum.return_to_base
               target: {entity_id: vacuum.koridor_roborock_qrevo}
-            style: {left: 92.7%, top: 77.2%, width: 11.94%, height: 7.09%}
+            style: {left: 92.7%, top: 86.8%, width: 11.94%, height: 7.09%}
           - type: icon
             icon: mdi:home-import-outline
             tap_action:
               action: perform-action
               perform_action: vacuum.return_to_base
               target: {entity_id: vacuum.koridor_roborock_qrevo}
-            style: {left: 88.5%, top: 77.2%, --mdc-icon-size: 20px, color: var(--primary-color)}
+            style: {left: 88.5%, top: 86.8%, --mdc-icon-size: 20px, color: var(--primary-color)}
   - title: Камера
     path: camera
     icon: mdi:cctv
@@ -841,3 +885,17 @@ views:
         entity: image.koridor_roborock_qrevo_map_0
         name: Карта пылесоса
         show_state: false
+  - title: Погода
+    path: weather
+    icon: mdi:weather-partly-cloudy
+    cards:
+      - type: weather-forecast
+        entity: weather.forecast_home_assistant
+        forecast_type: hourly
+        show_current: true
+        show_forecast: true
+      - type: weather-forecast
+        entity: weather.forecast_home_assistant
+        forecast_type: daily
+        show_current: false
+        show_forecast: true

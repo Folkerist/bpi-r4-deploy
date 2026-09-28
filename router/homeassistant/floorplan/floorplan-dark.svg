@@ -69,15 +69,16 @@
 <text x="43" y="715" font-size="7" fill="#e6e6e6" text-anchor="middle">Малый коридор</text>
 <rect x="-2" y="731" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
 <text x="43" y="748" font-size="7" fill="#e6e6e6" text-anchor="middle">Проход к кухне</text>
-<text x="565" y="492" font-size="8" font-weight="600" fill="#8b919c" text-anchor="middle" letter-spacing=".6">КАМЕРА</text>
-<text x="565" y="585" font-size="8" font-weight="600" fill="#8b919c" text-anchor="middle" letter-spacing=".6">СВЕТ</text>
-<rect x="528" y="592" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
-<text x="573" y="609" font-size="7" fill="#e6e6e6" text-anchor="middle">Выключить всё</text>
-<text x="565" y="645" font-size="8" font-weight="600" fill="#8b919c" text-anchor="middle" letter-spacing=".6">ПЫЛЕСОС</text>
-<rect x="528" y="690" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
-<text x="573" y="707" font-size="8.5" fill="#e6e6e6" text-anchor="middle">Старт</text>
-<rect x="528" y="723" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
-<text x="573" y="740" font-size="8.5" fill="#e6e6e6" text-anchor="middle">Пауза</text>
-<rect x="528" y="756" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
-<text x="573" y="773" font-size="8.5" fill="#e6e6e6" text-anchor="middle">На базу</text>
+<text x="565" y="492" font-size="8" font-weight="600" fill="#8b919c" text-anchor="middle" letter-spacing=".6">ПОГОДА</text>
+<text x="565" y="548" font-size="8" font-weight="600" fill="#8b919c" text-anchor="middle" letter-spacing=".6">КАМЕРА</text>
+<text x="565" y="628" font-size="8" font-weight="600" fill="#8b919c" text-anchor="middle" letter-spacing=".6">СВЕТ</text>
+<rect x="528" y="646" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="573" y="663" font-size="7" fill="#e6e6e6" text-anchor="middle">Выключить всё</text>
+<text x="565" y="692" font-size="8" font-weight="600" fill="#8b919c" text-anchor="middle" letter-spacing=".6">ПЫЛЕСОС</text>
+<rect x="528" y="728" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="573" y="745" font-size="8.5" fill="#e6e6e6" text-anchor="middle">Старт</text>
+<rect x="528" y="761" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="573" y="778" font-size="8.5" fill="#e6e6e6" text-anchor="middle">Пауза</text>
+<rect x="528" y="794" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="573" y="811" font-size="8.5" fill="#e6e6e6" text-anchor="middle">На базу</text>
 </svg>
