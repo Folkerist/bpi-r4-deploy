@@ -79,6 +79,9 @@
   в Спальне Yeelight → `light.spalnia_yeelight_bed` (+ `_ambilight`), на карте — заливка спальни.
   HA при добавлении перепутал светильники (Hall↔Bed) — поменяли местами в реестре; в приложении Yeelight
   имена тоже стоит поменять. (заливка зала на карте, нажатие по залу — вкл/выкл).
+- Пылесос Roborock Qrevo (интеграция Roborock) → `vacuum.koridor_roborock_qrevo`, карта
+  `image.koridor_roborock_qrevo_map_0`; база на кухне. На карте квартиры значок, вкладка «Пылесос» (управление,
+  режимы, карта). Уборка по комнатам — по сегментам из `roborock.get_maps` (ждём список).
 - Имена в Z2M: латиница, «тип_комната» (switch_kitchen, sensor_bath, motion_hall). Клавишам/сущностям даём
   постоянные entity_id правкой реестра (HA остановлен), в Z2M при переименовании снимать «обновить ID в HA».
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.

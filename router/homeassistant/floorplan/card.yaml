@@ -281,6 +281,12 @@ views:
             tap_action: {action: toggle}
             hold_action: {action: more-info}
             style: {left: 81.4%, top: 19%, --mdc-icon-size: 36px}
+          # Пылесос Roborock Qrevo: база на кухне; цвет значка = состояние, нажатие — управление.
+          - type: state-icon
+            entity: vacuum.koridor_roborock_qrevo
+            icon: mdi:robot-vacuum
+            tap_action: {action: more-info}
+            style: {left: 31.4%, top: 69.6%, --mdc-icon-size: 30px}
           # Климат: температура и влажность под названием комнаты, нажатие — график.
           - type: state-label
             entity: sensor.zal_temperature
@@ -352,3 +358,38 @@ views:
         name: Прихожая
         camera_view: live
         tap_action: {action: more-info}
+  - title: Пылесос
+    path: vacuum
+    icon: mdi:robot-vacuum
+    cards:
+      - type: tile
+        entity: vacuum.koridor_roborock_qrevo
+        name: Roborock Qrevo
+        features_position: bottom
+        features:
+          - type: vacuum-commands
+            commands: [start_pause, stop, return_home, locate]
+      - type: glance
+        show_name: true
+        entities:
+          - entity: sensor.koridor_roborock_qrevo_battery
+            name: Заряд
+          - entity: sensor.koridor_roborock_qrevo_status
+            name: Статус
+          - entity: sensor.koridor_roborock_qrevo_current_room
+            name: Комната
+          - entity: sensor.koridor_roborock_qrevo_cleaning_progress
+            name: Прогресс
+      - type: entities
+        title: Режимы
+        entities:
+          - entity: select.koridor_roborock_qrevo_cleaning_mode
+            name: Режим уборки
+          - entity: select.koridor_roborock_qrevo_mop_mode
+            name: Режим швабры
+          - entity: select.koridor_roborock_qrevo_mop_intensity
+            name: Подача воды
+      - type: picture-entity
+        entity: image.koridor_roborock_qrevo_map_0
+        name: Карта пылесоса
+        show_state: false
