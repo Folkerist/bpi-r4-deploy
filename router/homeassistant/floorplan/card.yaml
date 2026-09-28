@@ -147,14 +147,42 @@ views:
             entity: switch.light_corridor
             image: /local/fp-empty.svg?v=2
             tap_action: {action: toggle}
-            hold_action: {action: more-info}
+            hold_action:
+              action: perform-action
+              perform_action: vacuum.send_command
+              target: {entity_id: vacuum.koridor_roborock_qrevo}
+              data:
+                command: app_segment_clean
+                params: [{segments: [2], repeat: 1}]
+              confirmation: {text: "Пылесос: убрать малый коридор?"}
             style: {left: 58.2%, top: 32%, width: 16.4%, height: 11.9%}
           - type: image
             entity: switch.light_hall_main
             image: /local/fp-empty.svg?v=2
             tap_action: {action: toggle}
-            hold_action: {action: more-info}
+            hold_action:
+              action: perform-action
+              perform_action: vacuum.send_command
+              target: {entity_id: vacuum.koridor_roborock_qrevo}
+              data:
+                command: app_segment_clean
+                params: [{segments: [6], repeat: 1}]
+              confirmation: {text: "Пылесос: убрать коридор?"}
             style: {left: 58.2%, top: 51.3%, width: 16.4%, height: 26.6%}
+          # Верх Г прихожей: левая часть (к кухне, кладовке, WC) = сегмент 3 «Коридор1», правая = 7 «Прихожая».
+          - type: image
+            entity: switch.light_entry_main
+            image: /local/fp-empty.svg?v=2
+            tap_action: {action: toggle}
+            hold_action:
+              action: perform-action
+              perform_action: vacuum.send_command
+              target: {entity_id: vacuum.koridor_roborock_qrevo}
+              data:
+                command: app_segment_clean
+                params: [{segments: [3], repeat: 1}]
+              confirmation: {text: "Пылесос: убрать проход к кухне?"}
+            style: {left: 44.3%, top: 71.5%, width: 20.5%, height: 13.9%}
           - type: image
             entity: switch.light_entry_main
             image: /local/fp-empty.svg?v=2
@@ -167,7 +195,7 @@ views:
                 command: app_segment_clean
                 params: [{segments: [7], repeat: 1}]
               confirmation: {text: "Пылесос: убрать прихожую?"}
-            style: {left: 50%, top: 71.5%, width: 31.8%, height: 13.9%}
+            style: {left: 60.2%, top: 71.5%, width: 11.4%, height: 13.9%}
           - type: image
             entity: switch.light_entry_main
             image: /local/fp-empty.svg?v=2
@@ -437,7 +465,8 @@ views:
           - entity: select.koridor_roborock_qrevo_mop_intensity
             name: Подача воды
       # Уборка по комнатам: номера сегментов из roborock.get_maps (имена в приложении Roborock:
-      # 1 Кухня, 2 Коридор3, 3 Коридор1, 4 Главная спальня, 5 Зал, 6 Коридор, 7 Прихожая, 8 Лекс).
+      # 1 Кухня, 2 Коридор3 = малый коридор у ванной, 3 Коридор1 = проход от прихожей к кухне, 4 Главная спальня,
+      # 5 Зал, 6 Коридор = основной, 7 Прихожая, 8 Лекс = детская). Номера в приложении — другие (порядок показа).
       - type: grid
         title: Убрать комнату
         columns: 4
@@ -510,7 +539,7 @@ views:
                 params: [{segments: [6], repeat: 1}]
               confirmation: {text: "Убрать: Коридор?"}
           - type: button
-            name: Коридор 1
+            name: Проход к кухне
             icon: mdi:walk
             tap_action:
               action: perform-action
@@ -519,9 +548,9 @@ views:
               data:
                 command: app_segment_clean
                 params: [{segments: [3], repeat: 1}]
-              confirmation: {text: "Убрать: Коридор 1?"}
+              confirmation: {text: "Убрать: Проход к кухне?"}
           - type: button
-            name: Коридор 3
+            name: Малый коридор
             icon: mdi:walk
             tap_action:
               action: perform-action
@@ -530,7 +559,7 @@ views:
               data:
                 command: app_segment_clean
                 params: [{segments: [2], repeat: 1}]
-              confirmation: {text: "Убрать: Коридор 3?"}
+              confirmation: {text: "Убрать: Малый коридор?"}
       - type: picture-entity
         entity: image.koridor_roborock_qrevo_map_0
         name: Карта пылесоса
