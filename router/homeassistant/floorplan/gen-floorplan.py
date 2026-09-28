@@ -72,13 +72,17 @@ for name,c in themes.items():
         o.append(f'<rect x="{x0}" y="{yc-14}" width="74" height="28" rx="6" fill="{c["room"]}" stroke="{c["wall"]}" stroke-width="1"/>')
         fs = 8.5 if len(t) <= 9 else 7  # long captions ("Малый коридор") must fit next to the icon
         o.append(f'<text x="{x0+45}" y="{yc+3}" font-size="{fs}" fill="{c["text"]}" text-anchor="middle">{t}</text>')
+    def hbtn(x0, yc, t):  # half-width plate, two per row
+        o.append(f'<rect x="{x0}" y="{yc-14}" width="36" height="28" rx="6" fill="{c["room"]}" stroke="{c["wall"]}" stroke-width="1"/>')
+        o.append(f'<text x="{x0+25}" y="{yc+3}" font-size="8" fill="{c["text"]}" text-anchor="middle">{t}</text>')
     cap(35, 492, "УБОРКА")
     for i, (t, _seg, _icon) in enumerate(SIDE_ROOMS):
         btn(-2, 514 + 33*i, t)
     cap(565, 492, "ПОГОДА")
     cap(565, 548, "КАМЕРА")
     cap(565, 628, "СВЕТ")
-    btn(528, 660, "Выключить всё")
+    hbtn(528, 660, "Вкл")
+    hbtn(566, 660, "Выкл")
     cap(565, 692, "ПЫЛЕСОС")
     btn(528, 742, "Старт")
     btn(528, 775, "Пауза")

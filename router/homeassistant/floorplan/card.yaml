@@ -12,8 +12,8 @@ views:
     panel: true
     cards:
       - type: picture-elements
-        image: /local/floorplan-light.svg?v=6
-        dark_mode_image: /local/floorplan-dark.svg?v=6
+        image: /local/floorplan-light.svg?v=7
+        dark_mode_image: /local/floorplan-dark.svg?v=7
         # card-mod (HACS): план целиком по высоте экрана; 1.114 = 440/395 — пропорции SVG.
         card_mod:
           style: |
@@ -645,12 +645,54 @@ views:
                 image: /local/fp-camera-motion.svg?v=1
                 tap_action: {action: none}
                 style: {left: 92.7%, top: 31.6%, width: 12.9%, pointer-events: none}
-          # Свет: сколько горит (sensor.lights_on — помощник-шаблон) и «Выключить всё».
+          # Свет: сколько горит (sensor.lights_on — помощник-шаблон) и кнопки «Вкл»/«Выкл» для всего света.
           - type: state-label
             entity: sensor.lights_on
             prefix: "💡 Горит: "
             tap_action: {action: none}
             style: {left: 92.7%, top: 44.8%, color: var(--primary-text-color), font-size: 12px}
+          - type: image
+            image: /local/fp-empty.svg?v=2
+            tap_action:
+              action: perform-action
+              perform_action: homeassistant.turn_on
+              target:
+                entity_id:
+                  - switch.light_bath
+                  - switch.light_corridor
+                  - switch.light_hall_main
+                  - switch.light_hall_perimeter
+                  - switch.light_entry_main
+                  - switch.light_entry_perimeter
+                  - switch.light_wc
+                  - switch.light_storage
+                  - switch.light_kitchen_main
+                  - switch.light_kitchen_perimeter
+                  - light.zal_yeelight_hall
+                  - light.spalnia_yeelight_bed
+              confirmation: {text: "Включить весь свет?"}
+            style: {left: 89.68%, top: 49.4%, width: 5.81%, height: 7.09%}
+          - type: icon
+            icon: mdi:lightbulb-group
+            tap_action:
+              action: perform-action
+              perform_action: homeassistant.turn_on
+              target:
+                entity_id:
+                  - switch.light_bath
+                  - switch.light_corridor
+                  - switch.light_hall_main
+                  - switch.light_hall_perimeter
+                  - switch.light_entry_main
+                  - switch.light_entry_perimeter
+                  - switch.light_wc
+                  - switch.light_storage
+                  - switch.light_kitchen_main
+                  - switch.light_kitchen_perimeter
+                  - light.zal_yeelight_hall
+                  - light.spalnia_yeelight_bed
+              confirmation: {text: "Включить весь свет?"}
+            style: {left: 88.2%, top: 49.4%, --mdc-icon-size: 18px, color: var(--primary-color)}
           - type: image
             image: /local/fp-empty.svg?v=2
             tap_action:
@@ -671,7 +713,7 @@ views:
                   - light.zal_yeelight_hall
                   - light.spalnia_yeelight_bed
               confirmation: {text: "Выключить весь свет?"}
-            style: {left: 92.7%, top: 49.4%, width: 11.94%, height: 7.09%}
+            style: {left: 95.81%, top: 49.4%, width: 5.81%, height: 7.09%}
           - type: icon
             icon: mdi:lightbulb-group-off
             tap_action:
@@ -692,7 +734,7 @@ views:
                   - light.zal_yeelight_hall
                   - light.spalnia_yeelight_bed
               confirmation: {text: "Выключить весь свет?"}
-            style: {left: 88.5%, top: 49.4%, --mdc-icon-size: 20px, color: var(--primary-color)}
+            style: {left: 94.35%, top: 49.4%, --mdc-icon-size: 18px, color: var(--primary-color)}
           - type: state-label
             entity: sensor.koridor_roborock_qrevo_status
             tap_action: {action: more-info}
