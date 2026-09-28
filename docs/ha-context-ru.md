@@ -109,6 +109,12 @@
   Источник карты — `router/homeassistant/floorplan/map-desktop.yaml`; `gen-card.py` вставляет обе версии
   в card.yaml между `# BEGIN map` / `# END map` (вручную этот блок не править).
 
+- Резервные копии: `router/docker/stack-backup.sh` → `/usr/bin/stack-backup.sh`, cron `30 4 * * *`, в
+  `/mnt/nvme/backups/ГГГГ-ММ-ДД/` (root-only, хранится 14 дней, ~30 МБ/день): `homeassistant.tgz` (config без БД),
+  `ha-db.sqlite.gz` (снимок БД через sqlite backup), zigbee2mqtt (ключи сети!), mosquitto, matter-server, go2rtc,
+  compose, `router-config.tgz` (sysupgrade -b). Журнал: `logread -e stack-backup`. SSD2 не используем — его будут
+  менять; копии на том же NVMe, что и данные (от отказа диска не спасают) — после замены SSD2 добавить вторую копию.
+  Встроенный Backup HA не настроен (есть этот скрипт). Восстановление — в шапке скрипта.
 - Matter: веб-интерфейс python-matter-server на :5580 (без пароля, только LAN, наружу не пробрасывать) добавлен
   в боковую панель HA как панель «Веб-страница» `http://192.168.88.2:5580` («Matter»). Узлов пока 0.
 
@@ -146,6 +152,6 @@
   выполняет команды по SSH и присылает вывод.
 - Не повторять и не коммитить ключи/пароли/токены; если пользователь их прислал — напомнить сменить.
 - Локальная сессия (Claude Code на маке пользователя в домашней сети, `claude remote-control`): доступ к роутеру
-  `ssh bpi` (ключ `~/.ssh/bpi_claude`, у роутера dropbear → `/etc/dropbear/authorized_keys`). Смотреть,
+  `ssh bpi` (192.168.88.2, ключ `~/.ssh/openwrt_claude`, у роутера dropbear → `/etc/dropbear/authorized_keys`). Смотреть,
   читать логи и диагностировать — самостоятельно; любые изменения (конфиги, реестр HA, перезапуски контейнеров,
   uci, установка пакетов) — сначала показать план/команду и дождаться «да». Перед правкой файлов — копия `.bak`.
