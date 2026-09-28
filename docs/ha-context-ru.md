@@ -145,7 +145,7 @@
   `/etc/uplink-lan-ports`, по умолчанию `lan1`). Проверка: `nft list table netdev uplink_dscp | grep devices`
   (есть lan1), счётчики растут. tcpdump на lan1 всё равно показывает tos 0x20 — он видит пакеты до правила.
   Установлено 27.09.2026: скорость по Wi-Fi 21 → ~357–470 Мбит/с (curl 100 МБ с speedtest.selectel.ru; Mac на «Home» 5 ГГц, 80 МГц).
-- Wi-Fi BPI-R4 = те же сети, что у Xiaomi (устройства переходят сами): 2,4 ГГц `Xiaomii` канал 1 EHT20,
+- Wi-Fi BPI-R4 = те же сети, что у Xiaomi (устройства переходят сами): 2,4 ГГц `Xiaomii` канал 6 EHT20,
   5 ГГц `Xiaomii_5G` канал 149 EHT80, обе WPA2-PSK (psk2+ccmp, как у Xiaomi); 6 ГГц — `Home` (SAE).
   Порты RB5009: ether1 = BPI-R4 (+ его Wi-Fi-клиенты), ether2 = Xiaomi AX3600 (главный mesh, R3600 fw 1.1.21,
   MAC 88:c3:97:c9:11:d3), ether3 = Xiaomi AX1800 (узел mesh, RM1800 fw 1.0.399, MAC 28:d1:27:81:df:8b; связь с AX3600
