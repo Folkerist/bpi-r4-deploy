@@ -182,3 +182,19 @@ motion_room("fp-motion-tualet.svg", room_pts["wc"])
 motion_room("fp-motion-prikhozhaia.svg", room_pts["entry"])
 motion_spot("fp-motion-kukhnia-stol.svg", tx, ty, 22)
 motion_room("fp-motion-vannaia.svg", room_pts["bath"])
+
+# Entrance door open (binary_sensor.e4aaec6dff8c_contact): red leaf + swing on top of the plan's door symbol
+# (door "h" 825, 336..364, hinge at 364, opens outwards), red line across the opening.
+open("fp-door-open.svg", "w").write(HEAD + f'<g>{PULSE}<path d="M364 825 L364 853 A28 28 0 0 1 336 825 Z" fill="#ff5252" '
+    'fill-opacity=".18"/><line x1="364" y1="825" x2="364" y2="853" stroke="#ff5252" stroke-width="3" stroke-linecap="round"/>'
+    '<line x1="336" y1="825" x2="364" y2="825" stroke="#ff5252" stroke-width="2" stroke-dasharray="3 2"/></g></svg>')
+
+# Vacuum: room it is cleaning now (sensor.fp_vacuum_room from templates.yaml) = green fill + outline, so it doesn't
+# mix with yellow light and cyan motion. The upper part of the entry L is split like the Roborock segments:
+# left (to the kitchen/storage/WC) = segment 3 «Коридор1», right = 7 «Прихожая».
+VAC = {"kukhnia": room_pts["kitchen"], "koridor2": room_pts["corridor2"], "koridor": room_pts["corridor"],
+       "spalnia": room_pts["bedroom"], "zal": room_pts["hall"], "detskaia": room_pts["kids"],
+       "prokhod": "230,720 320,720 320,775 230,775", "prikhozhaia": "320,720 370,720 370,825 320,825"}
+for rid, pts in VAC.items():
+    open(f"fp-vac-{rid}.svg", "w").write(HEAD + f'<g>{PULSE}<polygon points="{pts}" fill="#66bb6a" fill-opacity=".2" '
+        f'stroke="#66bb6a" stroke-width="3" stroke-linejoin="round"/></g></svg>')

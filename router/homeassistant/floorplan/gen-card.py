@@ -22,18 +22,41 @@ def is_side(el):
         return all(is_side(e) for e in el["elements"])
     return "left" in st and not 80 <= x_of(st["left"]) <= 520
 
-hum = {el["entity"].rsplit("_", 1)[0]: x_of(el["style"]["left"]) for el in src["elements"]
-       if el["type"] == "state-label" and el.get("entity", "").endswith("_humidity")}
-els = []
-for el in src["elements"]:
-    if is_side(el) or (el["type"] == "state-label" and el.get("entity", "").endswith("_humidity")):
-        continue
-    el = copy.deepcopy(el); st = el.get("style") or {}
+def walk(items):
+    for el in items:
+        yield el
+        if el["type"] == "conditional": yield from walk(el["elements"])
+def label_of(el, suffix): return el["type"] == "state-label" and el.get("entity", "").endswith(suffix)
+def room_of(el): return el["entity"].rsplit("_", 1)[0]
+
+hum = {room_of(el): x_of(el["style"]["left"]) for el in walk(src["elements"]) if label_of(el, "_humidity")}
+# Temperature on the phone: centre of the old temp+humidity pair.
+temp_x = {room_of(el): (x_of(el["style"]["left"]) + hum.get(room_of(el), x_of(el["style"]["left"]))) / 2
+          for el in walk(src["elements"]) if label_of(el, "_temperature")}
+
+def to_phone(el):
+    """Desktop element -> phone element (None = not shown on the phone)."""
+    el = copy.deepcopy(el)
+    if el["type"] == "conditional":
+        if all(label_of(e, "_humidity") for e in el["elements"]):
+            # Humidity is hidden on the phone, except the «too humid» warning: under the temperature.
+            if not any("above" in c for c in el["conditions"]): return None
+            for e in el["elements"]:
+                e["style"].update(left=fmt(to_m(temp_x[room_of(e)])), top=fmt(pct(e["style"]["top"]) + 4.5))
+                e["style"]["font-size"] = "2.4cqw"
+            return el
+        el["elements"] = [p for p in map(to_phone, el["elements"]) if p]
+        return el
+    if label_of(el, "_humidity"):
+        return None
+    st = el.get("style") or {}
     if "left" in st:
         x = x_of(st["left"])
-        if el["type"] == "state-label" and el.get("entity", "").endswith("_temperature"):
-            x = (x + hum.get(el["entity"].rsplit("_", 1)[0], x)) / 2   # centre of the old temp+humidity pair
+        if label_of(el, "_temperature"):
+            x = temp_x[room_of(el)]
             st["font-size"] = "2.8cqw"
+        elif el["type"] == "state-label" and str(st.get("font-size", "")).endswith("px"):
+            st["font-size"] = f'{int(st["font-size"].rstrip("px")) * 0.2:.1f}cqw'
         if pct(st.get("width", "0")) == 70.97:          # room overlay: whole picture
             st["left"], st["width"] = "50%", "100%"
         else:
@@ -41,7 +64,9 @@ for el in src["elements"]:
             if "width" in st: st["width"] = fmt(pct(st["width"]) * 6.2 / 4.4)
     if "--mdc-icon-size" in st:
         st["--mdc-icon-size"] = f'{int(st["--mdc-icon-size"].rstrip("px")) * 0.128:.1f}cqw'
-    els.append(el)
+    return el
+
+els = [p for p in (to_phone(el) for el in src["elements"] if not is_side(el)) if p]
 
 LIGHTS = next(el for el in src["elements"] if el.get("tap_action", {}).get("perform_action") == "homeassistant.turn_off"
               )["tap_action"]["target"]["entity_id"]

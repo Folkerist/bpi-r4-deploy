@@ -1,0 +1,143 @@
+# Шаблонные сенсоры для «Планировки» (floorplan/map-desktop.yaml). Макросы — custom_templates/floorplan.jinja.
+# На роутере: /config/templates.yaml, в configuration.yaml — «template: !include templates.yaml».
+# После правки: Инструменты разработчика → YAML → «Шаблонные объекты» (перезапуск HA не нужен).
+
+# Сколько минут назад было движение в комнате (последнее включение/выключение датчика; 9999 — ещё не было).
+# Сенсоры по триггеру: время хранится в атрибуте last и переживает перезапуск HA; пересчёт раз в минуту.
+- trigger:
+    - {trigger: state, entity_id: [binary_sensor.kukhnia_motion, binary_sensor.kukhnia_stol_motion], to: "on", id: seen}
+    - {trigger: state, entity_id: [binary_sensor.kukhnia_motion, binary_sensor.kukhnia_stol_motion], from: "on", id: seen}
+    - {trigger: time_pattern, minutes: /1}
+  sensor:
+    - name: Кухня — движение, мин назад
+      unique_id: fp_motion_ago_kukhnia
+      default_entity_id: sensor.fp_motion_ago_kukhnia
+      unit_of_measurement: мин
+      icon: mdi:motion-sensor
+      state: >
+        {% set l = this.attributes.get('last') %}
+        {% set last = now() if trigger.id == 'seen' else (as_datetime(l) if l else none) %}
+        {{ ((now() - last).total_seconds() // 60) | int if last else 9999 }}
+      attributes:
+        last: "{{ now().isoformat() if trigger.id == 'seen' else this.attributes.get('last') }}"
+- trigger:
+    - {trigger: state, entity_id: binary_sensor.koridor_motion, to: "on", id: seen}
+    - {trigger: state, entity_id: binary_sensor.koridor_motion, from: "on", id: seen}
+    - {trigger: time_pattern, minutes: /1}
+  sensor:
+    - name: Коридор — движение, мин назад
+      unique_id: fp_motion_ago_koridor
+      default_entity_id: sensor.fp_motion_ago_koridor
+      unit_of_measurement: мин
+      icon: mdi:motion-sensor
+      state: >
+        {% set l = this.attributes.get('last') %}
+        {% set last = now() if trigger.id == 'seen' else (as_datetime(l) if l else none) %}
+        {{ ((now() - last).total_seconds() // 60) | int if last else 9999 }}
+      attributes:
+        last: "{{ now().isoformat() if trigger.id == 'seen' else this.attributes.get('last') }}"
+- trigger:
+    - {trigger: state, entity_id: binary_sensor.prikhozhaia_motion, to: "on", id: seen}
+    - {trigger: state, entity_id: binary_sensor.prikhozhaia_motion, from: "on", id: seen}
+    - {trigger: time_pattern, minutes: /1}
+  sensor:
+    - name: Прихожая — движение, мин назад
+      unique_id: fp_motion_ago_prikhozhaia
+      default_entity_id: sensor.fp_motion_ago_prikhozhaia
+      unit_of_measurement: мин
+      icon: mdi:motion-sensor
+      state: >
+        {% set l = this.attributes.get('last') %}
+        {% set last = now() if trigger.id == 'seen' else (as_datetime(l) if l else none) %}
+        {{ ((now() - last).total_seconds() // 60) | int if last else 9999 }}
+      attributes:
+        last: "{{ now().isoformat() if trigger.id == 'seen' else this.attributes.get('last') }}"
+
+- sensor:
+    # Сколько минут открыта входная дверь (0 — закрыта). now() в шаблоне — пересчёт раз в минуту.
+    - name: Входная дверь открыта, мин
+      unique_id: fp_door_open_min
+      default_entity_id: sensor.fp_door_open_min
+      unit_of_measurement: мин
+      icon: mdi:door-open
+      state: >
+        {% set d = states.binary_sensor.e4aaec6dff8c_contact %}
+        {{ ((now() - d.last_changed).total_seconds() // 60) | int if d and d.state == 'on' else 0 }}
+    # Где сейчас убирает пылесос — id комнаты для картинки на плане (none — не убирает).
+    # Имена — как в приложении Roborock (сегменты 1–8), на всякий случай и «понятные».
+    - name: Пылесос — комната на плане
+      unique_id: fp_vacuum_room
+      default_entity_id: sensor.fp_vacuum_room
+      icon: mdi:robot-vacuum
+      state: >
+        {% set m = {'Кухня': 'kukhnia', 'Коридор3': 'koridor2', 'Малый коридор': 'koridor2',
+                    'Коридор1': 'prokhod', 'Проход к кухне': 'prokhod', 'Спальня': 'spalnia', 'Зал': 'zal',
+                    'Коридор': 'koridor', 'Прихожая': 'prikhozhaia', 'Лекс': 'detskaia', 'Детская': 'detskaia'} %}
+        {{ m.get(states('sensor.koridor_roborock_qrevo_current_room'), 'none')
+           if is_state('vacuum.koridor_roborock_qrevo', 'cleaning') else 'none' }}
+
+- binary_sensor:
+    # ⚠ на плане: в комнате есть устройство с батареей < 20% или без связи; список — в атрибуте devices.
+    - name: Зал — проблемы с устройствами
+      unique_id: fp_problem_gostinaia
+      default_entity_id: binary_sensor.fp_problem_gostinaia
+      device_class: problem
+      state: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('gostinaia') != '' }}"
+      attributes:
+        devices: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('gostinaia') }}"
+    - name: Кухня — проблемы с устройствами
+      unique_id: fp_problem_kukhnia
+      default_entity_id: binary_sensor.fp_problem_kukhnia
+      device_class: problem
+      state: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('kukhnia') != '' }}"
+      attributes:
+        devices: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('kukhnia') }}"
+    - name: Спальня — проблемы с устройствами
+      unique_id: fp_problem_spalnia
+      default_entity_id: binary_sensor.fp_problem_spalnia
+      device_class: problem
+      state: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('spalnia') != '' }}"
+      attributes:
+        devices: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('spalnia') }}"
+    - name: Детская — проблемы с устройствами
+      unique_id: fp_problem_detskaia
+      default_entity_id: binary_sensor.fp_problem_detskaia
+      device_class: problem
+      state: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('detskaia') != '' }}"
+      attributes:
+        devices: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('detskaia') }}"
+    - name: Прихожая — проблемы с устройствами
+      unique_id: fp_problem_prikhozhaia
+      default_entity_id: binary_sensor.fp_problem_prikhozhaia
+      device_class: problem
+      state: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('prikhozhaia') != '' }}"
+      attributes:
+        devices: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('prikhozhaia') }}"
+    - name: Коридор — проблемы с устройствами
+      unique_id: fp_problem_koridor
+      default_entity_id: binary_sensor.fp_problem_koridor
+      device_class: problem
+      state: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('koridor') != '' }}"
+      attributes:
+        devices: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('koridor') }}"
+    - name: Ванная — проблемы с устройствами
+      unique_id: fp_problem_vannaia
+      default_entity_id: binary_sensor.fp_problem_vannaia
+      device_class: problem
+      state: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('vannaia') != '' }}"
+      attributes:
+        devices: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('vannaia') }}"
+    - name: Туалет — проблемы с устройствами
+      unique_id: fp_problem_tualet
+      default_entity_id: binary_sensor.fp_problem_tualet
+      device_class: problem
+      state: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('tualet') != '' }}"
+      attributes:
+        devices: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('tualet') }}"
+    - name: Кладовка — проблемы с устройствами
+      unique_id: fp_problem_kladovka
+      default_entity_id: binary_sensor.fp_problem_kladovka
+      device_class: problem
+      state: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('kladovka') != '' }}"
+      attributes:
+        devices: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('kladovka') }}"

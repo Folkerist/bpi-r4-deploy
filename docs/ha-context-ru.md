@@ -109,6 +109,13 @@
   Источник карты — `router/homeassistant/floorplan/map-desktop.yaml`; `gen-card.py` вставляет обе версии
   в card.yaml между `# BEGIN map` / `# END map` (вручную этот блок не править).
 
+- На «Планировке» (28.09.2026): открытая входная дверь (`binary_sensor.e4aaec6dff8c_contact`) — красная створка
+  и «открыта N мин»; Яндекс Станции и ТВ Станция значками в комнатах (нажатие — пауза/продолжить); зелёная
+  подсветка комнаты, которую убирает пылесос; ⚠ в комнате при батарее < 20% или «нет связи» (нажатие — список);
+  «🚶 N мин» с последнего движения (кухня, коридор, прихожая; < 2 ч); влажность ванной > 70% — красным.
+  Опирается на шаблонные сенсоры `router/homeassistant/templates.yaml` (`sensor.fp_*`, `binary_sensor.fp_problem_*`,
+  на роутере `config/templates.yaml`, подключён в configuration.yaml) и макрос `custom_templates/floorplan.jinja`.
+  Панель пишется в `.storage/lovelace.dashboard_karta` при остановленном HA (card.yaml → JSON, бэкап `.bak`).
 - Резервные копии: `router/docker/stack-backup.sh` → `/usr/bin/stack-backup.sh`, cron `30 4 * * *`, в
   `/mnt/nvme/backups/ГГГГ-ММ-ДД/` (root-only, хранится 14 дней, ~30 МБ/день): `homeassistant.tgz` (config без БД),
   `ha-db.sqlite.gz` (снимок БД через sqlite backup), zigbee2mqtt (ключи сети!), mosquitto, matter-server, go2rtc,

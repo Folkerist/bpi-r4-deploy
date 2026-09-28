@@ -172,6 +172,31 @@ views:
                   tap_action: {action: none}
                   hold_action: {action: none}
                   style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                # Входная дверь открыта — красная створка (время — подписью у двери, ниже).
+                - type: image
+                  entity: binary_sensor.e4aaec6dff8c_contact
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-door-open.svg?v=1
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                # Пылесос: комната, которую убирает сейчас (sensor.fp_vacuum_room — templates.yaml), зелёная.
+                - type: image
+                  entity: sensor.fp_vacuum_room
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    kukhnia: /local/fp-vac-kukhnia.svg?v=1
+                    koridor2: /local/fp-vac-koridor2.svg?v=1
+                    prokhod: /local/fp-vac-prokhod.svg?v=1
+                    spalnia: /local/fp-vac-spalnia.svg?v=1
+                    zal: /local/fp-vac-zal.svg?v=1
+                    koridor: /local/fp-vac-koridor.svg?v=1
+                    prikhozhaia: /local/fp-vac-prikhozhaia.svg?v=1
+                    detskaia: /local/fp-vac-detskaia.svg?v=1
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
                 - type: image
                   entity: light.zal_yeelight_hall
                   image: /local/fp-empty.svg?v=2
@@ -425,6 +450,112 @@ views:
                   icon: mdi:robot-vacuum
                   tap_action: {action: more-info}
                   style: {left: 37.1%, top: 76.7%, --mdc-icon-size: 30px}
+                # Яндекс Станции: значок горит, когда играет; нажатие — пауза/продолжить, долгое — громкость и что играет.
+                - type: state-icon
+                  entity: media_player.yandex_station_u0086h0002ec9r
+                  icon: mdi:speaker
+                  tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_u0086h0002ec9r}}
+                  hold_action: {action: more-info}
+                  style: {left: 24.2%, top: 60.8%, --mdc-icon-size: 24px}
+                - type: state-icon
+                  entity: media_player.yandex_tv_t60jcw202w4z1k
+                  icon: mdi:television
+                  tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_tv_t60jcw202w4z1k}}
+                  hold_action: {action: more-info}
+                  style: {left: 27.1%, top: 69.1%, --mdc-icon-size: 24px}
+                - type: state-icon
+                  entity: media_player.yandex_station_x11bmg2000x29z
+                  icon: mdi:speaker
+                  tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_x11bmg2000x29z}}
+                  hold_action: {action: more-info}
+                  style: {left: 81%, top: 34.7%, --mdc-icon-size: 24px}
+                - type: state-icon
+                  entity: media_player.yandex_station_m104q81001k74k
+                  icon: mdi:speaker
+                  tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_m104q81001k74k}}
+                  hold_action: {action: more-info}
+                  style: {left: 47.9%, top: 16%, --mdc-icon-size: 24px}
+                - type: state-icon
+                  entity: media_player.yandex_station_lp00000000000047571100008ab064b1
+                  icon: mdi:speaker
+                  tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_lp00000000000047571100008ab064b1}}
+                  hold_action: {action: more-info}
+                  style: {left: 52.4%, top: 70.9%, --mdc-icon-size: 24px}
+                - type: state-icon
+                  entity: media_player.yandex_station_r10cv31007wqfn
+                  icon: mdi:speaker
+                  tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_r10cv31007wqfn}}
+                  hold_action: {action: more-info}
+                  style: {left: 51.9%, top: 22%, --mdc-icon-size: 22px}
+                # ⚠ в комнате, где у устройства батарея < 20% или нет связи (binary_sensor.fp_problem_* — templates.yaml);
+                # нажатие — список устройств (атрибут devices).
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_gostinaia, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_gostinaia, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 24.2%, top: 41.3%, --mdc-icon-size: 22px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_kukhnia, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_kukhnia, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 36.3%, top: 67.6%, --mdc-icon-size: 22px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_spalnia, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_spalnia, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 81.5%, top: 14.4%, --mdc-icon-size: 22px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_detskaia, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_detskaia, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 31.9%, top: 34.9%, --mdc-icon-size: 22px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_prikhozhaia, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_prikhozhaia, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 60%, top: 67.6%, --mdc-icon-size: 22px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_koridor, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_koridor, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 60.3%, top: 60.8%, --mdc-icon-size: 22px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_vannaia, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_vannaia, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 60%, top: 14.4%, --mdc-icon-size: 20px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_tualet, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_tualet, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 52.1%, top: 80.3%, --mdc-icon-size: 18px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_kladovka, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_kladovka, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 46.5%, top: 80.3%, --mdc-icon-size: 18px, color: "#ff9800"}}
+                # Входная дверь: сколько минут открыта (sensor.fp_door_open_min), подпись снаружи у двери.
+                - type: conditional
+                  conditions: [{entity: binary_sensor.e4aaec6dff8c_contact, state: "on"}]
+                  elements:
+                    - {type: state-label, entity: sensor.fp_door_open_min, prefix: "🚪 открыта ", tap_action: {action: more-info},
+                       style: {left: 66.1%, top: 95.4%, color: "#ff5252", font-size: 12px, font-weight: 600}}
+                # Сколько минут назад было движение (sensor.fp_motion_ago_*), только если меньше двух часов.
+                - type: conditional
+                  conditions: [{condition: numeric_state, entity: sensor.fp_motion_ago_kukhnia, below: 120}]
+                  elements:
+                    - {type: state-label, entity: sensor.fp_motion_ago_kukhnia, prefix: "🚶 ", tap_action: {action: more-info},
+                       style: {left: 28.2%, top: 88.6%, color: var(--secondary-text-color), font-size: 11px}}
+                - type: conditional
+                  conditions: [{condition: numeric_state, entity: sensor.fp_motion_ago_koridor, below: 120}]
+                  elements:
+                    - {type: state-label, entity: sensor.fp_motion_ago_koridor, prefix: "🚶 ", tap_action: {action: more-info},
+                       style: {left: 55.8%, top: 62.8%, color: var(--secondary-text-color), font-size: 11px}}
+                - type: conditional
+                  conditions: [{condition: numeric_state, entity: sensor.fp_motion_ago_prikhozhaia, below: 120}]
+                  elements:
+                    - {type: state-label, entity: sensor.fp_motion_ago_prikhozhaia, prefix: "🚶 ", tap_action: {action: more-info},
+                       style: {left: 57.3%, top: 88.6%, color: var(--secondary-text-color), font-size: 11px}}
                 # Климат: температура и влажность под названием комнаты, нажатие — график.
                 - type: state-label
                   entity: sensor.zal_temperature
@@ -471,11 +602,17 @@ views:
                   prefix: "🌡 "
                   tap_action: {action: more-info}
                   style: {left: 53.7%, top: 18.2%, color: var(--primary-text-color), font-size: 12px, opacity: 0.85}
-                - type: state-label
-                  entity: sensor.vannaia_humidity
-                  prefix: "💧 "
-                  tap_action: {action: more-info}
-                  style: {left: 58.1%, top: 18.2%, color: var(--primary-text-color), font-size: 12px, opacity: 0.85}
+                # Ванная: влажность выше 70% (после душа) — красным и жирным.
+                - type: conditional
+                  conditions: [{condition: numeric_state, entity: sensor.vannaia_humidity, below: 70.01}]
+                  elements:
+                    - {type: state-label, entity: sensor.vannaia_humidity, prefix: "💧 ", tap_action: {action: more-info},
+                       style: {left: 58.1%, top: 18.2%, color: var(--primary-text-color), font-size: 12px, opacity: 0.85}}
+                - type: conditional
+                  conditions: [{condition: numeric_state, entity: sensor.vannaia_humidity, above: 70}]
+                  elements:
+                    - {type: state-label, entity: sensor.vannaia_humidity, prefix: "💧 ", tap_action: {action: more-info},
+                       style: {left: 58.1%, top: 18.2%, color: "#ff7043", font-size: 12px, font-weight: 700}}
                 - type: state-label
                   entity: sensor.spalnia_temperature
                   prefix: "🌡 "
@@ -1099,6 +1236,41 @@ views:
                     width: 100%
                     pointer-events: none
                 - type: image
+                  entity: binary_sensor.e4aaec6dff8c_contact
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-door-open.svg?v=1
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: sensor.fp_vacuum_room
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    kukhnia: /local/fp-vac-kukhnia.svg?v=1
+                    koridor2: /local/fp-vac-koridor2.svg?v=1
+                    prokhod: /local/fp-vac-prokhod.svg?v=1
+                    spalnia: /local/fp-vac-spalnia.svg?v=1
+                    zal: /local/fp-vac-zal.svg?v=1
+                    koridor: /local/fp-vac-koridor.svg?v=1
+                    prikhozhaia: /local/fp-vac-prikhozhaia.svg?v=1
+                    detskaia: /local/fp-vac-detskaia.svg?v=1
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
                   entity: light.zal_yeelight_hall
                   image: /local/fp-empty.svg?v=2
                   state_image:
@@ -1548,6 +1720,289 @@ views:
                     left: 31.8%
                     top: 76.7%
                     --mdc-icon-size: 3.8cqw
+                - type: state-icon
+                  entity: media_player.yandex_station_u0086h0002ec9r
+                  icon: mdi:speaker
+                  tap_action:
+                    action: perform-action
+                    perform_action: media_player.media_play_pause
+                    target:
+                      entity_id: media_player.yandex_station_u0086h0002ec9r
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 13.6%
+                    top: 60.8%
+                    --mdc-icon-size: 3.1cqw
+                - type: state-icon
+                  entity: media_player.yandex_tv_t60jcw202w4z1k
+                  icon: mdi:television
+                  tap_action:
+                    action: perform-action
+                    perform_action: media_player.media_play_pause
+                    target:
+                      entity_id: media_player.yandex_tv_t60jcw202w4z1k
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 17.7%
+                    top: 69.1%
+                    --mdc-icon-size: 3.1cqw
+                - type: state-icon
+                  entity: media_player.yandex_station_x11bmg2000x29z
+                  icon: mdi:speaker
+                  tap_action:
+                    action: perform-action
+                    perform_action: media_player.media_play_pause
+                    target:
+                      entity_id: media_player.yandex_station_x11bmg2000x29z
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 93.7%
+                    top: 34.7%
+                    --mdc-icon-size: 3.1cqw
+                - type: state-icon
+                  entity: media_player.yandex_station_m104q81001k74k
+                  icon: mdi:speaker
+                  tap_action:
+                    action: perform-action
+                    perform_action: media_player.media_play_pause
+                    target:
+                      entity_id: media_player.yandex_station_m104q81001k74k
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 47%
+                    top: 16%
+                    --mdc-icon-size: 3.1cqw
+                - type: state-icon
+                  entity: media_player.yandex_station_lp00000000000047571100008ab064b1
+                  icon: mdi:speaker
+                  tap_action:
+                    action: perform-action
+                    perform_action: media_player.media_play_pause
+                    target:
+                      entity_id: media_player.yandex_station_lp00000000000047571100008ab064b1
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 53.4%
+                    top: 70.9%
+                    --mdc-icon-size: 3.1cqw
+                - type: state-icon
+                  entity: media_player.yandex_station_r10cv31007wqfn
+                  icon: mdi:speaker
+                  tap_action:
+                    action: perform-action
+                    perform_action: media_player.media_play_pause
+                    target:
+                      entity_id: media_player.yandex_station_r10cv31007wqfn
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 52.7%
+                    top: 22%
+                    --mdc-icon-size: 2.8cqw
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_gostinaia
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_gostinaia
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 13.6%
+                      top: 41.3%
+                      --mdc-icon-size: 2.8cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_kukhnia
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_kukhnia
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 30.7%
+                      top: 67.6%
+                      --mdc-icon-size: 2.8cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_spalnia
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_spalnia
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 94.4%
+                      top: 14.4%
+                      --mdc-icon-size: 2.8cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_detskaia
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_detskaia
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 24.5%
+                      top: 34.9%
+                      --mdc-icon-size: 2.8cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_prikhozhaia
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_prikhozhaia
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 64.1%
+                      top: 67.6%
+                      --mdc-icon-size: 2.8cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_koridor
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_koridor
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 64.5%
+                      top: 60.8%
+                      --mdc-icon-size: 2.8cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_vannaia
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_vannaia
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 64.1%
+                      top: 14.4%
+                      --mdc-icon-size: 2.6cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_tualet
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_tualet
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 53%
+                      top: 80.3%
+                      --mdc-icon-size: 2.3cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_kladovka
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_kladovka
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 45.1%
+                      top: 80.3%
+                      --mdc-icon-size: 2.3cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.e4aaec6dff8c_contact
+                    state: 'on'
+                  elements:
+                  - type: state-label
+                    entity: sensor.fp_door_open_min
+                    prefix: '🚪 открыта '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 72.7%
+                      top: 95.4%
+                      color: '#ff5252'
+                      font-size: 2.4cqw
+                      font-weight: 600
+                - type: conditional
+                  conditions:
+                  - condition: numeric_state
+                    entity: sensor.fp_motion_ago_kukhnia
+                    below: 120
+                  elements:
+                  - type: state-label
+                    entity: sensor.fp_motion_ago_kukhnia
+                    prefix: '🚶 '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 19.3%
+                      top: 88.6%
+                      color: var(--secondary-text-color)
+                      font-size: 2.2cqw
+                - type: conditional
+                  conditions:
+                  - condition: numeric_state
+                    entity: sensor.fp_motion_ago_koridor
+                    below: 120
+                  elements:
+                  - type: state-label
+                    entity: sensor.fp_motion_ago_koridor
+                    prefix: '🚶 '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 58.2%
+                      top: 62.8%
+                      color: var(--secondary-text-color)
+                      font-size: 2.2cqw
+                - type: conditional
+                  conditions:
+                  - condition: numeric_state
+                    entity: sensor.fp_motion_ago_prikhozhaia
+                    below: 120
+                  elements:
+                  - type: state-label
+                    entity: sensor.fp_motion_ago_prikhozhaia
+                    prefix: '🚶 '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 60.3%
+                      top: 88.6%
+                      color: var(--secondary-text-color)
+                      font-size: 2.2cqw
                 - type: state-label
                   entity: sensor.zal_temperature
                   prefix: '🌡 '
@@ -1603,6 +2058,23 @@ views:
                     color: var(--primary-text-color)
                     font-size: 2.8cqw
                     opacity: 0.85
+                - type: conditional
+                  conditions:
+                  - condition: numeric_state
+                    entity: sensor.vannaia_humidity
+                    above: 70
+                  elements:
+                  - type: state-label
+                    entity: sensor.vannaia_humidity
+                    prefix: '💧 '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 58.3%
+                      top: 22.7%
+                      color: '#ff7043'
+                      font-size: 2.4cqw
+                      font-weight: 700
                 - type: state-label
                   entity: sensor.spalnia_temperature
                   prefix: '🌡 '
