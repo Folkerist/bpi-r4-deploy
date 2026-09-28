@@ -286,7 +286,7 @@ views:
             entity: vacuum.koridor_roborock_qrevo
             icon: mdi:robot-vacuum
             tap_action: {action: more-info}
-            style: {left: 31.4%, top: 69.6%, --mdc-icon-size: 30px}
+            style: {left: 31.8%, top: 76.7%, --mdc-icon-size: 30px}
           # Климат: температура и влажность под названием комнаты, нажатие — график.
           - type: state-label
             entity: sensor.zal_temperature
