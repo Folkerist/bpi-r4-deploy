@@ -104,6 +104,61 @@ views:
             tap_action: {action: none}
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+          # Движение (датчики Xiaomi): пульсирующая голубая рамка комнаты; на кухне ещё кольца у стола и автопоилки.
+          - type: image
+            entity: binary_sensor.kukhnia_motion
+            image: /local/fp-empty.svg?v=2
+            state_image:
+              "on": /local/fp-motion-kukhnia.svg?v=1
+              "off": /local/fp-empty.svg?v=2
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+          - type: image
+            entity: binary_sensor.kukhnia_stol_motion
+            image: /local/fp-empty.svg?v=2
+            state_image:
+              "on": /local/fp-motion-kukhnia-stol.svg?v=1
+              "off": /local/fp-empty.svg?v=2
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+          - type: image
+            entity: binary_sensor.avtopoilka_motion
+            image: /local/fp-empty.svg?v=2
+            state_image:
+              "on": /local/fp-motion-avtopoilka.svg?v=1
+              "off": /local/fp-empty.svg?v=2
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+          - type: image
+            entity: binary_sensor.koridor_motion
+            image: /local/fp-empty.svg?v=2
+            state_image:
+              "on": /local/fp-motion-koridor.svg?v=1
+              "off": /local/fp-empty.svg?v=2
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+          - type: image
+            entity: binary_sensor.tualet_motion
+            image: /local/fp-empty.svg?v=2
+            state_image:
+              "on": /local/fp-motion-tualet.svg?v=1
+              "off": /local/fp-empty.svg?v=2
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+          - type: image
+            entity: binary_sensor.prikhozhaia_motion
+            image: /local/fp-empty.svg?v=2
+            state_image:
+              "on": /local/fp-motion-prikhozhaia.svg?v=1
+              "off": /local/fp-empty.svg?v=2
+            tap_action: {action: none}
+            hold_action: {action: none}
+            style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
           # Камера C700: поле зрения (статично) — на входную дверь.
           - type: image
             image: /local/fp-camera-fov.svg?v=1
