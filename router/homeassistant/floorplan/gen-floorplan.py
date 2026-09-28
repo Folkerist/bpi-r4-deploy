@@ -165,7 +165,7 @@ open("fp-camera-motion.svg", "w").write(
     'fill="none" stroke="#ff5252" stroke-width="3"/></svg>')
 
 # Motion (Xiaomi BLE sensors): pulsing cyan outline of the room (SMIL, runs inside <img>), so it doesn't mix with
-# the yellow light fill. Kitchen has three sensors: room outline, a ring at the table and a ring at the cat's fountain.
+# the yellow light fill. Kitchen has two sensors: room outline and a ring at the table.
 PULSE = '<animate attributeName="opacity" values="1;.25;1" dur="1.6s" repeatCount="indefinite"/>'
 def motion_room(fname, pts):
     open(fname, "w").write(HEAD + f'<g>{PULSE}<polygon points="{pts}" fill="#29b6f6" fill-opacity=".12" '
@@ -179,5 +179,4 @@ motion_room("fp-motion-koridor.svg", room_pts["corridor"])
 motion_room("fp-motion-tualet.svg", room_pts["wc"])
 motion_room("fp-motion-prikhozhaia.svg", room_pts["entry"])
 motion_spot("fp-motion-kukhnia-stol.svg", tx, ty, 22)
-FOUNTAIN = (110, 812)  # cat's water fountain, kitchen bottom-left corner (approximate)
-motion_spot("fp-motion-avtopoilka.svg", *FOUNTAIN, 11)
+motion_room("fp-motion-vannaia.svg", room_pts["bath"])

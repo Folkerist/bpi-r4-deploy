@@ -99,7 +99,7 @@
 - Датчики движения: 8× Xiaomi RTCGQ02LM (BLE через Xiaomi Gateway 3). Переименованы скриптом реестра
   (id `<комната>_motion`, `_motion_light`, `sensor.<комната>_motion_battery`, `_motion_idle`, `select.…_motion_command`,
   имя устройства «Движение …», пространство устройства): kukhnia (943a), kukhnia_stol (b5a6, под столом),
-  avtopoilka (d8ab, у автопоилки кота, Кухня), koridor (d480, основной коридор у двери-купе), tualet (195d),
+  vannaia (d8ab, Ванная; в Mi Home был «автопоилка»), koridor (d480, основной коридор у двери-купе), tualet (195d),
   prikhozhaia (1752, возле шкафа). Не определены: 18c23c22943b («датчик движения») и 54ef44c4ea20 («Движение»).
   `binary_sensor.c700_motion` — шаблон по `motion_video_time` камеры (2 мин).
 
