@@ -658,7 +658,7 @@ views:
             style: {left: 3.1%, top: 70.9%, --mdc-icon-size: 20px, color: var(--primary-color)}
           # Погода: анимированный значок (Basmilius weather-icons, MIT) по состоянию + температура; нажатие — прогноз.
           - type: image
-            entity: weather.forecast_home_assistant
+            entity: weather.pavshino
             image: /local/weather/not-available.svg
             state_image:
               "clear-night": /local/weather/clear-night.svg
@@ -679,7 +679,7 @@ views:
             tap_action: {action: more-info}
             style: {left: 89.7%, top: 13.2%, width: 5.5%}
           - type: state-label
-            entity: weather.forecast_home_assistant
+            entity: weather.pavshino
             attribute: temperature
             suffix: " °C"
             tap_action: {action: more-info}
@@ -987,12 +987,12 @@ views:
     icon: mdi:weather-partly-cloudy
     cards:
       - type: weather-forecast
-        entity: weather.forecast_home_assistant
+        entity: weather.pavshino
         forecast_type: hourly
         show_current: true
         show_forecast: true
       - type: weather-forecast
-        entity: weather.forecast_home_assistant
+        entity: weather.pavshino
         forecast_type: daily
         show_current: false
         show_forecast: true

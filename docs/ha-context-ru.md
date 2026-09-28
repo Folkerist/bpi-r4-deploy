@@ -88,7 +88,7 @@
   снимок камеры, «Вкл»/«Выкл» (весь свет, с подтверждением), статус/заряд пылесоса, Старт/Пауза/На базу. Оверлеи комнат
   (свой viewBox 80..520) — по центру шириной 70.97%; card-mod max-width = (100vh-72px)*1.57.
 - Правая панель карты: погода (анимированные значки Basmilius weather-icons, MIT, в `config/www/weather/`,
-  по состоянию weather.*; сейчас `weather.forecast_home_assistant` = Met.no, план — Gismeteo из HACS),
+  по состоянию weather.*; сейчас `weather.pavshino` (Gismeteo) = Met.no, план — Gismeteo из HACS),
   снимок камеры + красная рамка при `binary_sensor.c700_motion` (ещё не создан), «Горит: N» =
   `sensor.lights_on` (помощник-шаблон), «Вкл»/«Выкл» весь свет (коммит 1b652fc), пылесос. Вкладка «Погода» — почасовой и дневной прогноз.
 - Имена в Z2M: латиница, «тип_комната» (switch_kitchen, sensor_bath, motion_hall). Клавишам/сущностям даём
