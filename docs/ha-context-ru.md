@@ -96,6 +96,13 @@
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.
 - Nextcloud пробовали и удалили (грузил CPU, segfault PHP JIT на ARM64).
 
+- Датчики движения: 8× Xiaomi RTCGQ02LM (BLE через Xiaomi Gateway 3). Переименованы скриптом реестра
+  (id `<комната>_motion`, `_motion_light`, `sensor.<комната>_motion_battery`, `_motion_idle`, `select.…_motion_command`,
+  имя устройства «Движение …», пространство устройства): kukhnia (943a), kukhnia_stol (b5a6, под столом),
+  avtopoilka (d8ab, у автопоилки кота, Кухня), koridor (d480, основной коридор у двери-купе), tualet (195d),
+  prikhozhaia (1752, возле шкафа). Не определены: 18c23c22943b («датчик движения») и 54ef44c4ea20 («Движение»).
+  `binary_sensor.c700_motion` — шаблон по `motion_video_time` камеры (2 мин).
+
 ## Сеть
 - Сейчас: BPI-R4 = роутер `192.168.1.1`, основной канал LTE; forkop (sing-box) направляет заблокированное
   в WireGuard `wg0` → RB5009 (`10.10.10.9` → `10.10.10.1`), резерв — подписка (priority group, без RU).
