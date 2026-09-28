@@ -127,3 +127,8 @@ open("fp-camera-fov.svg", "w").write(
 zal = next(r[3] for r in rooms if r[0] == "hall")
 open("fp-light-zal.svg", "w").write(
     HEAD + f'<polygon points="{zal}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+
+# Bedroom main light (Yeelight) = room fill.
+bed = next(r[3] for r in rooms if r[0] == "bedroom")
+open("fp-light-spalnia.svg", "w").write(
+    HEAD + f'<polygon points="{bed}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
