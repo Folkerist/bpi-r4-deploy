@@ -389,6 +389,101 @@ views:
             name: Режим швабры
           - entity: select.koridor_roborock_qrevo_mop_intensity
             name: Подача воды
+      # Уборка по комнатам: номера сегментов из roborock.get_maps (имена в приложении Roborock:
+      # 1 Кухня, 2 Коридор3, 3 Коридор1, 4 Главная спальня, 5 Зал, 6 Коридор, 7 Прихожая, 8 Лекс).
+      - type: grid
+        title: Убрать комнату
+        columns: 4
+        square: false
+        cards:
+          - type: button
+            name: Зал
+            icon: mdi:sofa
+            tap_action:
+              action: perform-action
+              perform_action: vacuum.send_command
+              target: {entity_id: vacuum.koridor_roborock_qrevo}
+              data:
+                command: app_segment_clean
+                params: [{segments: [5], repeat: 1}]
+              confirmation: {text: "Убрать: Зал?"}
+          - type: button
+            name: Кухня
+            icon: mdi:stove
+            tap_action:
+              action: perform-action
+              perform_action: vacuum.send_command
+              target: {entity_id: vacuum.koridor_roborock_qrevo}
+              data:
+                command: app_segment_clean
+                params: [{segments: [1], repeat: 1}]
+              confirmation: {text: "Убрать: Кухня?"}
+          - type: button
+            name: Спальня
+            icon: mdi:bed-king
+            tap_action:
+              action: perform-action
+              perform_action: vacuum.send_command
+              target: {entity_id: vacuum.koridor_roborock_qrevo}
+              data:
+                command: app_segment_clean
+                params: [{segments: [4], repeat: 1}]
+              confirmation: {text: "Убрать: Спальня?"}
+          - type: button
+            name: Детская (Лекс)
+            icon: mdi:teddy-bear
+            tap_action:
+              action: perform-action
+              perform_action: vacuum.send_command
+              target: {entity_id: vacuum.koridor_roborock_qrevo}
+              data:
+                command: app_segment_clean
+                params: [{segments: [8], repeat: 1}]
+              confirmation: {text: "Убрать: Детская (Лекс)?"}
+          - type: button
+            name: Прихожая
+            icon: mdi:door
+            tap_action:
+              action: perform-action
+              perform_action: vacuum.send_command
+              target: {entity_id: vacuum.koridor_roborock_qrevo}
+              data:
+                command: app_segment_clean
+                params: [{segments: [7], repeat: 1}]
+              confirmation: {text: "Убрать: Прихожая?"}
+          - type: button
+            name: Коридор
+            icon: mdi:walk
+            tap_action:
+              action: perform-action
+              perform_action: vacuum.send_command
+              target: {entity_id: vacuum.koridor_roborock_qrevo}
+              data:
+                command: app_segment_clean
+                params: [{segments: [6], repeat: 1}]
+              confirmation: {text: "Убрать: Коридор?"}
+          - type: button
+            name: Коридор 1
+            icon: mdi:walk
+            tap_action:
+              action: perform-action
+              perform_action: vacuum.send_command
+              target: {entity_id: vacuum.koridor_roborock_qrevo}
+              data:
+                command: app_segment_clean
+                params: [{segments: [3], repeat: 1}]
+              confirmation: {text: "Убрать: Коридор 1?"}
+          - type: button
+            name: Коридор 3
+            icon: mdi:walk
+            tap_action:
+              action: perform-action
+              perform_action: vacuum.send_command
+              target: {entity_id: vacuum.koridor_roborock_qrevo}
+              data:
+                command: app_segment_clean
+                params: [{segments: [2], repeat: 1}]
+              confirmation: {text: "Убрать: Коридор 3?"}
       - type: picture-entity
         entity: image.koridor_roborock_qrevo_map_0
         name: Карта пылесоса
