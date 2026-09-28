@@ -89,6 +89,8 @@ for name,c in themes.items():
     btn(528, 808, "На базу")
     o.append('</svg>')
     open(f"floorplan-{name}.svg","w").write("\n".join(o))
+    # Phone version: the apartment only (side panels are cut off; on the phone they are regular cards below the map).
+    open(f"floorplan-m-{name}.svg","w").write("\n".join(o).replace('viewBox="-10 465 620 395"','viewBox="80 465 440 395"',1))
 
 # Room light overlays for picture-elements (same viewBox as the plan, shown on top when a light is on).
 HEAD = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 465 440 395">'
