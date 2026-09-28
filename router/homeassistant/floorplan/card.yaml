@@ -110,7 +110,7 @@ views:
             hold_action: {action: none}
             style: {left: 50%, top: 50%, width: 100%, pointer-events: none}
           - type: image
-            entity: light.zal_main
+            entity: light.zal_yeelight_hall
             image: /local/fp-empty.svg?v=2
             state_image:
               "on": /local/fp-light-zal.svg?v=1
@@ -183,7 +183,7 @@ views:
             hold_action: {action: more-info}
             style: {left: 26.1%, top: 83.5%, width: 11.4%, height: 12.7%}
           - type: image
-            entity: light.zal_main
+            entity: light.zal_yeelight_hall
             image: /local/fp-empty.svg?v=2
             tap_action: {action: toggle}
             hold_action: {action: more-info}
@@ -255,7 +255,7 @@ views:
             tap_action: {action: more-info}
             style: {left: 58.2%, top: 36.5%, --mdc-icon-size: 28px, color: "#4fc3f7"}
           - type: state-icon
-            entity: light.zal_main
+            entity: light.zal_yeelight_hall
             icon: mdi:ceiling-light
             tap_action: {action: toggle}
             hold_action: {action: more-info}
