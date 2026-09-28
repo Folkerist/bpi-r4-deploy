@@ -65,7 +65,9 @@
 - Шлюз Xiaomi Smart Home Hub 2 (`lumi.gateway.mgl001`, fw 1.0.5, 192.168.88.19, статическая аренда на RB5009)
   через HACS-интеграцию Xiaomi Gateway 3 (AlexxIT), локально; принимает и BLE-датчики Xiaomi.
   Термометр LYWSD03MMC «Температура гостинная» (uid a4c13843f704) → `sensor.zal_temperature`,
-  `sensor.zal_humidity` (Зал), на карте — подписи под «Зал».
+  `sensor.zal_humidity` (Зал), на карте — подписи под «Зал». Остальные LYWSD03MMC (в Mi Home все «Температура»):
+  a4c138d0c5b1 → koridor, a4c13832519b → detskaia, a4c1389247b6 → kukhnia, a4c138dc8f4f → vannaia,
+  a4c13804447f → spalnia; объекты `sensor.<комната>_temperature/_humidity`, подписи на карте под комнатами.
 - Камеры: Xiaomi C700 (`chuangmi.camera.81ac1`, 192.168.88.52) — через отдельный go2rtc (compose, порт UI 1985,
   RTSP 8554, конфиг `/mnt/nvme/go2rtc/go2rtc.yaml`, источник xiaomi, нужен go2rtc ≥ 1.9.13) → Generic Camera в HA.
   Видео HEVC+opus. РАБОТАЕТ: поток `c700` (go2rtc 1.9.14), в HA Generic Camera — stream

@@ -292,6 +292,56 @@ views:
             prefix: "💧 "
             tap_action: {action: more-info}
             style: {left: 35.5%, top: 56.5%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}
+          - type: state-label
+            entity: sensor.koridor_temperature
+            prefix: "🌡 "
+            tap_action: {action: more-info}
+            style: {left: 55%, top: 54.7%, color: var(--primary-text-color), font-size: 12px, opacity: 0.85}
+          - type: state-label
+            entity: sensor.koridor_humidity
+            prefix: "💧 "
+            tap_action: {action: more-info}
+            style: {left: 61.4%, top: 54.7%, color: var(--primary-text-color), font-size: 12px, opacity: 0.85}
+          - type: state-label
+            entity: sensor.detskaia_temperature
+            prefix: "🌡 "
+            tap_action: {action: more-info}
+            style: {left: 32.3%, top: 29.1%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}
+          - type: state-label
+            entity: sensor.detskaia_humidity
+            prefix: "💧 "
+            tap_action: {action: more-info}
+            style: {left: 39.1%, top: 29.1%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}
+          - type: state-label
+            entity: sensor.kukhnia_temperature
+            prefix: "🌡 "
+            tap_action: {action: more-info}
+            style: {left: 11.8%, top: 79.2%, color: var(--primary-text-color), font-size: 14px, opacity: 0.85}
+          - type: state-label
+            entity: sensor.kukhnia_humidity
+            prefix: "💧 "
+            tap_action: {action: more-info}
+            style: {left: 18.2%, top: 79.2%, color: var(--primary-text-color), font-size: 14px, opacity: 0.85}
+          - type: state-label
+            entity: sensor.vannaia_temperature
+            prefix: "🌡 "
+            tap_action: {action: more-info}
+            style: {left: 55.2%, top: 18.2%, color: var(--primary-text-color), font-size: 12px, opacity: 0.85}
+          - type: state-label
+            entity: sensor.vannaia_humidity
+            prefix: "💧 "
+            tap_action: {action: more-info}
+            style: {left: 61.4%, top: 18.2%, color: var(--primary-text-color), font-size: 12px, opacity: 0.85}
+          - type: state-label
+            entity: sensor.spalnia_temperature
+            prefix: "🌡 "
+            tap_action: {action: more-info}
+            style: {left: 78%, top: 29.1%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}
+          - type: state-label
+            entity: sensor.spalnia_humidity
+            prefix: "💧 "
+            tap_action: {action: more-info}
+            style: {left: 84.8%, top: 29.1%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}
   - title: Камера
     path: camera
     icon: mdi:cctv
