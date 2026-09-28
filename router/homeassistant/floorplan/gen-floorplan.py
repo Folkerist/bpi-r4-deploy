@@ -11,6 +11,9 @@ rooms = [
  ("wc","WC","1,4","285,775 320,775 320,825 285,825",(302,810),False),
  ("entry","Прихожая","15,4","230,720 370,720 370,825 320,825 320,775 230,775",(345,803),False),
 ]
+SIDE_ROOMS = [("Зал", 5, "mdi:sofa"), ("Кухня", 1, "mdi:stove"), ("Спальня", 4, "mdi:bed-king"),
+              ("Детская", 8, "mdi:teddy-bear"), ("Прихожая", 7, "mdi:door"), ("Коридор", 6, "mdi:walk"),
+              ("Малый коридор", 2, "mdi:walk"), ("Проход к кухне", 3, "mdi:walk")]
 themes = {
  "dark": dict(bg="#1c1c1c", room="#262a31", balcony="#1a1d22", wall="#4a505c", text="#e6e6e6", sub="#8b919c", win="#5aa9e6"),
  "light":dict(bg="#ffffff", room="#f1f3f6", balcony="#e6e9ee", wall="#b8bdc6", text="#1f2328", sub="#6b7280", win="#3b8fd9"),
@@ -31,8 +34,8 @@ openings=[
  ("door","h",720,178,204,1,"b"),    # зал-кухня: проход
 ]
 for name,c in themes.items():
-    o=[f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 465 440 395" font-family="Roboto, Segoe UI, sans-serif">',
-       f'<rect x="80" y="465" width="440" height="395" fill="{c["bg"]}"/>']
+    o=[f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 465 620 395" font-family="Roboto, Segoe UI, sans-serif">',
+       f'<rect x="-10" y="465" width="620" height="395" fill="{c["bg"]}"/>']
     for rid,label,area,pts,(x,y),balc in rooms:
         o.append(f'<polygon id="{rid}" points="{pts}" fill="{c["balcony"] if balc else c["room"]}" stroke="{c["wall"]}" stroke-width="4" stroke-linejoin="round"/>')
     for x1,y1,x2,y2 in windows:
@@ -61,6 +64,24 @@ for name,c in themes.items():
             o.append(f'<text x="{x}" y="{y}" font-size="7" fill="{c["sub"]}" text-anchor="middle" transform="rotate(-90 {x} {y})">{label}</text>')
             continue
         o.append(f'<text x="{x}" y="{y+fs*0.35:.0f}" font-size="{fs}" font-weight="500" fill="{c["text"]}" text-anchor="middle">{label}</text>')
+    # Side panels (plan is x 80..520; panels -10..80 and 520..610): captions and button plates.
+    # Clickable areas and icons are picture-elements on top (card.yaml), positions from SIDE_* below.
+    def cap(x, y, t):
+        o.append(f'<text x="{x}" y="{y}" font-size="8" font-weight="600" fill="{c["sub"]}" text-anchor="middle" letter-spacing=".6">{t}</text>')
+    def btn(x0, yc, t):
+        o.append(f'<rect x="{x0}" y="{yc-14}" width="74" height="28" rx="6" fill="{c["room"]}" stroke="{c["wall"]}" stroke-width="1"/>')
+        fs = 8.5 if len(t) <= 9 else 7  # long captions ("Малый коридор") must fit next to the icon
+        o.append(f'<text x="{x0+45}" y="{yc+3}" font-size="{fs}" fill="{c["text"]}" text-anchor="middle">{t}</text>')
+    cap(35, 492, "УБОРКА")
+    for i, (t, _seg, _icon) in enumerate(SIDE_ROOMS):
+        btn(-2, 514 + 33*i, t)
+    cap(565, 492, "КАМЕРА")
+    cap(565, 585, "СВЕТ")
+    btn(528, 606, "Выключить всё")
+    cap(565, 645, "ПЫЛЕСОС")
+    btn(528, 704, "Старт")
+    btn(528, 737, "Пауза")
+    btn(528, 770, "На базу")
     o.append('</svg>')
     open(f"floorplan-{name}.svg","w").write("\n".join(o))
 

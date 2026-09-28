@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 465 440 395" font-family="Roboto, Segoe UI, sans-serif">
-<rect x="80" y="465" width="440" height="395" fill="#1c1c1c"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 465 620 395" font-family="Roboto, Segoe UI, sans-serif">
+<rect x="-10" y="465" width="620" height="395" fill="#1c1c1c"/>
 <polygon id="balcony" points="130,545 175,515 175,605 130,605" fill="#1a1d22" stroke="#4a505c" stroke-width="4" stroke-linejoin="round"/>
 <polygon id="kids" points="175,512 300,512 300,615 175,615" fill="#262a31" stroke="#4a505c" stroke-width="4" stroke-linejoin="round"/>
 <polygon id="bath" points="300,512 318,492 336,480 354,492 372,512 372,568 300,568" fill="#262a31" stroke="#4a505c" stroke-width="4" stroke-linejoin="round"/>
@@ -52,4 +52,32 @@
 <text x="257" y="812" font-size="7" font-weight="500" fill="#e6e6e6" text-anchor="middle">Кладовка</text>
 <text x="302" y="812" font-size="7" font-weight="500" fill="#e6e6e6" text-anchor="middle">WC</text>
 <text x="345" y="806" font-size="9" font-weight="500" fill="#e6e6e6" text-anchor="middle">Прихожая</text>
+<text x="35" y="492" font-size="8" font-weight="600" fill="#8b919c" text-anchor="middle" letter-spacing=".6">УБОРКА</text>
+<rect x="-2" y="500" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="43" y="517" font-size="8.5" fill="#e6e6e6" text-anchor="middle">Зал</text>
+<rect x="-2" y="533" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="43" y="550" font-size="8.5" fill="#e6e6e6" text-anchor="middle">Кухня</text>
+<rect x="-2" y="566" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="43" y="583" font-size="8.5" fill="#e6e6e6" text-anchor="middle">Спальня</text>
+<rect x="-2" y="599" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="43" y="616" font-size="8.5" fill="#e6e6e6" text-anchor="middle">Детская</text>
+<rect x="-2" y="632" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="43" y="649" font-size="8.5" fill="#e6e6e6" text-anchor="middle">Прихожая</text>
+<rect x="-2" y="665" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="43" y="682" font-size="8.5" fill="#e6e6e6" text-anchor="middle">Коридор</text>
+<rect x="-2" y="698" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="43" y="715" font-size="7" fill="#e6e6e6" text-anchor="middle">Малый коридор</text>
+<rect x="-2" y="731" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="43" y="748" font-size="7" fill="#e6e6e6" text-anchor="middle">Проход к кухне</text>
+<text x="565" y="492" font-size="8" font-weight="600" fill="#8b919c" text-anchor="middle" letter-spacing=".6">КАМЕРА</text>
+<text x="565" y="585" font-size="8" font-weight="600" fill="#8b919c" text-anchor="middle" letter-spacing=".6">СВЕТ</text>
+<rect x="528" y="592" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="573" y="609" font-size="7" fill="#e6e6e6" text-anchor="middle">Выключить всё</text>
+<text x="565" y="645" font-size="8" font-weight="600" fill="#8b919c" text-anchor="middle" letter-spacing=".6">ПЫЛЕСОС</text>
+<rect x="528" y="690" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="573" y="707" font-size="8.5" fill="#e6e6e6" text-anchor="middle">Старт</text>
+<rect x="528" y="723" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="573" y="740" font-size="8.5" fill="#e6e6e6" text-anchor="middle">Пауза</text>
+<rect x="528" y="756" width="74" height="28" rx="6" fill="#262a31" stroke="#4a505c" stroke-width="1"/>
+<text x="573" y="773" font-size="8.5" fill="#e6e6e6" text-anchor="middle">На базу</text>
 </svg>
