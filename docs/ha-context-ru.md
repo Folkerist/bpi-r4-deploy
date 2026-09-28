@@ -145,7 +145,7 @@
   `/etc/uplink-lan-ports`, по умолчанию `lan1`). Проверка: `nft list table netdev uplink_dscp | grep devices`
   (есть lan1), счётчики растут. tcpdump на lan1 всё равно показывает tos 0x20 — он видит пакеты до правила.
   Установлено 27.09.2026: скорость по Wi-Fi 21 → ~357–470 Мбит/с (curl 100 МБ с speedtest.selectel.ru; Mac на «Home» 5 ГГц, 80 МГц).
-- Wi-Fi BPI-R4 = те же сети, что у Xiaomi (устройства переходят сами): 2,4 ГГц `Xiaomii` канал 6 EHT20,
+- Wi-Fi BPI-R4 = те же сети, что у Xiaomi (устройства переходят сами): 2,4 ГГц `Xiaomii` канал 1 EHT20,
   5 ГГц `Xiaomii_5G` канал 149 EHT80, обе WPA2-PSK (psk2+ccmp, как у Xiaomi); 6 ГГц — `Home` (SAE).
   Порты RB5009: ether1 = BPI-R4 (+ его Wi-Fi-клиенты), ether2 = Xiaomi AX3600 (главный mesh, R3600 fw 1.1.21,
   MAC 88:c3:97:c9:11:d3), ether3 = Xiaomi AX1800 (узел mesh, RM1800 fw 1.0.399, MAC 28:d1:27:81:df:8b; связь с AX3600
@@ -161,8 +161,10 @@
   .42 AX1800 (у Xiaomi адрес прописан на самих роутерах — статус waiting). DSCP-правил на RB5009 нет, CS1 приходит
   извне; fasttrack включён (mangle на быстрые соединения не действует).
 - Точки доступа: BPI-R4 — у входной двери (прихожая), AX3600 — спальня, AX1800 — зал. Эфир 29.09.2026: 5 ГГц — Xiaomi
-  канал 44 (mesh, оба), BPI 149; 2,4 ГГц — BPI был на канале 1 (самый загруженный: 5 соседей, HONOR −61), 29.09.2026 переведён на 6
-  (бэкап `/etc/config/wireless.bak`); Xiaomi — канал 11. 802.11v (bss_transition/wnm_sleep_mode) НЕ включать:
+  канал 44 (mesh, оба), BPI 149; 2,4 ГГц — схема 1/6/11: BPI канал 1 (соседи есть, но 6 занят AX3600), AX3600 «Авто (6)» → закрепить 6 и
+  20 МГц (было 40/20), AX1800 — 11. 6 ГГц `Home` выключен 29.09.2026 (устройств с 6 ГГц нет; `uci set
+  wireless.radio2.disabled=0` вернёт). Бэкапы `/etc/config/wireless.bak`, `.bak2`. Скорость через AX3600 5 ГГц
+  рядом: 651/31 Мбит/с — CS1 на Xiaomi не мешает, DSCP-правило на RB5009 не нужно. 802.11v (bss_transition/wnm_sleep_mode) НЕ включать:
   стоит wpad-basic-mbedtls, hostapd с этими опциями не запускает ни одну точку (нужен полный wpad-mbedtls). Камера Botslab (.221) — худший клиент 2,4 ГГц (−79 дБм, 66% повторов).
 - Доступ к HA снаружи нужен: через Back To Home или пир WireGuard на RB5009 (не проброс порта).
 
