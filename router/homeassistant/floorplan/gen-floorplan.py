@@ -122,3 +122,8 @@ cx, cy = CAM
 open("fp-camera-fov.svg", "w").write(
     HEAD + f'<polygon points="{cx},{cy} 330,825 370,825" fill="#4fc3f7" fill-opacity=".10" stroke="#4fc3f7" '
     f'stroke-opacity=".35" stroke-width="1" stroke-dasharray="3 3"/></svg>')
+
+# Living room (Зал) main light = room fill.
+zal = next(r[3] for r in rooms if r[0] == "hall")
+open("fp-light-zal.svg", "w").write(
+    HEAD + f'<polygon points="{zal}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
