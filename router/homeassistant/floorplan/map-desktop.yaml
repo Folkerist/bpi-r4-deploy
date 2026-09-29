@@ -1,8 +1,8 @@
 # Карта для компьютера/планшета (picture-elements с боковыми панелями). Источник для gen-card.py:
 # он вставляет эту карточку и мобильную версию (строится отсюда же) в card.yaml. Правь здесь, потом запускай gen-card.py.
 - type: picture-elements
-  image: /local/floorplan-light.svg?v=8
-  dark_mode_image: /local/floorplan-dark.svg?v=8
+  image: /local/floorplan-light.svg?v=9
+  dark_mode_image: /local/floorplan-dark.svg?v=9
   # card-mod (HACS): план целиком по высоте экрана; 1.114 = 440/395 — пропорции SVG.
   card_mod:
     style: |
@@ -729,7 +729,7 @@
         data: {rooms: prokhod}
         confirmation: {text: "Пылесос: убрать — Проход к кухне?"}
       style: {left: 3.1%, top: 70.9%, --mdc-icon-size: 20px, color: var(--primary-color)}
-    # Кто убирает по долгому нажатию на комнату и кнопкам «Уборка» (input_select.fp_vacuum): Qrevo → S5 → Вместе.
+    # Кто убирает по долгому нажатию на комнату и кнопкам «Уборка» (input_select.fp_vacuum): Мокрый → Сухой → Вместе.
     - type: image
       image: /local/fp-empty.svg?v=2
       tap_action:
@@ -758,7 +758,7 @@
         action: perform-action
         perform_action: script.turn_on
         target: {entity_id: script.fp_vacuum_together}
-        confirmation: {text: "Вся квартира: сначала S5 пылесосит, потом Qrevo моет?"}
+        confirmation: {text: "Вся квартира: сначала сухой пылесосит, потом мокрый моет?"}
       style: {left: 7.3%, top: 93.9%, width: 11.94%, height: 7.09%}
     - type: icon
       icon: mdi:broom
@@ -766,7 +766,7 @@
         action: perform-action
         perform_action: script.turn_on
         target: {entity_id: script.fp_vacuum_together}
-        confirmation: {text: "Вся квартира: сначала S5 пылесосит, потом Qrevo моет?"}
+        confirmation: {text: "Вся квартира: сначала сухой пылесосит, потом мокрый моет?"}
       style: {left: 3.1%, top: 93.9%, --mdc-icon-size: 20px, color: var(--primary-color)}
     # Погода: анимированный значок (Basmilius weather-icons, MIT) по состоянию + температура; нажатие — прогноз.
     - type: image

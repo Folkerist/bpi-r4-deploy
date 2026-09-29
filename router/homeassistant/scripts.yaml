@@ -18,8 +18,8 @@ fp_vacuum_clean:
       required: true
     who:
       name: Пылесос
-      description: "Qrevo, S5 или Вместе; по умолчанию — переключатель «Кто убирает»."
-      example: S5
+      description: "Мокрый (Qrevo), Сухой (S5) или Вместе; по умолчанию — переключатель «Кто убирает»."
+      example: Сухой
   variables:
     qrevo: {zal: [5], kukhnia: [1], spalnia: [4], detskaia: [8], prikhozhaia: [7], koridor: [6], koridor2: [2], prokhod: [3]}
     s5: {zal: [16], kukhnia: [17], spalnia: [22], detskaia: [23], prikhozhaia: [21, 1], koridor: [20], koridor2: [18], prokhod: [19]}
@@ -33,7 +33,7 @@ fp_vacuum_clean:
               target: {entity_id: script.fp_vacuum_together}
               data: {variables: {rooms: "{{ ids }}"}}
         # S5 (прошивка 3.5.x): параметры — просто список сегментов.
-        - conditions: "{{ by == 'S5' }}"
+        - conditions: "{{ by == 'Сухой' }}"
           sequence:
             - action: vacuum.send_command
               target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
@@ -68,7 +68,7 @@ fp_vacuum_together:
     mode_before: "{{ states('select.koridor_roborock_qrevo_cleaning_mode') }}"
   sequence:
     - action: script.fp_vacuum_clean
-      data: {rooms: "{{ ids }}", who: S5}
+      data: {rooms: "{{ ids }}", who: Сухой}
     - wait_template: "{{ is_state(s5, 'cleaning') }}"
       timeout: "00:02:00"
     - if: "{{ not wait.completed }}"
@@ -88,7 +88,7 @@ fp_vacuum_together:
       data: {option: mop}
     - delay: "00:00:03"
     - action: script.fp_vacuum_clean
-      data: {rooms: "{{ ids }}", who: Qrevo}
+      data: {rooms: "{{ ids }}", who: Мокрый}
     - wait_template: "{{ is_state(qrevo, 'cleaning') }}"
       timeout: "00:02:00"
     - if: "{{ wait.completed }}"

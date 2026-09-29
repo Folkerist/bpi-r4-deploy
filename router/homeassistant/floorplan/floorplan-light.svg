@@ -80,11 +80,11 @@
 <text x="553" y="663" font-size="8" fill="#1f2328" text-anchor="middle">Вкл</text>
 <rect x="566" y="646" width="36" height="28" rx="6" fill="#f1f3f6" stroke="#b8bdc6" stroke-width="1"/>
 <text x="591" y="663" font-size="8" fill="#1f2328" text-anchor="middle">Выкл</text>
-<text x="565" y="692" font-size="8" font-weight="600" fill="#6b7280" text-anchor="middle" letter-spacing=".6">ПЫЛЕСОС</text>
+<text x="565" y="692" font-size="8" font-weight="600" fill="#6b7280" text-anchor="middle" letter-spacing=".6">МОКРЫЙ</text>
 <rect x="526" y="726" width="24" height="24" rx="6" fill="#f1f3f6" stroke="#b8bdc6" stroke-width="1"/>
 <rect x="553" y="726" width="24" height="24" rx="6" fill="#f1f3f6" stroke="#b8bdc6" stroke-width="1"/>
 <rect x="580" y="726" width="24" height="24" rx="6" fill="#f1f3f6" stroke="#b8bdc6" stroke-width="1"/>
-<text x="565" y="770" font-size="8" font-weight="600" fill="#6b7280" text-anchor="middle" letter-spacing=".6">ПЫЛЕСОС 2</text>
+<text x="565" y="770" font-size="8" font-weight="600" fill="#6b7280" text-anchor="middle" letter-spacing=".6">СУХОЙ</text>
 <rect x="526" y="804" width="24" height="24" rx="6" fill="#f1f3f6" stroke="#b8bdc6" stroke-width="1"/>
 <rect x="553" y="804" width="24" height="24" rx="6" fill="#f1f3f6" stroke="#b8bdc6" stroke-width="1"/>
 <rect x="580" y="804" width="24" height="24" rx="6" fill="#f1f3f6" stroke="#b8bdc6" stroke-width="1"/>

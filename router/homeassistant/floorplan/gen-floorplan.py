@@ -90,7 +90,7 @@ for name,c in themes.items():
     hbtn(528, 660, "Вкл")
     hbtn(566, 660, "Выкл")
     # Two vacuums: caption, status + battery (state-labels), row of icon plates Старт / Пауза / На базу.
-    for y0, t in ((692, "ПЫЛЕСОС"), (770, "ПЫЛЕСОС 2")):
+    for y0, t in ((692, "МОКРЫЙ"), (770, "СУХОЙ")):
         cap(565, y0, t)
         for x0 in (526, 553, 580):
             ibtn(x0, y0 + 46)

@@ -94,7 +94,7 @@
   S5 принимает `app_segment_clean` простым списком `[16]`.
 - Уборка на карте (29.09.2026): долгое нажатие на комнату и кнопки «Уборка» → `script.fp_vacuum_clean` (rooms: zal, kukhnia,
   spalnia, detskaia, prikhozhaia, koridor, koridor2, prokhod; таблица сегментов обоих пылесосов — `router/homeassistant/scripts.yaml`),
-  пылесос — переключатель `input_select.fp_vacuum` «Кто убирает» (Qrevo / S5 / Вместе; `input_select.yaml`, подключён в
+  пылесос — переключатель `input_select.fp_vacuum` «Кто убирает» (Мокрый = Qrevo / Сухой = S5 / Вместе; `input_select.yaml`, подключён в
   configuration.yaml). «Вместе» / «Всё вместе» = `script.fp_vacuum_together`: S5 пылесосит → ждёт базу → Qrevo в режиме `mop`
   моет → режим возвращается. Комната S5 — фиолетовая подсветка (`sensor.fp_vacuum2_room`, `fp-vac2-*.svg`).
 - Карта: viewBox плана расширен до -10..610 (боковые панели): слева «Уборка» (8 комнат пылесоса), справа
@@ -103,7 +103,7 @@
 - Правая панель карты: погода (анимированные значки Basmilius weather-icons, MIT, в `config/www/weather/`,
   по состоянию weather.*; сейчас `weather.pavshino` (Gismeteo) = Met.no, план — Gismeteo из HACS),
   снимок камеры + красная рамка при `binary_sensor.c700_motion` (ещё не создан), «Горит: N» =
-  `sensor.lights_on` (помощник-шаблон), «Вкл»/«Выкл» весь свет (коммит 1b652fc), «Пылесос» и «Пылесос 2» (статус, заряд,
+  `sensor.lights_on` (помощник-шаблон), «Вкл»/«Выкл» весь свет (коммит 1b652fc), «Мокрый» (Qrevo) и «Сухой» (S5) (статус, заряд,
   ▶ ❚❚ ⌂); слева под «Уборка» — «Кто убирает» и «Всё вместе». Вкладка «Погода» — почасовой и дневной прогноз.
 - Имена в Z2M: латиница, «тип_комната» (switch_kitchen, sensor_bath, motion_hall). Клавишам/сущностям даём
   постоянные entity_id правкой реестра (HA остановлен), в Z2M при переименовании снимать «обновить ID в HA».

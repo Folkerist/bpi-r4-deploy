@@ -65,7 +65,7 @@
         {{ ((now() - d.last_changed).total_seconds() // 60) | int if d and d.state == 'on' else 0 }}
     # Где сейчас убирает пылесос — id комнаты для картинки на плане (none — не убирает).
     # Имена — как в приложении Roborock (сегменты 1–8), на всякий случай и «понятные».
-    - name: Пылесос — комната на плане
+    - name: Мокрый пылесос — комната на плане
       unique_id: fp_vacuum_room
       default_entity_id: sensor.fp_vacuum_room
       icon: mdi:robot-vacuum
@@ -78,7 +78,7 @@
     # То же для второго пылесоса (Roborock S5): номер сегмента — из Xiaomi Cloud Map Extractor.
     # Сегменты S5 по координатам карты: 16 Зал, 17 Кухня, 18 Ванная+малый коридор, 19 Проход к кухне,
     # 20 Коридор, 21 и 1 — Прихожая (верх у арки и низ у двери), 22 Спальня, 23 Детская.
-    - name: Пылесос 2 — комната на плане
+    - name: Сухой пылесос — комната на плане
       unique_id: fp_vacuum2_room
       default_entity_id: sensor.fp_vacuum2_room
       icon: mdi:robot-vacuum-variant
