@@ -195,6 +195,37 @@
       tap_action: {action: none}
       hold_action: {action: none}
       style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+    # Яндекс Станции играют: розовые волны вокруг колонки (значки и подписи — ниже).
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_u0086h0002ec9r, state: playing}]
+      elements:
+        - {type: image, image: "/local/fp-play-u0086h0002ec9r.svg?v=1", tap_action: {action: none}, hold_action: {action: none},
+           style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_tv_t60jcw202w4z1k, state: playing}]
+      elements:
+        - {type: image, image: "/local/fp-play-t60jcw202w4z1k.svg?v=1", tap_action: {action: none}, hold_action: {action: none},
+           style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_x11bmg2000x29z, state: playing}]
+      elements:
+        - {type: image, image: "/local/fp-play-x11bmg2000x29z.svg?v=1", tap_action: {action: none}, hold_action: {action: none},
+           style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_m104q81001k74k, state: playing}]
+      elements:
+        - {type: image, image: "/local/fp-play-m104q81001k74k.svg?v=1", tap_action: {action: none}, hold_action: {action: none},
+           style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_lp00000000000047571100008ab064b1, state: playing}]
+      elements:
+        - {type: image, image: "/local/fp-play-lp00000000000047571100008ab064b1.svg?v=1", tap_action: {action: none}, hold_action: {action: none},
+           style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_r10cv31007wqfn, state: playing}]
+      elements:
+        - {type: image, image: "/local/fp-play-r10cv31007wqfn.svg?v=1", tap_action: {action: none}, hold_action: {action: none},
+           style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}}
     - type: image
       entity: light.zal_yeelight_hall
       image: /local/fp-empty.svg?v=2
@@ -427,43 +458,83 @@
       icon: mdi:robot-vacuum-variant
       tap_action: {action: more-info}
       style: {left: 37.1%, top: 82.8%, --mdc-icon-size: 26px}
-    # Яндекс Станции: значок горит, когда играет; нажатие — пауза/продолжить, долгое — громкость и что играет.
-    - type: state-icon
-      entity: media_player.yandex_station_u0086h0002ec9r
-      icon: mdi:speaker
-      tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_u0086h0002ec9r}}
-      hold_action: {action: more-info}
-      style: {left: 24.2%, top: 60.8%, --mdc-icon-size: 24px}
-    - type: state-icon
-      entity: media_player.yandex_tv_t60jcw202w4z1k
-      icon: mdi:television
-      tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_tv_t60jcw202w4z1k}}
-      hold_action: {action: more-info}
-      style: {left: 27.1%, top: 69.1%, --mdc-icon-size: 24px}
-    - type: state-icon
-      entity: media_player.yandex_station_x11bmg2000x29z
-      icon: mdi:speaker
-      tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_x11bmg2000x29z}}
-      hold_action: {action: more-info}
-      style: {left: 81%, top: 34.7%, --mdc-icon-size: 24px}
-    - type: state-icon
-      entity: media_player.yandex_station_m104q81001k74k
-      icon: mdi:speaker
-      tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_m104q81001k74k}}
-      hold_action: {action: more-info}
-      style: {left: 47.9%, top: 16%, --mdc-icon-size: 24px}
-    - type: state-icon
-      entity: media_player.yandex_station_lp00000000000047571100008ab064b1
-      icon: mdi:speaker
-      tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_lp00000000000047571100008ab064b1}}
-      hold_action: {action: more-info}
-      style: {left: 52.4%, top: 70.9%, --mdc-icon-size: 24px}
-    - type: state-icon
-      entity: media_player.yandex_station_r10cv31007wqfn
-      icon: mdi:speaker
-      tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_r10cv31007wqfn}}
-      hold_action: {action: more-info}
-      style: {left: 51.9%, top: 22%, --mdc-icon-size: 22px}
+    # Яндекс Станции: нажатие — пауза/продолжить, долгое — громкость и что играет. Когда играет — розовая нота,
+    # под ней название трека (у ТВ Станции его нет), вокруг — волны (fp-play-*.svg, выше в оверлеях).
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_u0086h0002ec9r, state_not: playing}]
+      elements:
+        - {type: state-icon, entity: media_player.yandex_station_u0086h0002ec9r, icon: mdi:speaker, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_u0086h0002ec9r}},
+           hold_action: {action: more-info}, style: {left: 24.2%, top: 60.8%, --mdc-icon-size: 24px}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_u0086h0002ec9r, state: playing}]
+      elements:
+        - {type: state-icon, entity: media_player.yandex_station_u0086h0002ec9r, icon: mdi:music, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_u0086h0002ec9r}},
+           hold_action: {action: more-info}, style: {left: 24.2%, top: 60.8%, --mdc-icon-size: 24px, color: "#f06292"}}
+        - {type: state-label, entity: media_player.yandex_station_u0086h0002ec9r, attribute: media_title, prefix: "♪ ", tap_action: {action: more-info},
+           style: {left: 24.2%, top: 64.4%, color: "#f06292", font-size: 10px, max-width: 90px, overflow: hidden,
+                   white-space: nowrap, text-overflow: ellipsis}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_tv_t60jcw202w4z1k, state_not: playing}]
+      elements:
+        - {type: state-icon, entity: media_player.yandex_tv_t60jcw202w4z1k, icon: mdi:speaker, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_tv_t60jcw202w4z1k}},
+           hold_action: {action: more-info}, style: {left: 27.1%, top: 69.1%, --mdc-icon-size: 24px}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_tv_t60jcw202w4z1k, state: playing}]
+      elements:
+        - {type: state-icon, entity: media_player.yandex_tv_t60jcw202w4z1k, icon: mdi:music, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_tv_t60jcw202w4z1k}},
+           hold_action: {action: more-info}, style: {left: 27.1%, top: 69.1%, --mdc-icon-size: 24px, color: "#f06292"}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_x11bmg2000x29z, state_not: playing}]
+      elements:
+        - {type: state-icon, entity: media_player.yandex_station_x11bmg2000x29z, icon: mdi:speaker, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_x11bmg2000x29z}},
+           hold_action: {action: more-info}, style: {left: 81%, top: 34.7%, --mdc-icon-size: 24px}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_x11bmg2000x29z, state: playing}]
+      elements:
+        - {type: state-icon, entity: media_player.yandex_station_x11bmg2000x29z, icon: mdi:music, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_x11bmg2000x29z}},
+           hold_action: {action: more-info}, style: {left: 81%, top: 34.7%, --mdc-icon-size: 24px, color: "#f06292"}}
+        - {type: state-label, entity: media_player.yandex_station_x11bmg2000x29z, attribute: media_title, prefix: "♪ ", tap_action: {action: more-info},
+           style: {left: 81%, top: 38.3%, color: "#f06292", font-size: 10px, max-width: 90px, overflow: hidden,
+                   white-space: nowrap, text-overflow: ellipsis}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_m104q81001k74k, state_not: playing}]
+      elements:
+        - {type: state-icon, entity: media_player.yandex_station_m104q81001k74k, icon: mdi:speaker, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_m104q81001k74k}},
+           hold_action: {action: more-info}, style: {left: 47.9%, top: 16%, --mdc-icon-size: 24px}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_m104q81001k74k, state: playing}]
+      elements:
+        - {type: state-icon, entity: media_player.yandex_station_m104q81001k74k, icon: mdi:music, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_m104q81001k74k}},
+           hold_action: {action: more-info}, style: {left: 47.9%, top: 16%, --mdc-icon-size: 24px, color: "#f06292"}}
+        - {type: state-label, entity: media_player.yandex_station_m104q81001k74k, attribute: media_title, prefix: "♪ ", tap_action: {action: more-info},
+           style: {left: 41.5%, top: 16%, color: "#f06292", font-size: 10px, max-width: 90px, overflow: hidden,
+                   white-space: nowrap, text-overflow: ellipsis}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_lp00000000000047571100008ab064b1, state_not: playing}]
+      elements:
+        - {type: state-icon, entity: media_player.yandex_station_lp00000000000047571100008ab064b1, icon: mdi:speaker, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_lp00000000000047571100008ab064b1}},
+           hold_action: {action: more-info}, style: {left: 52.4%, top: 70.9%, --mdc-icon-size: 24px}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_lp00000000000047571100008ab064b1, state: playing}]
+      elements:
+        - {type: state-icon, entity: media_player.yandex_station_lp00000000000047571100008ab064b1, icon: mdi:music, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_lp00000000000047571100008ab064b1}},
+           hold_action: {action: more-info}, style: {left: 52.4%, top: 70.9%, --mdc-icon-size: 24px, color: "#f06292"}}
+        - {type: state-label, entity: media_player.yandex_station_lp00000000000047571100008ab064b1, attribute: media_title, prefix: "♪ ", tap_action: {action: more-info},
+           style: {left: 52.4%, top: 74.5%, color: "#f06292", font-size: 10px, max-width: 90px, overflow: hidden,
+                   white-space: nowrap, text-overflow: ellipsis}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_r10cv31007wqfn, state_not: playing}]
+      elements:
+        - {type: state-icon, entity: media_player.yandex_station_r10cv31007wqfn, icon: mdi:speaker, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_r10cv31007wqfn}},
+           hold_action: {action: more-info}, style: {left: 51.9%, top: 22%, --mdc-icon-size: 22px}}
+    - type: conditional
+      conditions: [{entity: media_player.yandex_station_r10cv31007wqfn, state: playing}]
+      elements:
+        - {type: state-icon, entity: media_player.yandex_station_r10cv31007wqfn, icon: mdi:music, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_r10cv31007wqfn}},
+           hold_action: {action: more-info}, style: {left: 51.9%, top: 22%, --mdc-icon-size: 22px, color: "#f06292"}}
+        - {type: state-label, entity: media_player.yandex_station_r10cv31007wqfn, attribute: media_title, prefix: "♪ ", tap_action: {action: more-info},
+           style: {left: 51.9%, top: 25.6%, color: "#f06292", font-size: 10px, max-width: 90px, overflow: hidden,
+                   white-space: nowrap, text-overflow: ellipsis}}
     # ⚠ в комнате, где у устройства батарея < 20% или нет связи (binary_sensor.fp_problem_* — templates.yaml);
     # нажатие — список устройств (атрибут devices).
     - type: conditional
@@ -817,7 +888,13 @@
       entity: sensor.lights_on
       prefix: "💡 Горит: "
       tap_action: {action: none}
-      style: {left: 92.7%, top: 44.8%, color: var(--primary-text-color), font-size: 12px}
+      style: {left: 90.6%, top: 44.8%, color: var(--primary-text-color), font-size: 12px}
+    # Сколько Яндекс Станций играет (sensor.fp_media_playing — templates.yaml); нажатие — какие и что играет.
+    - type: state-label
+      entity: sensor.fp_media_playing
+      prefix: "🎵 "
+      tap_action: {action: more-info}
+      style: {left: 97.3%, top: 44.8%, color: var(--primary-text-color), font-size: 12px}
     - type: image
       image: /local/fp-empty.svg?v=2
       tap_action:

@@ -65,6 +65,8 @@ def to_phone(el):
         else:
             st["left"] = fmt(to_m(x))
             if "width" in st: st["width"] = fmt(pct(st["width"]) * 6.2 / 4.4)
+    if str(st.get("max-width", "")).endswith("px"):         # track title under a station: same scale as fonts
+        st["max-width"] = f'{int(st["max-width"].rstrip("px")) * 0.2:.1f}cqw'
     if "--mdc-icon-size" in st:
         st["--mdc-icon-size"] = f'{int(st["--mdc-icon-size"].rstrip("px")) * 0.128:.1f}cqw'
     return el
@@ -96,6 +98,9 @@ phone = {"type": "vertical-stack", "cards": [
         {"type": "tile", "entity": "sensor.lights_on", "name": "Горит", "icon": "mdi:lightbulb-on"},
         all_lights("turn_on", "Весь свет", "mdi:lightbulb-group", "Включить весь свет?"),
         all_lights("turn_off", "Выключить", "mdi:lightbulb-group-off", "Выключить весь свет?")]},
+    # Яндекс Станции: плитка видна, только когда что-то играет; нажатие — какие и что (атрибут stations).
+    {"type": "conditional", "conditions": [{"condition": "numeric_state", "entity": "sensor.fp_media_playing", "above": 0}],
+     "card": {"type": "tile", "entity": "sensor.fp_media_playing", "name": "Играет", "icon": "mdi:music", "color": "pink"}},
     {"type": "tile", "entity": "vacuum.koridor_roborock_qrevo", "name": "Мокрый (Qrevo)", "features_position": "bottom",
      "features": [{"type": "vacuum-commands", "commands": ["start_pause", "stop", "return_home"]}]},
     {"type": "tile", "entity": "vacuum.roborock_s5_8159_robot_cleaner", "name": "Сухой (S5)", "features_position": "bottom",

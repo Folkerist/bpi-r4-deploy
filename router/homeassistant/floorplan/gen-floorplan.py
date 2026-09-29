@@ -212,3 +212,16 @@ VAC2 = dict(VAC, koridor2="300,512 318,492 336,480 354,492 372,512 372,615 300,6
 for rid, pts in VAC2.items():
     open(f"fp-vac2-{rid}.svg", "w").write(HEAD + f'<g>{PULSE}<polygon points="{pts}" fill="#ba68c8" fill-opacity=".2" '
         f'stroke="#ba68c8" stroke-width="3" stroke-linejoin="round"/></g></svg>')
+
+# Yandex stations playing (conditional on media_player state «playing»): pink sound waves around the station icon —
+# three rings growing and fading one after another. Positions = the station icons in map-desktop.yaml (left%, top%).
+STATIONS = {"u0086h0002ec9r": (24.2, 60.8), "t60jcw202w4z1k": (27.1, 69.1), "x11bmg2000x29z": (81, 34.7),
+            "m104q81001k74k": (47.9, 16), "lp00000000000047571100008ab064b1": (52.4, 70.9), "r10cv31007wqfn": (51.9, 22)}
+for sid, (lx, ty) in STATIONS.items():
+    x, y = round(lx * 6.2 - 10, 1), round(ty * 3.95 + 465, 1)
+    rings = "".join(
+        f'<circle cx="{x}" cy="{y}" r="6" fill="none" stroke="#f06292" stroke-width="2" opacity="0">'
+        f'<animate attributeName="r" values="6;20" dur="2.4s" begin="{i * 0.8}s" repeatCount="indefinite"/>'
+        f'<animate attributeName="opacity" values=".9;0" dur="2.4s" begin="{i * 0.8}s" repeatCount="indefinite"/></circle>'
+        for i in range(3))
+    open(f"fp-play-{sid}.svg", "w").write(HEAD + rings + '</svg>')

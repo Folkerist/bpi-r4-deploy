@@ -87,6 +87,23 @@
                     '21': 'prikhozhaia', '1': 'prikhozhaia', '22': 'spalnia', '23': 'detskaia'} %}
         {{ m.get(states('sensor.robot_pylesos_vacuum_room_id'), 'none')
            if is_state('vacuum.roborock_s5_8159_robot_cleaner', 'cleaning') else 'none' }}
+    # Сколько Яндекс Станций сейчас играет; список «станция — трек» — в атрибуте stations (правая панель, «🎵 N»).
+    - name: Колонки — играют
+      unique_id: fp_media_playing
+      default_entity_id: sensor.fp_media_playing
+      icon: mdi:music
+      state: >
+        {{ states.media_player | selectattr('entity_id', 'match', 'media_player.yandex_')
+           | selectattr('state', 'eq', 'playing') | list | count }}
+      attributes:
+        stations: >
+          {% set ns = namespace(o=[]) %}
+          {% for s in states.media_player | selectattr('entity_id', 'match', 'media_player.yandex_')
+                                         | selectattr('state', 'eq', 'playing') %}
+            {% set t = s.attributes.media_title %}
+            {% set ns.o = ns.o + [s.name ~ (' — ' ~ t if t else '')] %}
+          {% endfor %}
+          {{ ns.o | join('; ') if ns.o else 'ничего не играет' }}
 
 - binary_sensor:
     # ⚠ на плане: в комнате есть устройство с батареей < 20% или без связи; список — в атрибуте devices.
