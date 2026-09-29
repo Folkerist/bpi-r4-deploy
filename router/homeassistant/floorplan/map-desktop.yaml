@@ -1,8 +1,8 @@
 # Карта для компьютера/планшета (picture-elements с боковыми панелями). Источник для gen-card.py:
 # он вставляет эту карточку и мобильную версию (строится отсюда же) в card.yaml. Правь здесь, потом запускай gen-card.py.
 - type: picture-elements
-  image: /local/floorplan-light.svg?v=9
-  dark_mode_image: /local/floorplan-dark.svg?v=9
+  image: /local/floorplan-light.svg?v=10
+  dark_mode_image: /local/floorplan-dark.svg?v=10
   # card-mod (HACS): план целиком по высоте экрана; 1.114 = 440/395 — пропорции SVG.
   card_mod:
     style: |

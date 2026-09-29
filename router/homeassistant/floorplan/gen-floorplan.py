@@ -19,19 +19,29 @@ themes = {
  "light":dict(bg="#ffffff", room="#f1f3f6", balcony="#e6e9ee", wall="#b8bdc6", text="#1f2328", sub="#6b7280", win="#3b8fd9"),
 }
 windows = [(130,560,130,595),(175,548,175,600),(505,535,505,590),(125,640,125,695),(95,760,95,815),(100,745,122,724)]
+# Doors and passages checked against the Qrevo lidar map (where two cleaning segments touch = a real passage,
+# fitted to the plan at ~39.5 mm per unit) and the realtor floor plan.
 openings=[
- ("door","v",300,585,609,1,"a"),   # детская: наружу в коридор, к ванной
- ("door","v",372,585,609,-1,"a"),  # спальня: наружу в коридор, к ванной
+ ("door","v",300,574,598,1,"a"),   # детская: наружу в коридор, к ванной
+ ("door","v",372,574,598,-1,"a"),  # спальня: наружу в коридор, к ванной
  ("door","h",568,324,348,-1,"b"),  # ванная
- ("slide","v",300,640,690,0,""),   # зал-коридор: купе
- ("door","v",230,730,756,1,"a"),   # кухня: в прихожую, к залу
+ ("slide","v",300,643,687,0,""),   # зал-коридор: купе-перегородка шириной в две двери (~1,7 м)
+ ("door","v",230,748,772,-1,"a"),  # кухня: внутрь кухни, петли сверху
  ("door","h",775,260,282,-1,"a"),  # кладовка: наружу, к кухне
  ("door","h",775,293,313,-1,"a"),  # WC: наружу, к кухне
  ("door","h",825,336,364,1,"b"),   # входная: наружу, петли справа
  ("door","v",175,518,540,1,"a"),   # балкон: внутрь детской, к верху
- ("arch","h",615,310,362,0,""),
- ("arch","h",720,312,362,0,""),
- ("door","h",720,178,204,1,"b"),    # зал-кухня: проход
+ ("arch","h",615,324,372,0,""),    # малый коридор -> коридор (слева встроенная полка)
+ ("arch","h",720,327,367,0,""),    # коридор -> прихожая
+ ("arch","h",720,192,215,0,""),    # зал -> кухня: проём без двери
+]
+# Built-in furniture and plumbing (thin outlines): shelf left of the small-corridor arch, wardrobe along the top wall
+# of the passage to the kitchen, bath tub along the bathroom's left wall, toilet in the bathroom (the WC has its icon).
+fixtures = [
+ ("rect", 301, 603, 22, 11),       # полка в малом коридоре
+ ("rect", 236, 722, 24, 13), ("rect", 260, 722, 24, 13),   # шкаф в проходе к кухне (две секции)
+ ("rect", 304, 518, 17, 44, 7),    # ванна
+ ("ellipse", 358, 558, 5, 4),      # унитаз в ванной
 ]
 for name,c in themes.items():
     o=[f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 465 620 395" font-family="Roboto, Segoe UI, sans-serif">',
@@ -56,6 +66,12 @@ for name,c in themes.items():
             o.append(f'<line x1="{c0+2}" y1="{m-3}" x2="{c0+2}" y2="{b}" stroke="{c["sub"]}" stroke-width="2"/>')
         else:
             o.append(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{c["sub"]}" stroke-width="1" stroke-dasharray="3 3"/>')
+    for f in fixtures:
+        if f[0] == "rect":
+            rx = f'rx="{f[5]}" ' if len(f) > 5 else 'rx="1.5" '
+            o.append(f'<rect x="{f[1]}" y="{f[2]}" width="{f[3]}" height="{f[4]}" {rx}fill="none" stroke="{c["sub"]}" stroke-width="1"/>')
+        else:
+            o.append(f'<ellipse cx="{f[1]}" cy="{f[2]}" rx="{f[3]}" ry="{f[4]}" fill="none" stroke="{c["sub"]}" stroke-width="1"/>')
     for rid,label,area,pts,(x,y),balc in rooms:
         if not label: continue
         small = rid in ("wc","storage","bath","balcony")
