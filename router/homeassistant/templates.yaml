@@ -75,6 +75,18 @@
                     'Коридор': 'koridor', 'Прихожая': 'prikhozhaia', 'Лекс': 'detskaia', 'Детская': 'detskaia'} %}
         {{ m.get(states('sensor.koridor_roborock_qrevo_current_room'), 'none')
            if is_state('vacuum.koridor_roborock_qrevo', 'cleaning') else 'none' }}
+    # То же для второго пылесоса (Roborock S5): номер сегмента — из Xiaomi Cloud Map Extractor.
+    # Сегменты S5 по координатам карты: 16 Зал, 17 Кухня, 18 Ванная+малый коридор, 19 Проход к кухне,
+    # 20 Коридор, 21 и 1 — Прихожая (верх у арки и низ у двери), 22 Спальня, 23 Детская.
+    - name: Пылесос 2 — комната на плане
+      unique_id: fp_vacuum2_room
+      default_entity_id: sensor.fp_vacuum2_room
+      icon: mdi:robot-vacuum-variant
+      state: >
+        {% set m = {'16': 'zal', '17': 'kukhnia', '18': 'koridor2', '19': 'prokhod', '20': 'koridor',
+                    '21': 'prikhozhaia', '1': 'prikhozhaia', '22': 'spalnia', '23': 'detskaia'} %}
+        {{ m.get(states('sensor.robot_pylesos_vacuum_room_id'), 'none')
+           if is_state('vacuum.roborock_s5_8159_robot_cleaner', 'cleaning') else 'none' }}
 
 - binary_sensor:
     # ⚠ на плане: в комнате есть устройство с батареей < 20% или без связи; список — в атрибуте devices.

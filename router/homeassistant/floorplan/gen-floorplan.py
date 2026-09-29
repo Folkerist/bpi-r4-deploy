@@ -75,18 +75,25 @@ for name,c in themes.items():
     def hbtn(x0, yc, t):  # half-width plate, two per row
         o.append(f'<rect x="{x0}" y="{yc-14}" width="36" height="28" rx="6" fill="{c["room"]}" stroke="{c["wall"]}" stroke-width="1"/>')
         o.append(f'<text x="{x0+25}" y="{yc+3}" font-size="8" fill="{c["text"]}" text-anchor="middle">{t}</text>')
+    def ibtn(x0, yc):  # small icon-only plate (Старт / Пауза / На базу), three per row
+        o.append(f'<rect x="{x0}" y="{yc-12}" width="24" height="24" rx="6" fill="{c["room"]}" stroke="{c["wall"]}" stroke-width="1"/>')
     cap(35, 492, "УБОРКА")
     for i, (t, _seg, _icon) in enumerate(SIDE_ROOMS):
         btn(-2, 514 + 33*i, t)
+    # Who cleans (input_select.fp_vacuum: the name is a state-label on the plate) and «all together».
+    cap(35, 780, "КТО УБИРАЕТ")
+    o.append(f'<rect x="-2" y="788" width="74" height="28" rx="6" fill="{c["room"]}" stroke="{c["wall"]}" stroke-width="1"/>')
+    btn(-2, 836, "Всё вместе")
     cap(565, 492, "ПОГОДА")
     cap(565, 548, "КАМЕРА")
     cap(565, 628, "СВЕТ")
     hbtn(528, 660, "Вкл")
     hbtn(566, 660, "Выкл")
-    cap(565, 692, "ПЫЛЕСОС")
-    btn(528, 742, "Старт")
-    btn(528, 775, "Пауза")
-    btn(528, 808, "На базу")
+    # Two vacuums: caption, status + battery (state-labels), row of icon plates Старт / Пауза / На базу.
+    for y0, t in ((692, "ПЫЛЕСОС"), (770, "ПЫЛЕСОС 2")):
+        cap(565, y0, t)
+        for x0 in (526, 553, 580):
+            ibtn(x0, y0 + 46)
     o.append('</svg>')
     open(f"floorplan-{name}.svg","w").write("\n".join(o))
     # Phone version: the apartment only (side panels are cut off; on the phone they are regular cards below the map).
@@ -198,3 +205,10 @@ VAC = {"kukhnia": room_pts["kitchen"], "koridor2": room_pts["corridor2"], "korid
 for rid, pts in VAC.items():
     open(f"fp-vac-{rid}.svg", "w").write(HEAD + f'<g>{PULSE}<polygon points="{pts}" fill="#66bb6a" fill-opacity=".2" '
         f'stroke="#66bb6a" stroke-width="3" stroke-linejoin="round"/></g></svg>')
+
+# Second vacuum (Roborock S5, sensor.fp_vacuum2_room): same rooms in purple (cyan is motion, green — Qrevo).
+# Its segment 18 covers the bath together with the small corridor.
+VAC2 = dict(VAC, koridor2="300,512 318,492 336,480 354,492 372,512 372,615 300,615")
+for rid, pts in VAC2.items():
+    open(f"fp-vac2-{rid}.svg", "w").write(HEAD + f'<g>{PULSE}<polygon points="{pts}" fill="#ba68c8" fill-opacity=".2" '
+        f'stroke="#ba68c8" stroke-width="3" stroke-linejoin="round"/></g></svg>')

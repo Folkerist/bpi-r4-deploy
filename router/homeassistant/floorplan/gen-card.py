@@ -9,7 +9,10 @@ import copy, re, yaml
 
 src = yaml.safe_load(open("map-desktop.yaml"))[0]
 full = yaml.safe_load(open("card.yaml"))
-vac_grid = next(c for v in full["views"] if v.get("path") == "vacuum" for c in v["cards"] if c.get("type") == "grid")
+vac_cards = next(v["cards"] for v in full["views"] if v.get("path") == "vacuum")
+vac_grid = next(c for c in vac_cards if c.get("title") == "Убрать комнату")
+who_grid = next(c for c in vac_cards if c.get("type") == "grid" and any(
+    x.get("entity") == "input_select.fp_vacuum" for x in c["cards"]))
 
 def pct(v): return float(str(v).rstrip("%"))
 def fmt(v): return f"{v:.1f}%".replace(".0%", "%")
@@ -95,6 +98,9 @@ phone = {"type": "vertical-stack", "cards": [
         all_lights("turn_off", "Выключить", "mdi:lightbulb-group-off", "Выключить весь свет?")]},
     {"type": "tile", "entity": "vacuum.koridor_roborock_qrevo", "name": "Пылесос", "features_position": "bottom",
      "features": [{"type": "vacuum-commands", "commands": ["start_pause", "stop", "return_home"]}]},
+    {"type": "tile", "entity": "vacuum.roborock_s5_8159_robot_cleaner", "name": "Пылесос 2", "features_position": "bottom",
+     "features": [{"type": "vacuum-commands", "commands": ["start_pause", "stop", "return_home"]}]},
+    who_grid,
     dict(vac_grid, columns=4),
 ]}
 

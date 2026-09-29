@@ -19,8 +19,8 @@ views:
             conditions: [{condition: screen, media_query: "(min-width: 768px)"}]
             card:
               type: picture-elements
-              image: /local/floorplan-light.svg?v=7
-              dark_mode_image: /local/floorplan-dark.svg?v=7
+              image: /local/floorplan-light.svg?v=8
+              dark_mode_image: /local/floorplan-dark.svg?v=8
               # card-mod (HACS): план целиком по высоте экрана; 1.114 = 440/395 — пропорции SVG.
               card_mod:
                 style: |
@@ -197,6 +197,22 @@ views:
                   tap_action: {action: none}
                   hold_action: {action: none}
                   style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                # Второй пылесос (Roborock S5): его комната — фиолетовая (sensor.fp_vacuum2_room — templates.yaml).
+                - type: image
+                  entity: sensor.fp_vacuum2_room
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    kukhnia: /local/fp-vac2-kukhnia.svg?v=1
+                    koridor2: /local/fp-vac2-koridor2.svg?v=1
+                    prokhod: /local/fp-vac2-prokhod.svg?v=1
+                    spalnia: /local/fp-vac2-spalnia.svg?v=1
+                    zal: /local/fp-vac2-zal.svg?v=1
+                    koridor: /local/fp-vac2-koridor.svg?v=1
+                    prikhozhaia: /local/fp-vac2-prikhozhaia.svg?v=1
+                    detskaia: /local/fp-vac2-detskaia.svg?v=1
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
                 - type: image
                   entity: light.zal_yeelight_hall
                   image: /local/fp-empty.svg?v=2
@@ -215,7 +231,7 @@ views:
                   tap_action: {action: none}
                   hold_action: {action: none}
                   style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
-                # Нажатие на комнату — свет; долгое — пылесос убирает комнату (зал, кухня, спальня, прихожая, детская).
+                # Нажатие на комнату — свет; долгое — уборка комнаты пылесосом с переключателя «Кто убирает» (script.fp_vacuum_clean).
                 - type: image
                   entity: switch.light_kitchen_main
                   image: /local/fp-empty.svg?v=2
@@ -237,11 +253,8 @@ views:
                   tap_action: {action: toggle}
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [2], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: koridor2}
                     confirmation: {text: "Пылесос: убрать малый коридор?"}
                   style: {left: 55.8%, top: 32%, width: 11.6%, height: 11.9%}
                 - type: image
@@ -250,11 +263,8 @@ views:
                   tap_action: {action: toggle}
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [6], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: koridor}
                     confirmation: {text: "Пылесос: убрать коридор?"}
                   style: {left: 55.8%, top: 51.3%, width: 11.6%, height: 26.6%}
                 # Верх Г прихожей: левая часть (к кухне, кладовке, WC) = сегмент 3 «Коридор1», правая = 7 «Прихожая».
@@ -264,11 +274,8 @@ views:
                   tap_action: {action: toggle}
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [3], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prokhod}
                     confirmation: {text: "Пылесос: убрать проход к кухне?"}
                   style: {left: 46%, top: 71.5%, width: 14.5%, height: 13.9%}
                 - type: image
@@ -277,11 +284,8 @@ views:
                   tap_action: {action: toggle}
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [7], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prikhozhaia}
                     confirmation: {text: "Пылесос: убрать прихожую?"}
                   style: {left: 57.2%, top: 71.5%, width: 8.1%, height: 13.9%}
                 - type: image
@@ -290,11 +294,8 @@ views:
                   tap_action: {action: toggle}
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [7], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prikhozhaia}
                     confirmation: {text: "Пылесос: убрать прихожую?"}
                   style: {left: 57.2%, top: 84.8%, width: 8.1%, height: 12.7%}
                 - type: image
@@ -315,11 +316,8 @@ views:
                   tap_action: {action: toggle}
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [1], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: kukhnia}
                     confirmation: {text: "Пылесос: убрать кухню?"}
                   style: {left: 27.9%, top: 77.8%, width: 21.8%, height: 26.6%}
                 - type: image
@@ -334,11 +332,8 @@ views:
                   tap_action: {action: toggle}
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [5], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: zal}
                     confirmation: {text: "Пылесос: убрать зал?"}
                   style: {left: 35.9%, top: 51.3%, width: 28.2%, height: 26.6%}
                 - type: image
@@ -347,11 +342,8 @@ views:
                   tap_action: {action: toggle}
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [4], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: spalnia}
                     confirmation: {text: "Пылесос: убрать спальню?"}
                   style: {left: 72.4%, top: 24.9%, width: 21.4%, height: 26.1%}
                 - type: image
@@ -359,11 +351,8 @@ views:
                   tap_action: {action: none}
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [8], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: detskaia}
                     confirmation: {text: "Пылесос: убрать детскую?"}
                   style: {left: 39.9%, top: 24.9%, width: 20.2%, height: 26.1%}
                 # Значки: лампы, люстра и подсветка по периметру.
@@ -450,6 +439,12 @@ views:
                   icon: mdi:robot-vacuum
                   tap_action: {action: more-info}
                   style: {left: 37.1%, top: 76.7%, --mdc-icon-size: 30px}
+                # Второй пылесос Roborock S5: база рядом с Qrevo (по карте Map Extractor — у правой стены кухни).
+                - type: state-icon
+                  entity: vacuum.roborock_s5_8159_robot_cleaner
+                  icon: mdi:robot-vacuum-variant
+                  tap_action: {action: more-info}
+                  style: {left: 37.1%, top: 82.8%, --mdc-icon-size: 26px}
                 # Яндекс Станции: значок горит, когда играет; нажатие — пауза/продолжить, долгое — громкость и что играет.
                 - type: state-icon
                   entity: media_player.yandex_station_u0086h0002ec9r
@@ -628,178 +623,169 @@ views:
                   image: /local/fp-empty.svg?v=2
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [5], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: zal}
                     confirmation: {text: "Пылесос: убрать — Зал?"}
                   style: {left: 7.3%, top: 12.4%, width: 11.94%, height: 7.09%}
                 - type: icon
                   icon: mdi:sofa
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [5], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: zal}
                     confirmation: {text: "Пылесос: убрать — Зал?"}
                   style: {left: 3.1%, top: 12.4%, --mdc-icon-size: 20px, color: var(--primary-color)}
                 - type: image
                   image: /local/fp-empty.svg?v=2
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [1], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: kukhnia}
                     confirmation: {text: "Пылесос: убрать — Кухня?"}
                   style: {left: 7.3%, top: 20.8%, width: 11.94%, height: 7.09%}
                 - type: icon
                   icon: mdi:stove
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [1], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: kukhnia}
                     confirmation: {text: "Пылесос: убрать — Кухня?"}
                   style: {left: 3.1%, top: 20.8%, --mdc-icon-size: 20px, color: var(--primary-color)}
                 - type: image
                   image: /local/fp-empty.svg?v=2
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [4], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: spalnia}
                     confirmation: {text: "Пылесос: убрать — Спальня?"}
                   style: {left: 7.3%, top: 29.1%, width: 11.94%, height: 7.09%}
                 - type: icon
                   icon: mdi:bed-king
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [4], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: spalnia}
                     confirmation: {text: "Пылесос: убрать — Спальня?"}
                   style: {left: 3.1%, top: 29.1%, --mdc-icon-size: 20px, color: var(--primary-color)}
                 - type: image
                   image: /local/fp-empty.svg?v=2
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [8], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: detskaia}
                     confirmation: {text: "Пылесос: убрать — Детская?"}
                   style: {left: 7.3%, top: 37.5%, width: 11.94%, height: 7.09%}
                 - type: icon
                   icon: mdi:teddy-bear
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [8], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: detskaia}
                     confirmation: {text: "Пылесос: убрать — Детская?"}
                   style: {left: 3.1%, top: 37.5%, --mdc-icon-size: 20px, color: var(--primary-color)}
                 - type: image
                   image: /local/fp-empty.svg?v=2
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [7], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prikhozhaia}
                     confirmation: {text: "Пылесос: убрать — Прихожая?"}
                   style: {left: 7.3%, top: 45.8%, width: 11.94%, height: 7.09%}
                 - type: icon
                   icon: mdi:door
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [7], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prikhozhaia}
                     confirmation: {text: "Пылесос: убрать — Прихожая?"}
                   style: {left: 3.1%, top: 45.8%, --mdc-icon-size: 20px, color: var(--primary-color)}
                 - type: image
                   image: /local/fp-empty.svg?v=2
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [6], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: koridor}
                     confirmation: {text: "Пылесос: убрать — Коридор?"}
                   style: {left: 7.3%, top: 54.2%, width: 11.94%, height: 7.09%}
                 - type: icon
                   icon: mdi:walk
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [6], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: koridor}
                     confirmation: {text: "Пылесос: убрать — Коридор?"}
                   style: {left: 3.1%, top: 54.2%, --mdc-icon-size: 20px, color: var(--primary-color)}
                 - type: image
                   image: /local/fp-empty.svg?v=2
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [2], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: koridor2}
                     confirmation: {text: "Пылесос: убрать — Малый коридор?"}
                   style: {left: 7.3%, top: 62.5%, width: 11.94%, height: 7.09%}
                 - type: icon
                   icon: mdi:walk
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [2], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: koridor2}
                     confirmation: {text: "Пылесос: убрать — Малый коридор?"}
                   style: {left: 3.1%, top: 62.5%, --mdc-icon-size: 20px, color: var(--primary-color)}
                 - type: image
                   image: /local/fp-empty.svg?v=2
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [3], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prokhod}
                     confirmation: {text: "Пылесос: убрать — Проход к кухне?"}
                   style: {left: 7.3%, top: 70.9%, width: 11.94%, height: 7.09%}
                 - type: icon
                   icon: mdi:walk
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target: {entity_id: vacuum.koridor_roborock_qrevo}
-                    data:
-                      command: app_segment_clean
-                      params: [{segments: [3], repeat: 1}]
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prokhod}
                     confirmation: {text: "Пылесос: убрать — Проход к кухне?"}
                   style: {left: 3.1%, top: 70.9%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                # Кто убирает по долгому нажатию на комнату и кнопкам «Уборка» (input_select.fp_vacuum): Qrevo → S5 → Вместе.
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_select.select_next
+                    target: {entity_id: input_select.fp_vacuum}
+                  style: {left: 7.3%, top: 85.3%, width: 11.94%, height: 7.09%}
+                - type: icon
+                  icon: mdi:robot-vacuum
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_select.select_next
+                    target: {entity_id: input_select.fp_vacuum}
+                  style: {left: 3.1%, top: 85.3%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                - type: state-label
+                  entity: input_select.fp_vacuum
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_select.select_next
+                    target: {entity_id: input_select.fp_vacuum}
+                  style: {left: 8.5%, top: 85.3%, color: var(--primary-text-color), font-size: 12px, font-weight: 500}
+                # Всё вместе: вся квартира, сначала S5 (сухая), потом Qrevo (мойка) — script.fp_vacuum_together.
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.turn_on
+                    target: {entity_id: script.fp_vacuum_together}
+                    confirmation: {text: "Вся квартира: сначала S5 пылесосит, потом Qrevo моет?"}
+                  style: {left: 7.3%, top: 93.9%, width: 11.94%, height: 7.09%}
+                - type: icon
+                  icon: mdi:broom
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.turn_on
+                    target: {entity_id: script.fp_vacuum_together}
+                    confirmation: {text: "Вся квартира: сначала S5 пылесосит, потом Qrevo моет?"}
+                  style: {left: 3.1%, top: 93.9%, --mdc-icon-size: 20px, color: var(--primary-color)}
                 # Погода: анимированный значок (Basmilius weather-icons, MIT) по состоянию + температура; нажатие — прогноз.
                 - type: image
                   entity: weather.pavshino
@@ -934,57 +920,109 @@ views:
                         - light.spalnia_yeelight_bed
                     confirmation: {text: "Выключить весь свет?"}
                   style: {left: 94.35%, top: 49.4%, --mdc-icon-size: 18px, color: var(--primary-color)}
+                # Пылесосы: статус, заряд и маленькие плашки Старт / Пауза / На базу (плашки и подписи — в SVG).
                 - type: state-label
                   entity: sensor.koridor_roborock_qrevo_status
                   tap_action: {action: more-info}
-                  style: {left: 92.7%, top: 61%, color: var(--primary-text-color), font-size: 12px}
+                  style: {left: 92.7%, top: 60.5%, color: var(--primary-text-color), font-size: 12px}
                 - type: state-label
                   entity: sensor.koridor_roborock_qrevo_battery
                   prefix: "🔋 "
                   tap_action: {action: more-info}
-                  style: {left: 92.7%, top: 64.8%, color: var(--secondary-text-color), font-size: 12px}
+                  style: {left: 92.7%, top: 63.8%, color: var(--secondary-text-color), font-size: 11px}
                 - type: image
                   image: /local/fp-empty.svg?v=2
                   tap_action:
                     action: perform-action
                     perform_action: vacuum.start
                     target: {entity_id: vacuum.koridor_roborock_qrevo}
-                  style: {left: 92.7%, top: 70.1%, width: 11.94%, height: 7.09%}
+                  style: {left: 88.4%, top: 69.1%, width: 3.87%, height: 6.08%}
                 - type: icon
                   icon: mdi:play
                   tap_action:
                     action: perform-action
                     perform_action: vacuum.start
                     target: {entity_id: vacuum.koridor_roborock_qrevo}
-                  style: {left: 88.5%, top: 70.1%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                  style: {left: 88.4%, top: 69.1%, --mdc-icon-size: 18px, color: var(--primary-color)}
                 - type: image
                   image: /local/fp-empty.svg?v=2
                   tap_action:
                     action: perform-action
                     perform_action: vacuum.pause
                     target: {entity_id: vacuum.koridor_roborock_qrevo}
-                  style: {left: 92.7%, top: 78.5%, width: 11.94%, height: 7.09%}
+                  style: {left: 92.7%, top: 69.1%, width: 3.87%, height: 6.08%}
                 - type: icon
                   icon: mdi:pause
                   tap_action:
                     action: perform-action
                     perform_action: vacuum.pause
                     target: {entity_id: vacuum.koridor_roborock_qrevo}
-                  style: {left: 88.5%, top: 78.5%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                  style: {left: 92.7%, top: 69.1%, --mdc-icon-size: 18px, color: var(--primary-color)}
                 - type: image
                   image: /local/fp-empty.svg?v=2
                   tap_action:
                     action: perform-action
                     perform_action: vacuum.return_to_base
                     target: {entity_id: vacuum.koridor_roborock_qrevo}
-                  style: {left: 92.7%, top: 86.8%, width: 11.94%, height: 7.09%}
+                  style: {left: 97.1%, top: 69.1%, width: 3.87%, height: 6.08%}
                 - type: icon
                   icon: mdi:home-import-outline
                   tap_action:
                     action: perform-action
                     perform_action: vacuum.return_to_base
                     target: {entity_id: vacuum.koridor_roborock_qrevo}
-                  style: {left: 88.5%, top: 86.8%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                  style: {left: 97.1%, top: 69.1%, --mdc-icon-size: 18px, color: var(--primary-color)}
+                - type: state-label
+                  entity: sensor.roborock_s5_8159_status
+                  tap_action: {action: more-info}
+                  style: {left: 92.7%, top: 80.3%, color: var(--primary-text-color), font-size: 12px}
+                - type: state-label
+                  entity: sensor.roborock_s5_8159_battery_level
+                  prefix: "🔋 "
+                  tap_action: {action: more-info}
+                  style: {left: 92.7%, top: 83.5%, color: var(--secondary-text-color), font-size: 11px}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.start
+                    target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+                  style: {left: 88.4%, top: 88.9%, width: 3.87%, height: 6.08%}
+                - type: icon
+                  icon: mdi:play
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.start
+                    target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+                  style: {left: 88.4%, top: 88.9%, --mdc-icon-size: 18px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.pause
+                    target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+                  style: {left: 92.7%, top: 88.9%, width: 3.87%, height: 6.08%}
+                - type: icon
+                  icon: mdi:pause
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.pause
+                    target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+                  style: {left: 92.7%, top: 88.9%, --mdc-icon-size: 18px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.return_to_base
+                    target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+                  style: {left: 97.1%, top: 88.9%, width: 3.87%, height: 6.08%}
+                - type: icon
+                  icon: mdi:home-import-outline
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.return_to_base
+                    target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+                  style: {left: 97.1%, top: 88.9%, --mdc-icon-size: 18px, color: var(--primary-color)}
           # Телефон: план на всю ширину, боковые панели — карточками ниже.
           - type: conditional
             conditions: [{condition: screen, media_query: "(max-width: 767px)"}]
@@ -992,8 +1030,8 @@ views:
               type: vertical-stack
               cards:
               - type: picture-elements
-                image: /local/floorplan-m-light.svg?v=7
-                dark_mode_image: /local/floorplan-m-dark.svg?v=7
+                image: /local/floorplan-m-light.svg?v=8
+                dark_mode_image: /local/floorplan-m-dark.svg?v=8
                 card_mod:
                   style: 'ha-card { container-type: inline-size; }
 
@@ -1271,6 +1309,27 @@ views:
                     width: 100%
                     pointer-events: none
                 - type: image
+                  entity: sensor.fp_vacuum2_room
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    kukhnia: /local/fp-vac2-kukhnia.svg?v=1
+                    koridor2: /local/fp-vac2-koridor2.svg?v=1
+                    prokhod: /local/fp-vac2-prokhod.svg?v=1
+                    spalnia: /local/fp-vac2-spalnia.svg?v=1
+                    zal: /local/fp-vac2-zal.svg?v=1
+                    koridor: /local/fp-vac2-koridor.svg?v=1
+                    prikhozhaia: /local/fp-vac2-prikhozhaia.svg?v=1
+                    detskaia: /local/fp-vac2-detskaia.svg?v=1
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
                   entity: light.zal_yeelight_hall
                   image: /local/fp-empty.svg?v=2
                   state_image:
@@ -1334,15 +1393,9 @@ views:
                     action: toggle
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 2
-                        repeat: 1
+                      rooms: koridor2
                     confirmation:
                       text: 'Пылесос: убрать малый коридор?'
                   style:
@@ -1357,15 +1410,9 @@ views:
                     action: toggle
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 6
-                        repeat: 1
+                      rooms: koridor
                     confirmation:
                       text: 'Пылесос: убрать коридор?'
                   style:
@@ -1380,15 +1427,9 @@ views:
                     action: toggle
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 3
-                        repeat: 1
+                      rooms: prokhod
                     confirmation:
                       text: 'Пылесос: убрать проход к кухне?'
                   style:
@@ -1403,15 +1444,9 @@ views:
                     action: toggle
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 7
-                        repeat: 1
+                      rooms: prikhozhaia
                     confirmation:
                       text: 'Пылесос: убрать прихожую?'
                   style:
@@ -1426,15 +1461,9 @@ views:
                     action: toggle
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 7
-                        repeat: 1
+                      rooms: prikhozhaia
                     confirmation:
                       text: 'Пылесос: убрать прихожую?'
                   style:
@@ -1473,15 +1502,9 @@ views:
                     action: toggle
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 1
-                        repeat: 1
+                      rooms: kukhnia
                     confirmation:
                       text: 'Пылесос: убрать кухню?'
                   style:
@@ -1508,15 +1531,9 @@ views:
                     action: toggle
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 5
-                        repeat: 1
+                      rooms: zal
                     confirmation:
                       text: 'Пылесос: убрать зал?'
                   style:
@@ -1531,15 +1548,9 @@ views:
                     action: toggle
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 4
-                        repeat: 1
+                      rooms: spalnia
                     confirmation:
                       text: 'Пылесос: убрать спальню?'
                   style:
@@ -1553,15 +1564,9 @@ views:
                     action: none
                   hold_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 8
-                        repeat: 1
+                      rooms: detskaia
                     confirmation:
                       text: 'Пылесос: убрать детскую?'
                   style:
@@ -1720,6 +1725,15 @@ views:
                     left: 31.8%
                     top: 76.7%
                     --mdc-icon-size: 3.8cqw
+                - type: state-icon
+                  entity: vacuum.roborock_s5_8159_robot_cleaner
+                  icon: mdi:robot-vacuum-variant
+                  tap_action:
+                    action: more-info
+                  style:
+                    left: 31.8%
+                    top: 82.8%
+                    --mdc-icon-size: 3.3cqw
                 - type: state-icon
                   entity: media_player.yandex_station_u0086h0002ec9r
                   icon: mdi:speaker
@@ -2154,6 +2168,36 @@ views:
                   - start_pause
                   - stop
                   - return_home
+              - type: tile
+                entity: vacuum.roborock_s5_8159_robot_cleaner
+                name: Пылесос 2
+                features_position: bottom
+                features:
+                - type: vacuum-commands
+                  commands:
+                  - start_pause
+                  - stop
+                  - return_home
+              - type: grid
+                columns: 2
+                square: false
+                cards:
+                - type: tile
+                  entity: input_select.fp_vacuum
+                  name: Кто убирает
+                  features_position: bottom
+                  features:
+                  - type: select-options
+                - type: button
+                  name: Всё вместе
+                  icon: mdi:broom
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.turn_on
+                    target:
+                      entity_id: script.fp_vacuum_together
+                    confirmation:
+                      text: 'Вся квартира: сначала S5 пылесосит, потом Qrevo моет?'
               - type: grid
                 title: Убрать комнату
                 columns: 4
@@ -2164,15 +2208,9 @@ views:
                   icon: mdi:sofa
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 5
-                        repeat: 1
+                      rooms: zal
                     confirmation:
                       text: 'Убрать: Зал?'
                 - type: button
@@ -2180,15 +2218,9 @@ views:
                   icon: mdi:stove
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 1
-                        repeat: 1
+                      rooms: kukhnia
                     confirmation:
                       text: 'Убрать: Кухня?'
                 - type: button
@@ -2196,15 +2228,9 @@ views:
                   icon: mdi:bed-king
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 4
-                        repeat: 1
+                      rooms: spalnia
                     confirmation:
                       text: 'Убрать: Спальня?'
                 - type: button
@@ -2212,15 +2238,9 @@ views:
                   icon: mdi:teddy-bear
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 8
-                        repeat: 1
+                      rooms: detskaia
                     confirmation:
                       text: 'Убрать: Детская (Лекс)?'
                 - type: button
@@ -2228,15 +2248,9 @@ views:
                   icon: mdi:door
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 7
-                        repeat: 1
+                      rooms: prikhozhaia
                     confirmation:
                       text: 'Убрать: Прихожая?'
                 - type: button
@@ -2244,15 +2258,9 @@ views:
                   icon: mdi:walk
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 6
-                        repeat: 1
+                      rooms: koridor
                     confirmation:
                       text: 'Убрать: Коридор?'
                 - type: button
@@ -2260,15 +2268,9 @@ views:
                   icon: mdi:walk
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 3
-                        repeat: 1
+                      rooms: prokhod
                     confirmation:
                       text: 'Убрать: Проход к кухне?'
                 - type: button
@@ -2276,15 +2278,9 @@ views:
                   icon: mdi:walk
                   tap_action:
                     action: perform-action
-                    perform_action: vacuum.send_command
-                    target:
-                      entity_id: vacuum.koridor_roborock_qrevo
+                    perform_action: script.fp_vacuum_clean
                     data:
-                      command: app_segment_clean
-                      params:
-                      - segments:
-                        - 2
-                        repeat: 1
+                      rooms: koridor2
                     confirmation:
                       text: 'Убрать: Малый коридор?'
       # END map
@@ -2329,9 +2325,46 @@ views:
             name: Режим швабры
           - entity: select.koridor_roborock_qrevo_mop_intensity
             name: Подача воды
-      # Уборка по комнатам: номера сегментов из roborock.get_maps (имена в приложении Roborock:
+      # Второй пылесос: Roborock S5 (Xiaomi Miot, только сухая уборка), карта — Xiaomi Cloud Map Extractor.
+      - type: tile
+        entity: vacuum.roborock_s5_8159_robot_cleaner
+        name: Roborock S5
+        features_position: bottom
+        features:
+          - type: vacuum-commands
+            commands: [start_pause, stop, return_home, locate]
+      - type: glance
+        show_name: true
+        entities:
+          - entity: sensor.roborock_s5_8159_battery_level
+            name: Заряд
+          - entity: sensor.roborock_s5_8159_status
+            name: Статус
+          - entity: sensor.robot_pylesos_vacuum_room_id
+            name: Сегмент
+          - entity: select.roborock_s5_8159_mode
+            name: Мощность
+      # Кто убирает по кнопкам ниже и долгому нажатию на карте (input_select.fp_vacuum); «Вместе» — сначала S5, потом Qrevo моет.
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: tile
+            entity: input_select.fp_vacuum
+            name: Кто убирает
+            features_position: bottom
+            features: [{type: select-options}]
+          - type: button
+            name: Всё вместе
+            icon: mdi:broom
+            tap_action:
+              action: perform-action
+              perform_action: script.turn_on
+              target: {entity_id: script.fp_vacuum_together}
+              confirmation: {text: "Вся квартира: сначала S5 пылесосит, потом Qrevo моет?"}
+      # Уборка по комнатам (script.fp_vacuum_clean, сегменты обоих пылесосов — в scripts.yaml). Qrevo (roborock.get_maps):
       # 1 Кухня, 2 Коридор3 = малый коридор у ванной, 3 Коридор1 = проход от прихожей к кухне, 4 Главная спальня,
-      # 5 Зал, 6 Коридор = основной, 7 Прихожая, 8 Лекс = детская). Номера в приложении — другие (порядок показа).
+      # 5 Зал, 6 Коридор = основной, 7 Прихожая, 8 Лекс = детская. Номера в приложении — другие (порядок показа).
       - type: grid
         title: Убрать комнату
         columns: 4
@@ -2342,92 +2375,72 @@ views:
             icon: mdi:sofa
             tap_action:
               action: perform-action
-              perform_action: vacuum.send_command
-              target: {entity_id: vacuum.koridor_roborock_qrevo}
-              data:
-                command: app_segment_clean
-                params: [{segments: [5], repeat: 1}]
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: zal}
               confirmation: {text: "Убрать: Зал?"}
           - type: button
             name: Кухня
             icon: mdi:stove
             tap_action:
               action: perform-action
-              perform_action: vacuum.send_command
-              target: {entity_id: vacuum.koridor_roborock_qrevo}
-              data:
-                command: app_segment_clean
-                params: [{segments: [1], repeat: 1}]
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: kukhnia}
               confirmation: {text: "Убрать: Кухня?"}
           - type: button
             name: Спальня
             icon: mdi:bed-king
             tap_action:
               action: perform-action
-              perform_action: vacuum.send_command
-              target: {entity_id: vacuum.koridor_roborock_qrevo}
-              data:
-                command: app_segment_clean
-                params: [{segments: [4], repeat: 1}]
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: spalnia}
               confirmation: {text: "Убрать: Спальня?"}
           - type: button
             name: Детская (Лекс)
             icon: mdi:teddy-bear
             tap_action:
               action: perform-action
-              perform_action: vacuum.send_command
-              target: {entity_id: vacuum.koridor_roborock_qrevo}
-              data:
-                command: app_segment_clean
-                params: [{segments: [8], repeat: 1}]
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: detskaia}
               confirmation: {text: "Убрать: Детская (Лекс)?"}
           - type: button
             name: Прихожая
             icon: mdi:door
             tap_action:
               action: perform-action
-              perform_action: vacuum.send_command
-              target: {entity_id: vacuum.koridor_roborock_qrevo}
-              data:
-                command: app_segment_clean
-                params: [{segments: [7], repeat: 1}]
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: prikhozhaia}
               confirmation: {text: "Убрать: Прихожая?"}
           - type: button
             name: Коридор
             icon: mdi:walk
             tap_action:
               action: perform-action
-              perform_action: vacuum.send_command
-              target: {entity_id: vacuum.koridor_roborock_qrevo}
-              data:
-                command: app_segment_clean
-                params: [{segments: [6], repeat: 1}]
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: koridor}
               confirmation: {text: "Убрать: Коридор?"}
           - type: button
             name: Проход к кухне
             icon: mdi:walk
             tap_action:
               action: perform-action
-              perform_action: vacuum.send_command
-              target: {entity_id: vacuum.koridor_roborock_qrevo}
-              data:
-                command: app_segment_clean
-                params: [{segments: [3], repeat: 1}]
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: prokhod}
               confirmation: {text: "Убрать: Проход к кухне?"}
           - type: button
             name: Малый коридор
             icon: mdi:walk
             tap_action:
               action: perform-action
-              perform_action: vacuum.send_command
-              target: {entity_id: vacuum.koridor_roborock_qrevo}
-              data:
-                command: app_segment_clean
-                params: [{segments: [2], repeat: 1}]
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: koridor2}
               confirmation: {text: "Убрать: Малый коридор?"}
       - type: picture-entity
         entity: image.koridor_roborock_qrevo_map_0
-        name: Карта пылесоса
+        name: Карта Qrevo
+        show_state: false
+      - type: picture-entity
+        entity: image.robot_pylesos_live_map
+        name: Карта S5
         show_state: false
   - title: Погода
     path: weather

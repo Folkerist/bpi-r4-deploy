@@ -84,13 +84,27 @@
   режимы, карта, кнопки уборки комнат). Сегменты: 1 Кухня, 2 Коридор3, 3 Коридор1, 4 Спальня, 5 Зал, 6 Коридор,
   7 Прихожая, 8 Лекс (детская); на карте долгое нажатие на зал/кухню/спальню/прихожую/детскую — уборка
   комнаты (с подтверждением); vacuum.send_command app_segment_clean [{segments:[N],repeat:1}].
+- Второй пылесос Roborock S5 (`roborock.vacuum.s5`, fw 3.5.8, 192.168.88.21, только сухая) — через Xiaomi Miot (учётка Mi Home, cn)
+  → `vacuum.roborock_s5_8159_robot_cleaner`, `sensor.roborock_s5_8159_status`/`_battery_level`, `select.roborock_s5_8159_mode`.
+  Прошивка S5 не умеет имена комнат (`get_room_mapping` = []), поэтому номера сегментов — из Xiaomi Cloud Map Extractor
+  v3.0.0-alpha-24 (ставили вручную в custom_components, в manifest.json снят пин `vacuum-map-parser-roborock==0.1.4`,
+  иначе откатил бы 0.1.5 у Roborock/Qrevo; обновлять через HACS нельзя — затрёт правку): `image.robot_pylesos_live_map`,
+  `sensor.robot_pylesos_rooms`/`_vacuum_room_id`/`_charger_position` (включены вручную). Сегменты S5: 16 Зал, 17 Кухня,
+  18 Ванная+малый коридор, 19 Проход к кухне, 20 Коридор, 21+1 Прихожая, 22 Спальня, 23 Детская; база — на кухне рядом с Qrevo.
+  S5 принимает `app_segment_clean` простым списком `[16]`.
+- Уборка на карте (29.09.2026): долгое нажатие на комнату и кнопки «Уборка» → `script.fp_vacuum_clean` (rooms: zal, kukhnia,
+  spalnia, detskaia, prikhozhaia, koridor, koridor2, prokhod; таблица сегментов обоих пылесосов — `router/homeassistant/scripts.yaml`),
+  пылесос — переключатель `input_select.fp_vacuum` «Кто убирает» (Qrevo / S5 / Вместе; `input_select.yaml`, подключён в
+  configuration.yaml). «Вместе» / «Всё вместе» = `script.fp_vacuum_together`: S5 пылесосит → ждёт базу → Qrevo в режиме `mop`
+  моет → режим возвращается. Комната S5 — фиолетовая подсветка (`sensor.fp_vacuum2_room`, `fp-vac2-*.svg`).
 - Карта: viewBox плана расширен до -10..610 (боковые панели): слева «Уборка» (8 комнат пылесоса), справа
   снимок камеры, «Вкл»/«Выкл» (весь свет, с подтверждением), статус/заряд пылесоса, Старт/Пауза/На базу. Оверлеи комнат
   (свой viewBox 80..520) — по центру шириной 70.97%; card-mod max-width = (100vh-72px)*1.57.
 - Правая панель карты: погода (анимированные значки Basmilius weather-icons, MIT, в `config/www/weather/`,
   по состоянию weather.*; сейчас `weather.pavshino` (Gismeteo) = Met.no, план — Gismeteo из HACS),
   снимок камеры + красная рамка при `binary_sensor.c700_motion` (ещё не создан), «Горит: N» =
-  `sensor.lights_on` (помощник-шаблон), «Вкл»/«Выкл» весь свет (коммит 1b652fc), пылесос. Вкладка «Погода» — почасовой и дневной прогноз.
+  `sensor.lights_on` (помощник-шаблон), «Вкл»/«Выкл» весь свет (коммит 1b652fc), «Пылесос» и «Пылесос 2» (статус, заряд,
+  ▶ ❚❚ ⌂); слева под «Уборка» — «Кто убирает» и «Всё вместе». Вкладка «Погода» — почасовой и дневной прогноз.
 - Имена в Z2M: латиница, «тип_комната» (switch_kitchen, sensor_bath, motion_hall). Клавишам/сущностям даём
   постоянные entity_id правкой реестра (HA остановлен), в Z2M при переименовании снимать «обновить ID в HA».
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.

@@ -1,0 +1,104 @@
+# Скрипты для «Планировки». На роутере: /config/scripts.yaml (в configuration.yaml — «script: !include scripts.yaml»).
+# После правки: Инструменты разработчика → YAML → «Скрипты».
+#
+# Комнаты плана (как у sensor.fp_vacuum_room): zal, kukhnia, spalnia, detskaia, prikhozhaia, koridor,
+# koridor2 (малый коридор у ванной; у S5 вместе с ванной), prokhod (проход от прихожей к кухне).
+# Сегменты Qrevo — из приложения Roborock; S5 (Mi Home, комнаты без имён) — по координатам Xiaomi Cloud Map Extractor.
+
+# Убрать комнату (или список) пылесосом с переключателя input_select.fp_vacuum (или из поля who).
+fp_vacuum_clean:
+  alias: Пылесос — убрать комнаты
+  icon: mdi:robot-vacuum
+  mode: parallel
+  fields:
+    rooms:
+      name: Комнаты
+      description: "Комната плана или список: zal, kukhnia, spalnia, detskaia, prikhozhaia, koridor, koridor2, prokhod."
+      example: zal
+      required: true
+    who:
+      name: Пылесос
+      description: "Qrevo, S5 или Вместе; по умолчанию — переключатель «Кто убирает»."
+      example: S5
+  variables:
+    qrevo: {zal: [5], kukhnia: [1], spalnia: [4], detskaia: [8], prikhozhaia: [7], koridor: [6], koridor2: [2], prokhod: [3]}
+    s5: {zal: [16], kukhnia: [17], spalnia: [22], detskaia: [23], prikhozhaia: [21, 1], koridor: [20], koridor2: [18], prokhod: [19]}
+    ids: "{{ [rooms] if rooms is string else rooms | list }}"
+    by: "{{ who if who is defined and who else states('input_select.fp_vacuum') }}"
+  sequence:
+    - choose:
+        - conditions: "{{ by == 'Вместе' }}"
+          sequence:
+            - action: script.turn_on
+              target: {entity_id: script.fp_vacuum_together}
+              data: {variables: {rooms: "{{ ids }}"}}
+        # S5 (прошивка 3.5.x): параметры — просто список сегментов.
+        - conditions: "{{ by == 'S5' }}"
+          sequence:
+            - action: vacuum.send_command
+              target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+              data:
+                command: app_segment_clean
+                params: "{{ ids | select('in', s5) | map('extract', s5) | sum(start=[]) }}"
+      default:
+        - action: vacuum.send_command
+          target: {entity_id: vacuum.koridor_roborock_qrevo}
+          data:
+            command: app_segment_clean
+            params: "{{ [{'segments': ids | select('in', qrevo) | map('extract', qrevo) | sum(start=[]), 'repeat': 1}] }}"
+
+# Вместе: сначала S5 пылесосит, после его возвращения на базу Qrevo моет те же комнаты (режим «только швабра»),
+# потом режим Qrevo возвращается прежний. Если S5 не поехал или ушёл в ошибку — Qrevo не запускается.
+fp_vacuum_together:
+  alias: Пылесосы — сухая (S5), потом влажная (Qrevo)
+  icon: mdi:robot-vacuum-variant
+  mode: single
+  fields:
+    rooms:
+      name: Комнаты
+      description: "Как у fp_vacuum_clean; не задано — вся квартира."
+      example: "[zal, kukhnia]"
+  variables:
+    ids: >
+      {{ ([rooms] if rooms is string else rooms | list) if rooms is defined and rooms
+         else ['zal', 'kukhnia', 'spalnia', 'detskaia', 'prikhozhaia', 'koridor', 'koridor2', 'prokhod'] }}
+    s5: vacuum.roborock_s5_8159_robot_cleaner
+    qrevo: vacuum.koridor_roborock_qrevo
+    mode_sel: select.koridor_roborock_qrevo_cleaning_mode
+    mode_before: "{{ states('select.koridor_roborock_qrevo_cleaning_mode') }}"
+  sequence:
+    - action: script.fp_vacuum_clean
+      data: {rooms: "{{ ids }}", who: S5}
+    - wait_template: "{{ is_state(s5, 'cleaning') }}"
+      timeout: "00:02:00"
+    - if: "{{ not wait.completed }}"
+      then:
+        - action: persistent_notification.create
+          data: {title: Уборка вместе, message: "S5 не начал уборку за 2 минуты — Qrevo не запускаю."}
+        - stop: S5 не начал уборку
+    - wait_template: "{{ states(s5) in ['docked', 'idle', 'error'] }}"
+      timeout: "03:00:00"
+    - if: "{{ not wait.completed or is_state(s5, 'error') }}"
+      then:
+        - action: persistent_notification.create
+          data: {title: Уборка вместе, message: "S5 не закончил уборку (ошибка или больше 3 ч) — Qrevo не запускаю."}
+        - stop: S5 не закончил уборку
+    - action: select.select_option
+      target: {entity_id: "{{ mode_sel }}"}
+      data: {option: mop}
+    - delay: "00:00:03"
+    - action: script.fp_vacuum_clean
+      data: {rooms: "{{ ids }}", who: Qrevo}
+    - wait_template: "{{ is_state(qrevo, 'cleaning') }}"
+      timeout: "00:02:00"
+    - if: "{{ wait.completed }}"
+      then:
+        - wait_template: "{{ states(qrevo) in ['docked', 'idle', 'error'] }}"
+          timeout: "03:00:00"
+      else:
+        - action: persistent_notification.create
+          data: {title: Уборка вместе, message: "Qrevo не начал мойку за 2 минуты."}
+    - action: select.select_option
+      target: {entity_id: "{{ mode_sel }}"}
+      data:
+        option: "{{ mode_before if mode_before in ['vacuum', 'vac_and_mop', 'mop', 'custom', 'smart_mode'] else 'vac_and_mop' }}"
