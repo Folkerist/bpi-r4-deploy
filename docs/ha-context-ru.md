@@ -110,6 +110,13 @@
   снимок камеры + красная рамка при `binary_sensor.c700_motion` (ещё не создан), «Горит: N» =
   `sensor.lights_on` (помощник-шаблон), «Вкл»/«Выкл» весь свет (коммит 1b652fc), «Мокрый» (Qrevo) и «Сухой» (S5) (статус, заряд,
   ▶ ❚❚ ⌂); слева под «Уборка» — «Кто убирает» и «Всё вместе». Вкладка «Погода» — почасовой и дневной прогноз.
+- Порядок в Zigbee (29.09.2026): ретранслятор (стоит в ванной) переименован Retranslyator → `router_bath`; у всех устройств
+  в Z2M русское `description`; служебные сущности в HA — по имени устройства вместо IEEE (`sensor.switch_kitchen_device_temperature`,
+  `select.switch_hall_operation_mode_left`, `update.switch_entry2`, `sensor.router_bath_linkquality`…; история перенесена);
+  имена устройств в HA — русские («Выключатель кухня», «Ретранслятор Zigbee»…), мост Z2M — в «Прихожей», ретранслятор — в «Ванной».
+  Старые `configuration_backup_v*.yaml` и `migration-*.log` Z2M — в `data/old/`; retained-хвосты старых имён в MQTT удалены.
+  Бэкапы: `configuration.yaml.bak-20260929` (Z2M), `core.*_registry.bak-20260929z`, `home-assistant_v2.db.bak-20260929z`.
+  В `description` Z2M значения с «: » — только в кавычках (иначе Z2M не стартует: «configuration is not valid»).
 - Имена в Z2M: латиница, «тип_комната» (switch_kitchen, sensor_bath, motion_hall). Клавишам/сущностям даём
   постоянные entity_id правкой реестра (HA остановлен), в Z2M при переименовании снимать «обновить ID в HA».
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.
