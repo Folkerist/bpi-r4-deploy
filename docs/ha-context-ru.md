@@ -117,6 +117,12 @@
   Старые `configuration_backup_v*.yaml` и `migration-*.log` Z2M — в `data/old/`; retained-хвосты старых имён в MQTT удалены.
   Бэкапы: `configuration.yaml.bak-20260929` (Z2M), `core.*_registry.bak-20260929z`, `home-assistant_v2.db.bak-20260929z`.
   В `description` Z2M значения с «: » — только в кавычках (иначе Z2M не стартует: «configuration is not valid»).
+- Карта сети Zigbee (29.09.2026): к координатору (донгл в USB-хабе у BPI, прихожая) напрямую — только switch_storage и
+  switch_kitchen; switch_entry/entry2 (в 1–2 м от роутера), switch_hall и switch_bath_corridor — через router_bath (ванная).
+  Причины: мощность координатора была 5 дБм (по умолчанию Z2M), донгл «глохнет» у роутера (Wi-Fi 2,4 ГГц BPI, LTE-модем
+  на USB 3.0; координатор слышит router_bath с LQI 102, тот его — 162), а Aqara E1 без нуля не меняют родителя сами.
+  Сделано: `advanced.transmit_power: 20` (бэкап `configuration.yaml.bak-20260929tx`). Дальше: донгл на удлинитель USB 1–1,5 м
+  подальше от корпуса, затем выключить router_bath минут на 10 — его выключатели переподключатся, снять networkmap.
 - Имена в Z2M: латиница, «тип_комната» (switch_kitchen, sensor_bath, motion_hall). Клавишам/сущностям даём
   постоянные entity_id правкой реестра (HA остановлен), в Z2M при переименовании снимать «обновить ID в HA».
 - Bluetooth: в прошивке нет kmod-bluetooth/bluez → рекомендованы ESPHome Bluetooth-прокси на ESP32.
