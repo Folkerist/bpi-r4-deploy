@@ -184,7 +184,8 @@ button.pill:hover { background:var(--card-hi); transform:translateY(-1px); }
   min-height:86px; transition:all .25s; position:relative; overflow:hidden; }
 .rt:hover { background:var(--tile-hi); }
 .rt .ri { width:46px; height:46px; border-radius:15px; display:grid; place-items:center; background:var(--tile-hi); flex:none; color:var(--sub); }
-.rt .rn { font-weight:800; font-size:16px; } .rt .rs { color:var(--sub); font-size:13px; font-weight:600; margin-top:3px; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.rt .rn { font-weight:800; font-size:16px; } .rt .rs { color:var(--sub); font-size:13px; font-weight:600; margin-top:3px; line-height:1.45; }
+.rt .rs ha-icon { vertical-align:-3px; }
 .rt .rs .temp { font-weight:800; }
 .rt .grow { flex:1; min-width:0; }
 .rt .lb { width:46px; height:46px; border-radius:15px; display:grid; place-items:center; flex:none; background:var(--tile-hi); border:1px solid var(--line); color:var(--faint); transition:all .3s; }
