@@ -42,7 +42,7 @@
               target: {entity_id: [vacuum.roborock_s5_8159_robot_cleaner, vacuum.koridor_roborock_qrevo]}
             - action: media_player.play_media
               target: {entity_id: "{{ speaker }}"}
-              data: {media_content_type: text, media_content_id: "Останавливаю уборку, пылесосы едут на базу"}
+              data: {media_content_type: text, media_content_id: "Пылесосы едут на базу"}
         # Пауза: «Вместе» прерывается (иначе после паузы и возврата S5 на базу Qrevo начал бы мыть). Пауза на стоящем
         # пылесосе безвредна, а состояние S5 в HA запаздывает на ~20 с — поэтому без проверки состояния, ошибки не мешают.
         - conditions: "{{ room == 'pause' }}"
