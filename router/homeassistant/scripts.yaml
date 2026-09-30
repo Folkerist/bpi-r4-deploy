@@ -39,13 +39,13 @@ fp_vacuum_clean:
               target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
               data:
                 command: app_segment_clean
-                params: "{{ ids | select('in', s5) | map('extract', s5) | sum(start=[]) }}"
+                params: "{% set ns = namespace(v=[]) %}{% for r in ids if r in s5 %}{% set ns.v = ns.v + s5[r] %}{% endfor %}{{ ns.v }}"
       default:
         - action: vacuum.send_command
           target: {entity_id: vacuum.koridor_roborock_qrevo}
           data:
             command: app_segment_clean
-            params: "{{ [{'segments': ids | select('in', qrevo) | map('extract', qrevo) | sum(start=[]), 'repeat': 1}] }}"
+            params: "{% set ns = namespace(v=[]) %}{% for r in ids if r in qrevo %}{% set ns.v = ns.v + qrevo[r] %}{% endfor %}{{ [{'segments': ns.v, 'repeat': 1}] }}"
 
 # Вместе: сначала S5 пылесосит, после его возвращения на базу Qrevo моет те же комнаты (режим «только швабра»),
 # потом режим Qrevo возвращается прежний. Если S5 не поехал или ушёл в ошибку — Qrevo не запускается.
