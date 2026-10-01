@@ -159,7 +159,7 @@ Progress.prototype.frame = function() {
 		    left = this.rate > 0 ? (s.total - this.shown) / this.rate : 0;
 		this.barEl.setAttribute('title', pct.toFixed(0) + '%');
 		this.text.textContent = fmtBytes(this.shown) + ' из ' + fmtBytes(s.total) + ' (' + pct.toFixed(0) + '%)  ·  ' +
-			round(mbit) + ' Мбит/с  ·  прошло ' + fmtTime(s.el + dt) +
+			round(mbit) + ' Мбит/с (' + (this.rate / 1048576).toFixed(1) + ' МБ/с)  ·  прошло ' + fmtTime(s.el + dt) +
 			(pct < 100 && this.rate > 0 ? '  ·  осталось ~' + fmtTime(left) : '');
 	}
 
