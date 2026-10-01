@@ -11,10 +11,11 @@ var CMD = '/usr/bin/speedtest.sh';
 
 var STEPS = {
 	start: 'Запуск…',
+	ip: 'Определение внешнего IP…',
 	ping: 'Пинг…',
 	dl1: 'Скачивание, 1 поток…',
 	dl4: 'Скачивание, 4 потока…',
-	up: 'Отдача…',
+	up: 'Отдача, 4 потока…',
 	done: 'Готово'
 };
 
@@ -76,7 +77,8 @@ function round(v) {
 
 function fmtBytes(b) {
 	b = +b || 0;
-	if (b >= 1073741824) return (b / 1073741824).toFixed(2) + ' ГБ';
+	/* "1 ГБ" / "10 ГБ" tests are 1000 / 10000 MiB, so a gigabyte here is 1000 MiB to match the buttons */
+	if (b >= 1048576000) return (b / 1048576000).toFixed(2).replace(/\.?0+$/, '') + ' ГБ';
 	if (b >= 1048576) return (b / 1048576).toFixed(b >= 104857600 ? 0 : 1) + ' МБ';
 	return (b / 1024).toFixed(0) + ' КБ';
 }
@@ -87,7 +89,7 @@ function fmtTime(sec) {
 	return m + ':' + (ss < 10 ? '0' : '') + ss;
 }
 
-var ORDER = [ 'ping', 'dl1', 'dl4', 'up' ];
+var ORDER = [ 'ip', 'ping', 'dl1', 'dl4', 'up' ];
 
 /* Live progress: built once and updated in place. Between the 1 s status samples the bar is
  * extrapolated at the measured rate on every animation frame, so it moves smoothly. */
@@ -173,11 +175,22 @@ Progress.prototype.stop = function() {
 	this.step = null;
 };
 
-function speedCell(v, busy) {
+function fmtSec(t) {
+	var n = parseFloat(t);
+	if (isNaN(n)) return '';
+	return n < 60 ? n.toFixed(1).replace('.', ',') + ' с' : fmtTime(n);
+}
+
+function speedCell(v, busy, bytes, secs) {
 	var n = parseFloat(v);
 	if (isNaN(n))
 		return E('span', { 'style': 'opacity:.6' }, busy ? 'ожидание…' : '—');
-	return E('div', {}, [ E('strong', {}, round(n) + ' Мбит/с'), bar(n) ]);
+	var took = (+bytes > 0 && secs) ? fmtBytes(bytes) + ' за ' + fmtSec(secs) : '';
+	return E('div', {}, [
+		E('strong', {}, round(n) + ' Мбит/с'),
+		took ? E('span', { 'style': 'opacity:.7' }, '  ·  ' + took) : '',
+		bar(n)
+	]);
 }
 
 function sizeName(s) {
@@ -243,6 +256,17 @@ function verdict(r, q) {
 	return '❗ Связь очень плохая: нужна внешняя антенна или другое место для роутера.';
 }
 
+function ipCell(s) {
+	if (!s.ip && !s.ip_cf)
+		return E('span', { 'style': 'opacity:.6' }, s.running ? 'ожидание…' : '—');
+	var parts = [ E('strong', {}, s.ip || s.ip_cf) ];
+	if (s.ip && s.ip_cf && s.ip != s.ip_cf)
+		parts.push(E('div', { 'style': 'margin-top:.3em;color:#f97316' },
+			'⚠️ Cloudflare (тест отдачи) видит другой адрес: ' + s.ip_cf +
+			'. Скорее всего, этот трафик идёт через прокси (mihomo), и отдача измеряет скорость прокси.'));
+	return E('div', {}, parts);
+}
+
 function resultTable(s) {
 	var rows = [
 		[ 'Канал', (NAMES[s.iface] || '—') + (s.size ? ', объём ' + sizeName(s.size) : '') ],
@@ -250,9 +274,10 @@ function resultTable(s) {
 			? E('span', { 'style': 'opacity:.6' }, s.running ? 'ожидание…' : '—')
 			: E('span', {}, [ round(s.ping) + ' мс',
 				(s.loss && s.loss != '0') ? E('span', { 'style': 'color:#f97316' }, ', потери ' + s.loss + '%') : ', без потерь' ]) ],
-		[ 'Скачивание, 1 поток', speedCell(s.dl1, s.running) ],
-		[ 'Скачивание, 4 потока', speedCell(s.dl4, s.running) ],
-		[ 'Отдача', speedCell(s.up, s.running) ]
+		[ 'Внешний IP', ipCell(s) ],
+		[ 'Скачивание, 1 поток', speedCell(s.dl1, s.running, s.b_dl1, s.t_dl1) ],
+		[ 'Скачивание, 4 потока', speedCell(s.dl4, s.running, s.b_dl4, s.t_dl4) ],
+		[ 'Отдача, 4 потока', speedCell(s.up, s.running, s.b_up, s.t_up) ]
 	];
 	if (s.iface == 'lte')
 		rows.push([ 'Сигнал LTE', signalBlock(s) ]);
@@ -272,7 +297,8 @@ function historyTable(text) {
 	if (!lines.length)
 		return E('em', {}, 'Замеров пока нет');
 
-	var head = [ 'Дата', 'Канал', 'Объём', 'Пинг, мс', '↓ 1 поток', '↓ 4 потока', '↑ отдача', 'Сигнал' ];
+	var head = [ 'Дата', 'Канал', 'Объём', 'Пинг, мс', '↓ 1 поток', '↓ 4 потока', '↑ отдача',
+		'Время ↓1 · ↓4 · ↑', 'Внешний IP', 'Сигнал' ];
 	return E('table', { 'class': 'table' }, [
 		E('tr', { 'class': 'tr table-titles' }, head.map(function(h) {
 			return E('th', { 'class': 'th' }, h);
@@ -282,6 +308,8 @@ function historyTable(text) {
 		return E('tr', { 'class': 'tr' }, [
 			f[0], NAMES[f[1]] || f[1], f[8] ? sizeName(f[8]) : '100 МБ',
 			round(f[2]), round(f[4]), round(f[5]), round(f[6]),
+			f[10] ? [ f[10], f[11], f[12] ].map(fmtSec).join(' · ') : '—',
+			f[13] || '—',
 			lv ? chip(lv) : '—'
 		].map(function(v) { return E('td', { 'class': 'td' }, v); }));
 	})));
