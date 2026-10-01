@@ -20,6 +20,40 @@ var STEPS = {
 
 var NAMES = { main: 'Основной интернет', lte: 'LTE (модем)' };
 
+var SIZES = [
+	[ 10, '10 МБ', 'быстро, ~20 МБ трафика' ],
+	[ 100, '100 МБ', 'точнее, ~200–300 МБ трафика' ],
+	[ 1000, '1 ГБ', 'максимальная точность, ~2,1 ГБ трафика' ]
+];
+
+/* LTE band -> frequency */
+var BANDS = { 1: '2100', 3: '1800', 7: '2600', 8: '900', 20: '800', 28: '700', 31: '450',
+	38: '2600 TDD', 40: '2300 TDD', 41: '2500 TDD', 42: '3500 TDD' };
+
+/* [threshold, label, colour, fill %] - first matching row wins */
+var RSRP_LEVELS = [
+	[ -80, 'отличный', '#22c55e', 100 ],
+	[ -90, 'хороший', '#84cc16', 75 ],
+	[ -100, 'средний', '#eab308', 50 ],
+	[ -110, 'слабый', '#f97316', 25 ],
+	[ -999, 'очень слабый', '#ef4444', 10 ]
+];
+var SINR_LEVELS = [
+	[ 20, 'отлично', '#22c55e', 100 ],
+	[ 13, 'хорошо', '#84cc16', 75 ],
+	[ 5, 'средне', '#eab308', 50 ],
+	[ 0, 'плохо', '#f97316', 25 ],
+	[ -999, 'очень плохо', '#ef4444', 10 ]
+];
+
+function level(table, v) {
+	v = parseFloat(v);
+	if (isNaN(v)) return null;
+	for (var i = 0; i < table.length; i++)
+		if (v >= table[i][0]) return table[i];
+	return table[table.length - 1];
+}
+
 function run(args) {
 	return L.resolveDefault(fs.exec(CMD, args), {}).then(function(r) {
 		return (r && r.stdout) || '';
@@ -34,25 +68,85 @@ function num(v, unit) {
 	return (v === undefined || v === null || v === '') ? '—' : v + (unit ? ' ' + unit : '');
 }
 
+function round(v) {
+	var n = parseFloat(v);
+	return isNaN(n) ? '—' : (n >= 100 ? n.toFixed(0) : n.toFixed(1).replace(/\.0$/, ''));
+}
+
+function sizeName(s) {
+	for (var i = 0; i < SIZES.length; i++)
+		if (String(SIZES[i][0]) == String(s)) return SIZES[i][1];
+	return s ? s + ' МБ' : '—';
+}
+
 function bar(mbit) {
 	var v = parseFloat(mbit);
 	if (isNaN(v)) return E('span', {}, '—');
 	var pct = Math.min(100, Math.round(Math.log10(1 + v) / Math.log10(1001) * 100));
-	return E('div', { 'class': 'cbi-progressbar', 'title': v + ' Мбит/с' },
+	return E('div', { 'class': 'cbi-progressbar', 'title': round(v) + ' Мбит/с' },
 		E('div', { 'style': 'width:' + pct + '%' }));
+}
+
+function chip(lv) {
+	return E('span', {
+		'style': 'display:inline-block;padding:.1em .6em;border-radius:999px;font-weight:600;' +
+			'color:#fff;background:' + lv[2]
+	}, lv[1]);
+}
+
+function meter(lv) {
+	return E('div', { 'style': 'height:.5em;border-radius:999px;background:rgba(127,127,127,.25);margin-top:.35em;overflow:hidden' },
+		E('div', { 'style': 'height:100%;width:' + lv[3] + '%;background:' + lv[2] }));
+}
+
+function signalBlock(s) {
+	var r = level(RSRP_LEVELS, s.rsrp), q = level(SINR_LEVELS, s.sinr), parts = [];
+
+	if (r)
+		parts.push(E('div', { 'style': 'margin-bottom:.6em' }, [
+			E('div', {}, [ 'Уровень сигнала: ', chip(r), E('small', { 'style': 'opacity:.7' }, '  ' + round(s.rsrp) + ' дБм') ]),
+			meter(r)
+		]));
+	if (q)
+		parts.push(E('div', { 'style': 'margin-bottom:.6em' }, [
+			E('div', {}, [ 'Качество (помехи): ', chip(q), E('small', { 'style': 'opacity:.7' }, '  SINR ' + round(s.sinr) + ' дБ') ]),
+			meter(q)
+		]));
+
+	var bands = (s.bands || '').split(',').map(function(b) {
+		var m = b.match(/B(\d+)/);
+		return m ? 'B' + m[1] + (BANDS[m[1]] ? ' (' + BANDS[m[1]] + ' МГц)' : '') : null;
+	}).filter(function(b) { return b; });
+	if (bands.length)
+		parts.push(E('div', {}, bands.length > 1
+			? 'Агрегация ' + bands.length + ' частот: ' + bands.join(' + ')
+			: 'Частота: ' + bands[0]));
+
+	if (r && q)
+		parts.push(E('div', { 'style': 'margin-top:.4em;opacity:.8' }, verdict(r, q)));
+
+	return parts.length ? E('div', {}, parts) : E('span', {}, '—');
+}
+
+function verdict(r, q) {
+	var score = Math.min(r[3], q[3]);
+	if (score >= 75) return '👍 Связь отличная, менять ничего не нужно.';
+	if (score >= 50) return '👌 Связь нормальная. Можно попробовать чуть повернуть антенны.';
+	if (score >= 25) return '⚠️ Связь слабая: поверните антенны или переставьте роутер ближе к окну.';
+	return '❗ Связь очень плохая: нужна внешняя антенна или другое место для роутера.';
 }
 
 function resultTable(s) {
 	var rows = [
-		[ 'Канал', NAMES[s.iface] || '—' ],
-		[ 'Пинг (77.88.8.8)', num(s.ping, 'мс') + (s.loss ? ', потери ' + s.loss + '%' : '') ],
-		[ 'Скачивание, 1 поток', E('div', {}, [ E('strong', {}, num(s.dl1, 'Мбит/с')), bar(s.dl1) ]) ],
-		[ 'Скачивание, 4 потока', E('div', {}, [ E('strong', {}, num(s.dl4, 'Мбит/с')), bar(s.dl4) ]) ],
-		[ 'Отдача', E('div', {}, [ E('strong', {}, num(s.up, 'Мбит/с')), bar(s.up) ]) ]
+		[ 'Канал', (NAMES[s.iface] || '—') + (s.size ? ', объём ' + sizeName(s.size) : '') ],
+		[ 'Пинг (77.88.8.8)', E('span', {}, [ num(round(s.ping), 'мс'),
+			(s.loss && s.loss != '0') ? E('span', { 'style': 'color:#f97316' }, ', потери ' + s.loss + '%') : ', без потерь' ]) ],
+		[ 'Скачивание, 1 поток', E('div', {}, [ E('strong', {}, num(round(s.dl1), 'Мбит/с')), bar(s.dl1) ]) ],
+		[ 'Скачивание, 4 потока', E('div', {}, [ E('strong', {}, num(round(s.dl4), 'Мбит/с')), bar(s.dl4) ]) ],
+		[ 'Отдача', E('div', {}, [ E('strong', {}, num(round(s.up), 'Мбит/с')), bar(s.up) ]) ]
 	];
 	if (s.iface == 'lte')
-		rows.push([ 'Сигнал', num(s.rsrp, 'дБм RSRP') + (s.sinr ? ', SINR ' + s.sinr + ' дБ' : '') +
-			(s.bands ? ' — ' + s.bands : '') ]);
+		rows.push([ 'Сигнал LTE', signalBlock(s) ]);
 	if (s.ts)
 		rows.push([ 'Время', new Date(s.ts * 1000).toLocaleString() ]);
 
@@ -69,20 +163,24 @@ function historyTable(text) {
 	if (!lines.length)
 		return E('em', {}, 'Замеров пока нет');
 
-	var head = [ 'Дата', 'Канал', 'Пинг, мс', '↓ 1 поток', '↓ 4 потока', '↑ отдача', 'RSRP' ];
+	var head = [ 'Дата', 'Канал', 'Объём', 'Пинг, мс', '↓ 1 поток', '↓ 4 потока', '↑ отдача', 'Сигнал' ];
 	return E('table', { 'class': 'table' }, [
 		E('tr', { 'class': 'tr table-titles' }, head.map(function(h) {
 			return E('th', { 'class': 'th' }, h);
 		}))
 	].concat(lines.map(function(l) {
-		var f = l.split('|');
+		var f = l.split('|'), lv = level(RSRP_LEVELS, f[7]);
 		return E('tr', { 'class': 'tr' }, [
-			f[0], NAMES[f[1]] || f[1], num(f[2]), num(f[4]), num(f[5]), num(f[6]), num(f[7])
+			f[0], NAMES[f[1]] || f[1], f[8] ? sizeName(f[8]) : '100 МБ',
+			round(f[2]), round(f[4]), round(f[5]), round(f[6]),
+			lv ? chip(lv) : '—'
 		].map(function(v) { return E('td', { 'class': 'td' }, v); }));
 	})));
 }
 
 return view.extend({
+	size: 100,
+
 	load: function() {
 		return Promise.all([ run([ 'status' ]), run([ 'history' ]) ]);
 	},
@@ -92,6 +190,16 @@ return view.extend({
 		this.status = E('div', {});
 		this.result = E('div', {});
 		this.history = E('div', {});
+		this.hint = E('div', { 'style': 'margin:.5em 0 1em;opacity:.75' });
+
+		this.sizeButtons = SIZES.map(function(sz) {
+			return E('button', {
+				'class': 'cbi-button',
+				'style': 'margin-right:.5em',
+				'click': function(ev) { self.size = sz[0]; self.paintSizes(); return false; }
+			}, sz[1]);
+		});
+
 		this.buttons = [ 'main', 'lte' ].map(function(i) {
 			return E('button', {
 				'class': 'cbi-button cbi-button-action',
@@ -100,6 +208,7 @@ return view.extend({
 			}, 'Тест: ' + NAMES[i]);
 		});
 
+		this.paintSizes();
 		this.update(json(data[0]), data[1]);
 
 		poll.add(function() {
@@ -112,29 +221,47 @@ return view.extend({
 			E('h2', {}, 'Тест скорости'),
 			E('div', { 'class': 'cbi-map-descr' },
 				'«Основной интернет» — через RB5009 (оптика, при аварии — LTE). «LTE» — напрямую через модем, ' +
-				'основной канал при этом не отключается. Тест длится около минуты и расходует ~100–300 МБ трафика.'),
-			E('div', { 'class': 'cbi-section' }, [ E('div', {}, this.buttons), this.status ]),
+				'основной канал при этом не отключается.'),
+			E('div', { 'class': 'cbi-section' }, [
+				E('div', { 'style': 'margin-bottom:.3em' }, [ E('strong', {}, 'Объём скачивания: ') ].concat(this.sizeButtons)),
+				this.hint,
+				E('div', {}, this.buttons),
+				this.status
+			]),
 			E('div', { 'class': 'cbi-section' }, [ E('h3', {}, 'Последний результат'), this.result ]),
 			E('div', { 'class': 'cbi-section' }, [ E('h3', {}, 'История'), this.history ])
 		]);
 	},
 
+	paintSizes: function() {
+		var self = this;
+		this.sizeButtons.forEach(function(b, i) {
+			b.className = 'cbi-button' + (SIZES[i][0] == self.size ? ' cbi-button-positive' : '');
+		});
+		var sz = SIZES.filter(function(s) { return s[0] == self.size; })[0];
+		dom.content(this.hint, sz[2] + (self.size == 1000 ? '. На LTE тест займёт несколько минут.' : ''));
+	},
+
 	update: function(s, hist) {
 		if (hist != null) this.lastHist = hist;
 		var busy = !!s.running;
-		this.buttons.forEach(function(b) { b.disabled = busy; });
+		this.buttons.concat(this.sizeButtons).forEach(function(b) { b.disabled = busy; });
 
-		var msg = s.error ? E('span', { 'style': 'color:#e74c3c' }, 'Ошибка: ' + s.error)
-			: busy ? E('span', {}, [ E('span', { 'class': 'spinning' }, ' '), ' ', NAMES[s.iface] + ': ' + (STEPS[s.step] || s.step) ])
+		var msg = s.error ? E('span', { 'style': 'color:#ef4444' }, 'Ошибка: ' + s.error)
+			: busy ? E('span', {}, [ E('span', { 'class': 'spinning' }, ' '), ' ',
+				NAMES[s.iface] + ' (' + sizeName(s.size) + '): ' + (STEPS[s.step] || s.step) ])
 			: '';
 		dom.content(this.status, E('p', { 'style': 'margin-top:1em' }, msg));
-		dom.content(this.result, s.iface ? resultTable(s) : E('em', {}, 'Нажмите кнопку, чтобы запустить тест'));
+		dom.content(this.result, s.iface ? resultTable(s) : E('em', {}, 'Выберите объём и нажмите кнопку теста'));
 		dom.content(this.history, historyTable(this.lastHist));
 	},
 
 	start: function(iface) {
 		var self = this;
-		return run([ 'start', iface ]).then(function(t) {
+		if (this.size == 1000 && iface == 'lte' &&
+		    !confirm('Тест 1 ГБ через LTE израсходует около 2 ГБ мобильного трафика. Продолжить?'))
+			return;
+		return run([ 'start', iface, String(this.size) ]).then(function(t) {
 			var r = json(t);
 			if (r.error == 'busy')
 				ui.addNotification(null, E('p', 'Тест уже идёт, дождитесь окончания.'));

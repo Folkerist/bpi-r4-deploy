@@ -3,14 +3,34 @@
 		"description": "Run the router speed test (main uplink / LTE)",
 		"read": {
 			"file": {
-				"/usr/bin/speedtest.sh status": [ "exec" ],
-				"/usr/bin/speedtest.sh history": [ "exec" ]
+				"/usr/bin/speedtest.sh status": [
+					"exec"
+				],
+				"/usr/bin/speedtest.sh history": [
+					"exec"
+				]
 			}
 		},
 		"write": {
 			"file": {
-				"/usr/bin/speedtest.sh start main": [ "exec" ],
-				"/usr/bin/speedtest.sh start lte": [ "exec" ]
+				"/usr/bin/speedtest.sh start main 10": [
+					"exec"
+				],
+				"/usr/bin/speedtest.sh start main 100": [
+					"exec"
+				],
+				"/usr/bin/speedtest.sh start main 1000": [
+					"exec"
+				],
+				"/usr/bin/speedtest.sh start lte 10": [
+					"exec"
+				],
+				"/usr/bin/speedtest.sh start lte 100": [
+					"exec"
+				],
+				"/usr/bin/speedtest.sh start lte 1000": [
+					"exec"
+				]
 			}
 		}
 	}
