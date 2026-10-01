@@ -1,13 +1,13 @@
 #!/bin/sh
 # /usr/bin/speedtest.sh - speed test for LuCI (Status -> Speed test).
-#   speedtest.sh start main|lte [10|100|1000]   run in the background (main = default route,
+#   speedtest.sh start main|lte [10|100|1000|10000]   run in the background (main = default route,
 #                                 lte = bound to the modem); size = MB downloaded per download test
 #   speedtest.sh status           current/last result as JSON
 #   speedtest.sh history          last results, one per line: date|iface|ping|loss|dl1|dl4|up|rsrp|size|sinr
 DIR=/tmp/speedtest
 ST=$DIR/state.json
 HIST=/root/speedtest-history.txt
-URL_DL=http://speedtest.selectel.ru/1GB	# 1 GiB file, supports byte ranges
+URL_DL=http://speedtest.selectel.ru/10GB	# 10 GiB file, supports byte ranges
 URL_UP=https://speed.cloudflare.com/__up
 PING_HOST=77.88.8.8
 
@@ -39,7 +39,7 @@ run() {
 	LOSS=$(echo "$out" | sed -n 's/.* \([0-9]*\)% packet loss.*/\1/p')
 
 	# the whole chosen volume is downloaded (time limit only as a safety net)
-	case "$SIZE" in 10) T=30 ;; 100) T=90 ;; *) T=400 ;; esac
+	case "$SIZE" in 10) T=30 ;; 100) T=90 ;; 1000) T=400 ;; *) T=1800 ;; esac
 	bytes=$((SIZE * 1048576)) part=$((SIZE * 262144))
 
 	state true dl1
@@ -68,7 +68,9 @@ case "$1" in
 	start)
 		case "$2" in main|lte) ;; *) echo '{"error":"usage"}'; exit 1 ;; esac
 		SIZE=${3:-100}
-		case "$SIZE" in 10|100|1000) ;; *) echo '{"error":"size"}'; exit 1 ;; esac
+		case "$SIZE" in 10|100|1000|10000) ;; *) echo '{"error":"size"}'; exit 1 ;; esac
+		# 10 GB = ~20 GB of traffic: fixed line only
+		[ "$2" = lte ] && [ "$SIZE" = 10000 ] && { echo '{"error":"lte10g"}'; exit 1; }
 		if [ -f $DIR/pid ] && kill -0 "$(cat $DIR/pid)" 2>/dev/null; then echo '{"error":"busy"}'; exit 0; fi
 		IFACE=$2; state true start
 		( run "$2" "$SIZE" ) </dev/null >/dev/null 2>&1 &
@@ -76,5 +78,5 @@ case "$1" in
 		echo '{"started":true}' ;;
 	status) cat $ST 2>/dev/null || echo '{}' ;;
 	history) tail -n 20 "$HIST" 2>/dev/null ;;
-	*) echo "usage: $0 start main|lte [10|100|1000] | status | history"; exit 1 ;;
+	*) echo "usage: $0 start main|lte [10|100|1000|10000] | status | history"; exit 1 ;;
 esac

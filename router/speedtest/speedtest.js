@@ -23,7 +23,8 @@ var NAMES = { main: 'Основной интернет', lte: 'LTE (модем)'
 var SIZES = [
 	[ 10, '10 МБ', 'быстро, ~20 МБ трафика' ],
 	[ 100, '100 МБ', 'точнее, ~200–300 МБ трафика' ],
-	[ 1000, '1 ГБ', 'максимальная точность, ~2,1 ГБ трафика' ]
+	[ 1000, '1 ГБ', 'высокая точность, ~2,1 ГБ трафика' ],
+	[ 10000, '10 ГБ', 'для быстрой оптики, ~20 ГБ трафика, несколько минут; только основной интернет' ]
 ];
 
 /* LTE band -> frequency */
@@ -240,12 +241,14 @@ return view.extend({
 		});
 		var sz = SIZES.filter(function(s) { return s[0] == self.size; })[0];
 		dom.content(this.hint, sz[2] + (self.size == 1000 ? '. На LTE тест займёт несколько минут.' : ''));
+		if (this.buttons) this.buttons[1].disabled = (self.size == 10000);
 	},
 
 	update: function(s, hist) {
 		if (hist != null) this.lastHist = hist;
 		var busy = !!s.running;
 		this.buttons.concat(this.sizeButtons).forEach(function(b) { b.disabled = busy; });
+		if (this.size == 10000) this.buttons[1].disabled = true;
 
 		var msg = s.error ? E('span', { 'style': 'color:#ef4444' }, 'Ошибка: ' + s.error)
 			: busy ? E('span', {}, [ E('span', { 'class': 'spinning' }, ' '), ' ',
@@ -258,6 +261,11 @@ return view.extend({
 
 	start: function(iface) {
 		var self = this;
+		if (this.size == 10000 && iface == 'lte')
+			return;
+		if (this.size == 10000 &&
+		    !confirm('Тест 10 ГБ скачает около 20 ГБ и займёт несколько минут. Продолжить?'))
+			return;
 		if (this.size == 1000 && iface == 'lte' &&
 		    !confirm('Тест 1 ГБ через LTE израсходует около 2 ГБ мобильного трафика. Продолжить?'))
 			return;

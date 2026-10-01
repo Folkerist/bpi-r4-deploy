@@ -30,6 +30,9 @@
 				],
 				"/usr/bin/speedtest.sh start lte 1000": [
 					"exec"
+				],
+				"/usr/bin/speedtest.sh start main 10000": [
+					"exec"
 				]
 			}
 		}
