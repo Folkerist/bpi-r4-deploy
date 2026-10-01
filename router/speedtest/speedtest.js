@@ -89,28 +89,89 @@ function fmtTime(sec) {
 
 var ORDER = [ 'ping', 'dl1', 'dl4', 'up' ];
 
-function progressBlock(s) {
-	var idx = ORDER.indexOf(s.step), parts = [];
-	parts.push(E('div', { 'style': 'margin-bottom:.4em' }, [
-		E('span', { 'class': 'spinning' }, ' '), ' ',
+/* Live progress: built once and updated in place. Between the 1 s status samples the bar is
+ * extrapolated at the measured rate on every animation frame, so it moves smoothly. */
+function Progress() {
+	this.spin = E('span', { 'class': 'spinning' }, ' ');
+	this.title = E('span', {});
+	this.inner = E('div', { 'style': 'width:0%' });
+	this.barEl = E('div', { 'class': 'cbi-progressbar' }, this.inner);
+	this.text = E('div', { 'style': 'margin-top:.4em;font-variant-numeric:tabular-nums' });
+	this.box = E('div', { 'style': 'margin-top:1em' }, [
+		E('div', { 'style': 'margin-bottom:.4em' }, [ this.spin, ' ', this.title ]),
+		this.barEl, this.text
+	]);
+	this.sample = null;
+	this.step = null;
+	this.rate = 0;
+	this.shown = 0;
+	this.raf = null;
+	this.lastText = 0;
+}
+
+Progress.prototype.set = function(s) {
+	var idx = ORDER.indexOf(s.step), now = performance.now();
+	dom.content(this.title, [
 		E('strong', {}, NAMES[s.iface] + ' (' + sizeName(s.size) + ')'),
 		': ' + (STEPS[s.step] || s.step) + (idx >= 0 ? '  ·  шаг ' + (idx + 1) + ' из ' + ORDER.length : '')
-	]));
+	]);
 
-	if (s.p_total > 0) {
-		var pct = Math.min(100, s.p_done / s.p_total * 100),
-		    el = Math.max(1, s.p_el),
-		    mbit = s.p_done * 8 / el / 1e6,
-		    left = mbit > 0 ? (s.p_total - s.p_done) * 8 / 1e6 / mbit : 0;
-		parts.push(E('div', { 'class': 'cbi-progressbar', 'title': pct.toFixed(0) + '%' },
-			E('div', { 'style': 'width:' + pct.toFixed(1) + '%' })));
-		parts.push(E('div', { 'style': 'margin-top:.4em;font-variant-numeric:tabular-nums' },
-			fmtBytes(s.p_done) + ' из ' + fmtBytes(s.p_total) + ' (' + pct.toFixed(0) + '%)  ·  ' +
-			round(mbit) + ' Мбит/с  ·  прошло ' + fmtTime(el) +
-			(pct < 100 && mbit > 0 ? '  ·  осталось ~' + fmtTime(left) : '')));
+	if (s.step != this.step) {
+		this.step = s.step;
+		this.sample = null;
+		this.rate = 0;
+		this.shown = 0;
 	}
-	return E('div', { 'style': 'margin-top:1em' }, parts);
-}
+
+	var has = s.p_total > 0;
+	this.barEl.style.display = this.text.style.display = has ? '' : 'none';
+	if (!has) return;
+
+	var prev = this.sample;
+	if (prev && now > prev.at) {
+		var inst = (s.p_done - prev.done) / ((now - prev.at) / 1000);
+		this.rate = this.rate > 0 ? this.rate * 0.6 + inst * 0.4 : inst;
+	} else {
+		this.rate = s.p_done / Math.max(0.5, s.p_el);
+	}
+	this.sample = { done: +s.p_done, total: +s.p_total, el: +s.p_el, at: now };
+
+	if (!this.raf)
+		this.raf = requestAnimationFrame(this.frame.bind(this));
+};
+
+Progress.prototype.frame = function() {
+	this.raf = null;
+	var s = this.sample;
+	if (!s) return;
+
+	var now = performance.now(),
+	    dt = Math.min(1.5, (now - s.at) / 1000),	/* never run far ahead of the last real sample */
+	    est = Math.min(s.total, s.done + Math.max(0, this.rate) * dt);
+	this.shown = Math.max(this.shown, est);
+
+	var pct = this.shown / s.total * 100;
+	this.inner.style.width = pct.toFixed(2) + '%';
+
+	if (now - this.lastText > 250) {
+		this.lastText = now;
+		var mbit = this.rate * 8 / 1e6,
+		    left = this.rate > 0 ? (s.total - this.shown) / this.rate : 0;
+		this.barEl.setAttribute('title', pct.toFixed(0) + '%');
+		this.text.textContent = fmtBytes(this.shown) + ' из ' + fmtBytes(s.total) + ' (' + pct.toFixed(0) + '%)  ·  ' +
+			round(mbit) + ' Мбит/с  ·  прошло ' + fmtTime(s.el + dt) +
+			(pct < 100 && this.rate > 0 ? '  ·  осталось ~' + fmtTime(left) : '');
+	}
+
+	this.raf = requestAnimationFrame(this.frame.bind(this));
+};
+
+Progress.prototype.stop = function() {
+	if (this.raf) cancelAnimationFrame(this.raf);
+	this.raf = null;
+	this.sample = null;
+	this.step = null;
+};
 
 function speedCell(v, busy) {
 	var n = parseFloat(v);
@@ -302,10 +363,15 @@ return view.extend({
 		this.buttons.concat(this.sizeButtons).forEach(function(b) { b.disabled = busy; });
 		if (this.size == 10000) this.buttons[1].disabled = true;
 
-		var msg = s.error ? E('p', { 'style': 'margin-top:1em;color:#ef4444' }, 'Ошибка: ' + s.error)
-			: busy ? progressBlock(s)
-			: '';
-		dom.content(this.status, msg);
+		if (!this.prog) this.prog = new Progress();
+		if (busy && !s.error) {
+			this.prog.set(s);
+			if (this.prog.box.parentNode !== this.status)
+				dom.content(this.status, this.prog.box);
+		} else {
+			this.prog.stop();
+			dom.content(this.status, s.error ? E('p', { 'style': 'margin-top:1em;color:#ef4444' }, 'Ошибка: ' + s.error) : '');
+		}
 		dom.content(this.result, s.iface ? resultTable(s) : E('em', {}, 'Выберите объём и нажмите кнопку теста'));
 		dom.content(this.history, historyTable(this.lastHist));
 	},

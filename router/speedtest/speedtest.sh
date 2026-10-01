@@ -22,7 +22,7 @@ state() { # running step
 # live progress: interface byte counters (covers all 4 parallel streams at once)
 prog() { # rx|tx expected_bytes
 	[ -n "$NETDEV" ] && [ -d /sys/class/net/$NETDEV ] || { rm -f $DIR/prog; return; }
-	echo "$NETDEV $1 $(cat /sys/class/net/$NETDEV/statistics/${1}_bytes 2>/dev/null || echo 0) $2 $(date +%s)" > $DIR/prog
+	echo "$NETDEV $1 $(cat /sys/class/net/$NETDEV/statistics/${1}_bytes 2>/dev/null || echo 0) $2 $(cut -d' ' -f1 /proc/uptime)" > $DIR/prog
 }
 
 show_status() {
@@ -31,7 +31,8 @@ show_status() {
 		read -r dev kind base total t0 < $DIR/prog
 		now=$(cat /sys/class/net/$dev/statistics/${kind}_bytes 2>/dev/null || echo "$base")
 		got=$((now - base)); [ "$got" -gt "$total" ] && got=$total; [ "$got" -lt 0 ] && got=0
-		sed "s/}\$/,\"p_done\":$got,\"p_total\":$total,\"p_el\":$(($(date +%s) - t0))}/" $ST
+		el=$(awk -v a="$t0" -v b="$(cut -d' ' -f1 /proc/uptime)" 'BEGIN { printf "%.2f", b - a }')
+		sed "s/}\$/,\"p_done\":$got,\"p_total\":$total,\"p_el\":$el}/" $ST
 	else
 		cat $ST
 	fi
