@@ -287,11 +287,115 @@ function historyTable(text) {
 	})));
 }
 
+/* ---- history chart: one small chart per channel (fibre and LTE differ ~15x, so no shared axis) ---- */
+
+var SERIES = [	/* fixed categorical order, validated palette (slots 1-3) */
+	{ key: 5, name: '↓ 4 потока', cls: 's1' },
+	{ key: 4, name: '↓ 1 поток', cls: 's2' },
+	{ key: 6, name: '↑ отдача', cls: 's3', dash: '5 4' }
+];
+
+var CHART_CSS =
+	'.st-viz{--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--grid:rgba(127,127,127,.22);--surface:#fcfcfb}' +
+	'@media (prefers-color-scheme:dark){.st-viz{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--surface:#1a1a19}}' +
+	':root[data-darkmode="true"] .st-viz,:root[data-theme="dark"] .st-viz{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--surface:#1a1a19}' +
+	'.st-viz .s1{stroke:var(--s1);fill:var(--s1)} .st-viz .s2{stroke:var(--s2);fill:var(--s2)} .st-viz .s3{stroke:var(--s3);fill:var(--s3)}' +
+	'.st-viz .ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}' +
+	'.st-viz .dot{stroke:var(--surface);stroke-width:2}' +
+	'.st-viz .hit{fill:transparent;stroke:none;cursor:default}' +
+	'.st-viz .ax{fill:currentColor;opacity:.65;font-size:11px}' +
+	'.st-viz .gl{stroke:var(--grid);stroke-width:1}' +
+	'.st-viz .lg{display:flex;flex-wrap:wrap;gap:.4em 1.4em;margin:.2em 0 .4em;font-size:.92em}' +
+	'.st-viz .sw{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:.4em}' +
+	'.st-viz .cw{margin-bottom:1.2em}';
+
+function plural(n, one, few, many) {
+	var m10 = n % 10, m100 = n % 100;
+	return m10 == 1 && m100 != 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many;
+}
+
+function niceMax(v) {
+	if (!(v > 0)) return 1;
+	var e = Math.pow(10, Math.floor(Math.log10(v))), m = v / e;
+	return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * e;
+}
+
+function esc(t) {
+	return String(t).replace(/[&<>"]/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+}
+
+function chartFor(rows, title) {
+	var W = 640, H = 210, L = 46, R = 12, T = 10, B = 26,
+	    pw = W - L - R, ph = H - T - B, n = rows.length,
+	    max = 0;
+
+	rows.forEach(function(f) {
+		SERIES.forEach(function(se) { var v = parseFloat(f[se.key]); if (v > max) max = v; });
+	});
+	max = niceMax(max * 1.05);
+
+	var x = function(i) { return L + (n > 1 ? i * pw / (n - 1) : pw / 2); },
+	    y = function(v) { return T + ph - v / max * ph; },
+	    svg = [];
+
+	for (var g = 0; g <= 4; g++) {
+		var gv = max * g / 4, gy = y(gv);
+		svg.push('<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + gy + '" y2="' + gy + '"/>');
+		svg.push('<text class="ax" x="' + (L - 6) + '" y="' + (gy + 4) + '" text-anchor="end">' + round(gv) + '</text>');
+	}
+
+	/* x labels: first, last and a few in between, never overlapping */
+	var step = Math.max(1, Math.ceil(n / 5));
+	rows.forEach(function(f, i) {
+		if (i % step && i != n - 1) return;
+		if (i != n - 1 && n - 1 - i < step / 2) return;
+		var d = (f[0] || '').match(/\d{4}-(\d\d)-(\d\d) (\d\d:\d\d)/), lbl = d ? d[2] + '.' + d[1] + ' ' + d[3] : f[0];
+		svg.push('<text class="ax" x="' + x(i) + '" y="' + (H - 6) + '" text-anchor="' +
+			(n > 1 && i == 0 ? 'start' : i == n - 1 && n > 1 ? 'end' : 'middle') + '">' + esc(lbl) + '</text>');
+	});
+
+	SERIES.forEach(function(se) {
+		var pts = [];
+		rows.forEach(function(f, i) { var v = parseFloat(f[se.key]); if (!isNaN(v)) pts.push([ x(i), y(v), v, f[0] ]); });
+		if (pts.length > 1)
+			svg.push('<polyline class="ln ' + se.cls + '"' + (se.dash ? ' stroke-dasharray="' + se.dash + '"' : '') +
+				' points="' + pts.map(function(p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ') + '"/>');
+		pts.forEach(function(p) {
+			svg.push('<circle class="dot ' + se.cls + '" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="4"/>');
+			svg.push('<circle class="hit" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="11"><title>' +
+				esc(p[3] + ' · ' + se.name + ': ' + round(p[2]) + ' Мбит/с') + '</title></circle>');
+		});
+	});
+
+	var last = rows[n - 1];
+	var legend = '<div class="lg">' + SERIES.map(function(se) {
+		var v = parseFloat(last[se.key]);
+		return '<span><span class="sw ' + se.cls + '" style="background:var(--' + se.cls + ')' +
+			(se.dash ? ';background:repeating-linear-gradient(90deg,var(--' + se.cls + ') 0 5px,transparent 5px 9px)' : '') +
+			'"></span>' + esc(se.name) + (isNaN(v) ? '' : ' — <strong>' + round(v) + '</strong> Мбит/с') + '</span>';
+	}).join('') + '</div>';
+
+	return '<div class="cw"><div><strong>' + esc(title) + '</strong> <span style="opacity:.65">· Мбит/с, ' +
+		(n == 1 ? 'один замер' : 'последние ' + n + ' ' + plural(n, 'замер', 'замера', 'замеров')) + '</span></div>' + legend +
+		'<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + esc(title) + '">' + svg.join('') + '</svg></div>';
+}
+
+function historyChart(text) {
+	var rows = (text || '').trim().split('\n').filter(function(l) { return l; }).map(function(l) { return l.split('|'); }),
+	    html = [ 'main', 'lte' ].map(function(ch) {
+		var r = rows.filter(function(f) { return f[1] == ch; });
+		return r.length ? chartFor(r, NAMES[ch]) : '';
+	    }).join('');
+	var div = E('div', { 'class': 'st-viz' });
+	div.innerHTML = html || '<em>Для графика пока нет замеров</em>';
+	return div;
+}
+
 return view.extend({
 	size: 100,
 
 	load: function() {
-		return Promise.all([ run([ 'status' ]), run([ 'history' ]) ]);
+		return Promise.all([ run([ 'status' ]), run([ 'history', '50' ]) ]);
 	},
 
 	render: function(data) {
@@ -299,6 +403,9 @@ return view.extend({
 		this.status = E('div', {});
 		this.result = E('div', {});
 		this.history = E('div', {});
+		this.chart = E('div', {});
+		if (!document.getElementById('st-viz-css'))
+			document.head.appendChild(E('style', { 'id': 'st-viz-css' }, CHART_CSS));
 		this.hint = E('div', { 'style': 'margin:.5em 0 1em;opacity:.75' });
 
 		this.sizeButtons = SIZES.map(function(sz) {
@@ -327,7 +434,7 @@ return view.extend({
 				self.wasRunning = !!st.running;
 				if (!finished)
 					return self.update(st, null);
-				return run([ 'history' ]).then(function(h) { self.update(st, h); });
+				return run([ 'history', '50' ]).then(function(h) { self.update(st, h); });
 			});
 		}, 1);
 
@@ -343,6 +450,7 @@ return view.extend({
 				this.status
 			]),
 			E('div', { 'class': 'cbi-section' }, [ E('h3', {}, 'Последний результат'), this.result ]),
+			E('div', { 'class': 'cbi-section' }, [ E('h3', {}, 'Скорость по времени'), this.chart ]),
 			E('div', { 'class': 'cbi-section' }, [ E('h3', {}, 'История'), this.history ])
 		]);
 	},
@@ -373,7 +481,10 @@ return view.extend({
 			dom.content(this.status, s.error ? E('p', { 'style': 'margin-top:1em;color:#ef4444' }, 'Ошибка: ' + s.error) : '');
 		}
 		dom.content(this.result, s.iface ? resultTable(s) : E('em', {}, 'Выберите объём и нажмите кнопку теста'));
-		dom.content(this.history, historyTable(this.lastHist));
+		if (hist != null) {
+			dom.content(this.history, historyTable((this.lastHist || '').trim().split('\n').slice(-20).join('\n')));
+			dom.content(this.chart, historyChart(this.lastHist));
+		}
 	},
 
 	start: function(iface) {

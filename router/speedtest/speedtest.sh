@@ -3,7 +3,7 @@
 #   speedtest.sh start main|lte [10|100|1000|10000]   run in the background (main = default route,
 #                                 lte = bound to the modem); size = MB downloaded per download test
 #   speedtest.sh status           current/last result as JSON
-#   speedtest.sh history          last results, one per line: date|iface|ping|loss|dl1|dl4|up|rsrp|size|sinr
+#   speedtest.sh history [N]      last N (default 20) results, one per line: date|iface|ping|loss|dl1|dl4|up|rsrp|size|sinr
 DIR=/tmp/speedtest
 ST=$DIR/state.json
 HIST=/root/speedtest-history.txt
@@ -96,6 +96,6 @@ case "$1" in
 		echo $! > $DIR/pid
 		echo '{"started":true}' ;;
 	status) show_status ;;
-	history) tail -n 20 "$HIST" 2>/dev/null ;;
+	history) tail -n "${2:-20}" "$HIST" 2>/dev/null ;;
 	*) echo "usage: $0 start main|lte [10|100|1000|10000] | status | history"; exit 1 ;;
 esac

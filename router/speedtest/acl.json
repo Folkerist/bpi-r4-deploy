@@ -8,6 +8,9 @@
 				],
 				"/usr/bin/speedtest.sh history": [
 					"exec"
+				],
+				"/usr/bin/speedtest.sh history 50": [
+					"exec"
 				]
 			}
 		},
