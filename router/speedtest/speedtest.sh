@@ -42,7 +42,7 @@ run() {
 	DL1=$(mbit "$(curl $CURL -o /dev/null -m $T -s -w '%{speed_download}' $URL_DL)")
 
 	state true dl4
-	for i in 1 2 3 4; do curl $CURL -o /dev/null -m $T -s -w '%{speed_download}' $URL_DL > $DIR/dl$i & done
+	for i in 1 2 3 4; do curl $CURL -o /dev/null -m $T -s -w '%{speed_download}\n' $URL_DL > $DIR/dl$i & done
 	wait
 	DL4=$(mbit "$(cat $DIR/dl1 $DIR/dl2 $DIR/dl3 $DIR/dl4 2>/dev/null | awk '{ s += $1 } END { print s + 0 }')")
 
