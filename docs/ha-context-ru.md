@@ -238,6 +238,12 @@
   Проверка 23:10–23:13: 1 ГБ отдачи Mac (Wi-Fi AX3600) → BPI по ssh через ether2 — 0 новых FCS и падений (54 Мбит/с,
   предел — Wi-Fi Mac 288 Мбит/с при −62 дБм и ssh, не кабель). Похоже, кабель переподключили — ошибки ушли. На ether4–8 PoE auto-on.
   Отдача через AX3600 30–37 Мбит/с при 167 по кабелю с BPI — из-за этих потерь. Камера Botslab (.221) — худший клиент 2,4 ГГц (−79 дБм, 66% повторов).
+- Резерв через LTE для всего дома (01.10.2026, проверено): на RB5009 маршрут `ISP-main` (0.0.0.0/0 через
+  77.88.8.1, check-gateway=ping, distance 1; хост-маршрут `ISP-check-host` 77.88.8.1 через шлюз провайдера,
+  обновляется скриптом dhcp-client), `LTE-backup-BPI` (через 192.168.88.2, distance 2), DHCP-маршрут distance 3,
+  srcnat masquerade out-interface=bridge dst!=192.168.88.0/24. На BPI-R4 `router/lte-backup/lte-backup.sh`:
+  правила `iif br-lan` → main (suppress_prefixlength 0) / table 100 (default dev wwan0, hotplug 45-lte-backup).
+  Тест: при выключенном ISP-main RB5009 вышел в интернет с IP Yota. Откат: `sh /root/lte-backup.sh undo`.
 - Доступ к HA снаружи нужен: через Back To Home или пир WireGuard на RB5009 (не проброс порта).
 
 ## Как работаем
