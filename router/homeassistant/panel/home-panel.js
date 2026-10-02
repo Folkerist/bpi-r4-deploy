@@ -3,7 +3,7 @@
 "use strict";
 // ─── Ядро: конфигурация квартиры, форматирование, значки ────────────────────────────────────────────────────
 
-const HP_VERSION = "9bccee0d";
+const HP_VERSION = "12554cdd";
 
 // Комнаты: зона HA, что в ней есть, как она нарисована на плане и как её зовут пылесосы.
 const ROOMS = [
@@ -306,7 +306,7 @@ const HP_CSS = `
 * { box-sizing:border-box; }
 button { font:inherit; color:inherit; border:0; background:none; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 ha-icon { --mdc-icon-size:22px; display:inline-flex; }
-.root { position:relative; min-height:100vh; color:var(--text); background:var(--bg); overflow:hidden; padding:22px 26px 34px; }
+.root { position:relative; min-height:100vh; color:var(--text); background:var(--bg); overflow:hidden; overflow:clip; padding:22px 26px 34px; }
 .root::before { content:""; position:absolute; inset:-20%; pointer-events:none; z-index:0;
   background: radial-gradient(900px 600px at 12% -5%, rgba(251,191,36,.10), transparent 60%),
     radial-gradient(800px 700px at 100% 0%, rgba(167,139,250,.10), transparent 60%),
@@ -346,13 +346,31 @@ button.pill:hover { background:var(--card-hi); transform:translateY(-1px); }
   backdrop-filter:blur(var(--glass-blur)); transition:transform .25s, background .2s; }
 .iconbtn:hover { background:var(--card-hi); transform:rotate(15deg); }
 
-/* ─ Сетка ─ */
-.grid { display:grid; grid-template-columns:minmax(320px,1fr) minmax(460px,1.5fr) minmax(320px,1fr); gap:var(--gap); align-items:start; }
+/* ─ Страницы (листаются вбок) ─ */
+.pnav { position:sticky; top:calc(var(--header-height, 0px) + 8px); z-index:6; display:grid; grid-template-columns:repeat(var(--n),minmax(0,1fr));
+  padding:5px; margin:0 auto 18px; max-width:820px; border-radius:20px; background:var(--card); border:1px solid var(--line);
+  backdrop-filter:blur(24px) saturate(1.4); -webkit-backdrop-filter:blur(24px) saturate(1.4); box-shadow:var(--shadow); }
+.root:not(.light) .pnav { background:rgba(13,20,34,.78); } .root.light .pnav { background:rgba(251,248,242,.85); }
+.pnav button { position:relative; z-index:1; height:46px; border-radius:15px; display:flex; align-items:center; justify-content:center; gap:8px;
+  font-weight:700; font-size:14.5px; color:var(--sub); transition:color .25s; min-width:0; }
+.pnav button span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pnav button ha-icon { --mdc-icon-size:20px; }
+.pnav button.on { color:var(--text); } .pnav button.on ha-icon { color:var(--amber); }
+.pnav .ind { position:absolute; top:5px; bottom:5px; left:5px; width:calc((100% - 10px) / var(--n)); border-radius:15px;
+  background:var(--tile-hi); border:1px solid var(--line2); transform:translateX(calc(var(--x, 0) * 100%)); will-change:transform; }
+.pages { --px:26px; display:flex; align-items:flex-start; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory;
+  overscroll-behavior-x:contain; scrollbar-width:none; margin:0 calc(-1 * var(--px)); scroll-margin-top:calc(var(--header-height, 0px) + 84px); }
+.pages::-webkit-scrollbar { display:none; }
+.page { flex:0 0 100%; min-width:0; scroll-snap-align:start; scroll-snap-stop:always; padding:0 var(--px) 30px;
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--gap); align-items:start; }
+.page.p-home { grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); }
+.page.p-plan { grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); }
 .col { display:flex; flex-direction:column; gap:var(--gap); min-width:0; }
+.hourly, .tabs { overscroll-behavior-x:contain; }
 .card { min-width:0; position:relative; background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:20px;
   backdrop-filter:blur(var(--glass-blur)); -webkit-backdrop-filter:blur(var(--glass-blur)); box-shadow:var(--shadow);
   animation:rise .6s cubic-bezier(.2,.8,.2,1) both; }
-.col:nth-child(2) .card { animation-delay:.06s } .col:nth-child(3) .card { animation-delay:.12s }
+.col:nth-child(2) .card { animation-delay:.06s }
 @keyframes rise { from { opacity:0; transform:translateY(14px) scale(.99); } }
 .card-h { display:flex; align-items:center; gap:10px; margin-bottom:14px; min-height:36px; }
 .card-h h2 { margin:0; font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--sub); font-weight:700; }
@@ -678,13 +696,11 @@ input[type=range]::-moz-range-thumb { width:16px; height:16px; border-radius:50%
 .confirm .rowbtns { justify-content:flex-end; }
 
 /* ─ Адаптив ─ */
-@media (max-width:1400px) { .grid { grid-template-columns:minmax(300px,1fr) minmax(0,1.45fr); } .col.c3 { grid-column:1/-1; display:grid; grid-template-columns:repeat(2,1fr); } }
-@media (max-width:1400px) and (min-width:1000px) { .col.c3 { grid-template-columns:repeat(4,1fr); } .col.c3 .card.vac { grid-column:span 2; } .col.c3 .card.media { grid-column:span 2; } }
-@media (max-width:1000px) { .root { padding:16px 14px 28px; } .grid { grid-template-columns:minmax(0,1fr); } .col, .col.c3 { display:contents; }
-  .card.quick { order:1 } .card.rooms-c { order:2 } .card.vac { order:3 } .card.planc { order:4 } .card.hubc { order:5 } .card.climc { order:6 }
-  .card.wx { order:7 } .card.camc { order:8 } .card.media { order:9 } .card.feedc { order:10 } .card.health { order:11 }
+@media (max-width:1000px) { .root { padding:16px 14px 28px; } .pages { --px:14px; } .page, .page.p-home, .page.p-plan { grid-template-columns:minmax(0,1fr); }
+  .col { display:contents; } .pnav { margin-bottom:14px; }
   .mcols, .cams { grid-template-columns:1fr; } .chips { grid-template-columns:repeat(2,1fr); } }
-@media (max-width:640px) { .qa { grid-template-columns:repeat(2,1fr); } .qt { min-height:112px; } .rooms { grid-template-columns:1fr; }
+@media (max-width:640px) { .pnav button { flex-direction:column; gap:2px; height:52px; font-size:11.5px; } .pnav button ha-icon { --mdc-icon-size:19px; }
+  .qa { grid-template-columns:repeat(2,1fr); } .qt { min-height:112px; } .rooms { grid-template-columns:1fr; }
   header { gap:8px; } .pill { height:46px; padding:0 12px; font-size:14px; } .pill .muted { display:none; } .qt .qn { font-size:15px; } .iconbtn { width:46px; height:46px; }
   .clock { order:-1; width:100%; font-size:44px; } .greet { flex-basis:100%; } .stats { grid-template-columns:repeat(2,1fr); }
   .overlay { padding:0; align-items:flex-end; } .modal { border-radius:28px 28px 0 0; max-height:92vh; padding:20px 16px; }
@@ -833,6 +849,16 @@ function renderPlan(hass, opts = {}) {
 
 // ─── Панель ──────────────────────────────────────────────────────────────────────────────────────────────────
 const SECTIONS = ["hdr", "hub", "wx", "clim", "health", "quick", "rooms", "plan", "vac", "cam", "media", "feed"];
+// Страницы листаются вбок. cols — колонки на широком экране; на телефоне карточки идут одна под другой в том же порядке.
+const PAGES = [
+  { id: "home", name: "Главная", icon: "home-variant-outline", cols: [["quick", "rooms"], ["hub"]] },
+  { id: "plan", name: "План", icon: "floor-plan", cols: [["plan"], ["vac"]] },
+  { id: "climate", name: "Климат", icon: "thermometer", cols: [["clim"], ["wx"]] },
+  { id: "media", name: "Камера", icon: "cctv", cols: [["cam"], ["media"]] },
+  { id: "events", name: "События", icon: "timeline-clock-outline", cols: [["health"], ["feed"]] },
+];
+const SEC_CLASS = { hub: "hubc", wx: "wx", clim: "climc", health: "health", quick: "quick", rooms: "rooms-c", plan: "planc",
+  vac: "vac", cam: "camc", media: "media", feed: "feedc" };
 
 class HomePanelCard extends HTMLElement {
   constructor() {
@@ -852,6 +878,7 @@ class HomePanelCard extends HTMLElement {
     this._log = [];
     this._subs = [];
     try { this._theme = localStorage.getItem("hp-theme") || "auto"; } catch (e) { this._theme = "auto"; }
+    try { this._page = clamp(parseInt(localStorage.getItem("hp-page")) || 0, 0, PAGES.length - 1); } catch (e) { this._page = 0; }
   }
   setConfig(config) { this._config = config || {}; }
   getCardSize() { return 24; }
@@ -889,17 +916,18 @@ class HomePanelCard extends HTMLElement {
       l.href = "https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800;900&display=swap";
       document.head.appendChild(l);
     }
-    const sec = (id, cls) => `<section class="card ${cls}" id="s-${id}"></section>`;
+    const sec = (id) => `<section class="card ${SEC_CLASS[id]}" id="s-${id}"></section>`;
     this.shadowRoot.innerHTML = `<style>${HP_CSS}</style>
       <div class="root" id="root"><div class="wrap">
         <header id="s-hdr"></header>
-        <div class="grid">
-          <div class="col c1">${sec("hub", "hubc")}${sec("wx", "wx")}${sec("clim", "climc")}${sec("health", "health")}</div>
-          <div class="col c2">${sec("quick", "quick")}${sec("rooms", "rooms-c")}${sec("plan", "planc")}</div>
-          <div class="col c3">${sec("vac", "vac")}${sec("cam", "camc")}${sec("media", "media")}${sec("feed", "feedc")}</div>
-        </div></div>
+        <nav class="pnav" id="pnav" style="--n:${PAGES.length}"><span class="ind"></span>${PAGES.map((p, i) =>
+          `<button data-act="page" data-p="${i}" class="${i === this._page ? "on" : ""}">${ico(p.icon)}<span>${p.name}</span></button>`).join("")}</nav>
+        <div class="pages" id="pages">${PAGES.map((p) =>
+          `<div class="page p-${p.id}">${p.cols.map((c) => `<div class="col">${c.map(sec).join("")}</div>`).join("")}</div>`).join("")}</div>
+        </div>
         <div id="modal"></div><div id="toast"></div>
       </div>`;
+    this._initPages();
     const R = this.shadowRoot;
     R.addEventListener("click", (e) => this._onClick(e));
     R.addEventListener("change", (e) => this._onInput(e, true));
@@ -907,8 +935,59 @@ class HomePanelCard extends HTMLElement {
     R.addEventListener("pointerdown", (e) => { if (e.target.matches?.("input[type=range]")) this._dragging = true; });
     R.addEventListener("pointerup", () => { this._dragging = false; });
     R.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.id === "tts-text") this._tts(); });
-    this._escHandler = (e) => { if (e.key === "Escape" && this._modal) this._closeModal(); };
+    this._escHandler = (e) => {
+      if (e.key === "Escape" && this._modal) this._closeModal();
+      const t = e.composedPath()[0];
+      if (!this._modal && (e.key === "ArrowLeft" || e.key === "ArrowRight") && !/^(INPUT|TEXTAREA|SELECT)$/.test(t?.tagName || "") && !t?.isContentEditable)
+        this._goPage(this._page + (e.key === "ArrowRight" ? 1 : -1));
+    };
     window.addEventListener("keydown", this._escHandler);
+  }
+
+  // ─── Страницы: листание вбок (scroll-snap), вкладки, высота по текущей странице ───
+  _initPages() {
+    const P = this._pagesEl = this.shadowRoot.getElementById("pages");
+    this._navEl = this.shadowRoot.getElementById("pnav");
+    P.addEventListener("scroll", () => {
+      this._onPagesScroll();
+      clearTimeout(this._settle);
+      this._settle = setTimeout(() => this._pageSettled(), 140);
+    }, { passive: true });
+    let w = 0;
+    // В следующем кадре: менять высоту прямо из ResizeObserver — это «ResizeObserver loop».
+    this._pagesRO = new ResizeObserver(() => requestAnimationFrame(() => {
+      // Ширина поменялась (поворот, окно) — остаёмся на той же странице.
+      if (P.clientWidth !== w) { w = P.clientWidth; P.scrollLeft = this._page * w; }
+      this._onPagesScroll();
+    }));
+    this._pagesRO.observe(P);
+    [...P.children].forEach((pg) => this._pagesRO.observe(pg));
+  }
+  _onPagesScroll() {
+    const P = this._pagesEl, w = P.clientWidth; if (!w) return;
+    const x = clamp(P.scrollLeft / w, 0, PAGES.length - 1);
+    this._navEl.style.setProperty("--x", x.toFixed(4));
+    const i = Math.round(x);
+    if (i !== this._page) {
+      this._page = i;
+      this._navEl.querySelectorAll("button").forEach((b, j) => b.classList.toggle("on", j === i));
+      try { localStorage.setItem("hp-page", i); } catch (e) {}
+    }
+    // Пока листается — высота по большей из двух соседних страниц, чтобы ничего не обрезалось.
+    const pg = P.children, a = Math.floor(x), b = Math.ceil(x);
+    const h = Math.abs(x - i) < 0.01 ? pg[i].offsetHeight : Math.max(pg[a]?.offsetHeight || 0, pg[b]?.offsetHeight || 0);
+    if (h && h !== this._ph) { this._ph = h; P.style.height = `${h}px`; }
+  }
+  _pageSettled() {
+    this._onPagesScroll();
+    // Страница пролистана, а экран прокручен ниже её начала — подняться к началу страницы.
+    const r = this._pagesEl.getBoundingClientRect(), nav = this._navEl.getBoundingClientRect();
+    if (r.top < nav.bottom - 1) this._pagesEl.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+  _goPage(i) {
+    i = clamp(i, 0, PAGES.length - 1);
+    const P = this._pagesEl;
+    P.scrollTo({ left: i * P.clientWidth, behavior: "smooth" });
   }
 
   _schedule() {
@@ -1444,6 +1523,7 @@ class HomePanelCard extends HTMLElement {
         return this._update(true);
       }
       case "tab": this._tab = d.t; return this._update();
+      case "page": return this._goPage(+d.p);
       case "layer": this._layers.has(d.l) ? this._layers.delete(d.l) : this._layers.add(d.l); return this._update();
       case "room": return this._openModal("room", d.room);
       case "roomlights": return this._roomLights(ROOM[d.room]);

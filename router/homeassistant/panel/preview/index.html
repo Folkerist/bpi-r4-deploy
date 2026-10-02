@@ -14,7 +14,7 @@
   // ?frame=390 — показать панель в iframe такой ширины (Chrome не даёт окно уже ~500 px).
   if (q.get("frame")) { const w = q.get("frame"); q.delete("frame");
     document.write(`<iframe src="?${q}" style="border:0;width:${w}px;height:100vh;display:block"></iframe>`); document.close(); throw 0; }
-  try { localStorage.setItem("hp-theme", q.get("theme") || "dark"); } catch (e) {}
+  try { localStorage.setItem("hp-theme", q.get("theme") || "dark"); localStorage.setItem("hp-page", q.get("page") || "0"); } catch (e) {}
 </script>
 <script type="module">
   import * as mdi from "./vendor/mdi.js";

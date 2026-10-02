@@ -1,5 +1,15 @@
 // ─── Панель ──────────────────────────────────────────────────────────────────────────────────────────────────
 const SECTIONS = ["hdr", "hub", "wx", "clim", "health", "quick", "rooms", "plan", "vac", "cam", "media", "feed"];
+// Страницы листаются вбок. cols — колонки на широком экране; на телефоне карточки идут одна под другой в том же порядке.
+const PAGES = [
+  { id: "home", name: "Главная", icon: "home-variant-outline", cols: [["quick", "rooms"], ["hub"]] },
+  { id: "plan", name: "План", icon: "floor-plan", cols: [["plan"], ["vac"]] },
+  { id: "climate", name: "Климат", icon: "thermometer", cols: [["clim"], ["wx"]] },
+  { id: "media", name: "Камера", icon: "cctv", cols: [["cam"], ["media"]] },
+  { id: "events", name: "События", icon: "timeline-clock-outline", cols: [["health"], ["feed"]] },
+];
+const SEC_CLASS = { hub: "hubc", wx: "wx", clim: "climc", health: "health", quick: "quick", rooms: "rooms-c", plan: "planc",
+  vac: "vac", cam: "camc", media: "media", feed: "feedc" };
 
 class HomePanelCard extends HTMLElement {
   constructor() {
@@ -19,6 +29,7 @@ class HomePanelCard extends HTMLElement {
     this._log = [];
     this._subs = [];
     try { this._theme = localStorage.getItem("hp-theme") || "auto"; } catch (e) { this._theme = "auto"; }
+    try { this._page = clamp(parseInt(localStorage.getItem("hp-page")) || 0, 0, PAGES.length - 1); } catch (e) { this._page = 0; }
   }
   setConfig(config) { this._config = config || {}; }
   getCardSize() { return 24; }
@@ -56,17 +67,18 @@ class HomePanelCard extends HTMLElement {
       l.href = "https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800;900&display=swap";
       document.head.appendChild(l);
     }
-    const sec = (id, cls) => `<section class="card ${cls}" id="s-${id}"></section>`;
+    const sec = (id) => `<section class="card ${SEC_CLASS[id]}" id="s-${id}"></section>`;
     this.shadowRoot.innerHTML = `<style>${HP_CSS}</style>
       <div class="root" id="root"><div class="wrap">
         <header id="s-hdr"></header>
-        <div class="grid">
-          <div class="col c1">${sec("hub", "hubc")}${sec("wx", "wx")}${sec("clim", "climc")}${sec("health", "health")}</div>
-          <div class="col c2">${sec("quick", "quick")}${sec("rooms", "rooms-c")}${sec("plan", "planc")}</div>
-          <div class="col c3">${sec("vac", "vac")}${sec("cam", "camc")}${sec("media", "media")}${sec("feed", "feedc")}</div>
-        </div></div>
+        <nav class="pnav" id="pnav" style="--n:${PAGES.length}"><span class="ind"></span>${PAGES.map((p, i) =>
+          `<button data-act="page" data-p="${i}" class="${i === this._page ? "on" : ""}">${ico(p.icon)}<span>${p.name}</span></button>`).join("")}</nav>
+        <div class="pages" id="pages">${PAGES.map((p) =>
+          `<div class="page p-${p.id}">${p.cols.map((c) => `<div class="col">${c.map(sec).join("")}</div>`).join("")}</div>`).join("")}</div>
+        </div>
         <div id="modal"></div><div id="toast"></div>
       </div>`;
+    this._initPages();
     const R = this.shadowRoot;
     R.addEventListener("click", (e) => this._onClick(e));
     R.addEventListener("change", (e) => this._onInput(e, true));
@@ -74,8 +86,59 @@ class HomePanelCard extends HTMLElement {
     R.addEventListener("pointerdown", (e) => { if (e.target.matches?.("input[type=range]")) this._dragging = true; });
     R.addEventListener("pointerup", () => { this._dragging = false; });
     R.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.id === "tts-text") this._tts(); });
-    this._escHandler = (e) => { if (e.key === "Escape" && this._modal) this._closeModal(); };
+    this._escHandler = (e) => {
+      if (e.key === "Escape" && this._modal) this._closeModal();
+      const t = e.composedPath()[0];
+      if (!this._modal && (e.key === "ArrowLeft" || e.key === "ArrowRight") && !/^(INPUT|TEXTAREA|SELECT)$/.test(t?.tagName || "") && !t?.isContentEditable)
+        this._goPage(this._page + (e.key === "ArrowRight" ? 1 : -1));
+    };
     window.addEventListener("keydown", this._escHandler);
+  }
+
+  // ─── Страницы: листание вбок (scroll-snap), вкладки, высота по текущей странице ───
+  _initPages() {
+    const P = this._pagesEl = this.shadowRoot.getElementById("pages");
+    this._navEl = this.shadowRoot.getElementById("pnav");
+    P.addEventListener("scroll", () => {
+      this._onPagesScroll();
+      clearTimeout(this._settle);
+      this._settle = setTimeout(() => this._pageSettled(), 140);
+    }, { passive: true });
+    let w = 0;
+    // В следующем кадре: менять высоту прямо из ResizeObserver — это «ResizeObserver loop».
+    this._pagesRO = new ResizeObserver(() => requestAnimationFrame(() => {
+      // Ширина поменялась (поворот, окно) — остаёмся на той же странице.
+      if (P.clientWidth !== w) { w = P.clientWidth; P.scrollLeft = this._page * w; }
+      this._onPagesScroll();
+    }));
+    this._pagesRO.observe(P);
+    [...P.children].forEach((pg) => this._pagesRO.observe(pg));
+  }
+  _onPagesScroll() {
+    const P = this._pagesEl, w = P.clientWidth; if (!w) return;
+    const x = clamp(P.scrollLeft / w, 0, PAGES.length - 1);
+    this._navEl.style.setProperty("--x", x.toFixed(4));
+    const i = Math.round(x);
+    if (i !== this._page) {
+      this._page = i;
+      this._navEl.querySelectorAll("button").forEach((b, j) => b.classList.toggle("on", j === i));
+      try { localStorage.setItem("hp-page", i); } catch (e) {}
+    }
+    // Пока листается — высота по большей из двух соседних страниц, чтобы ничего не обрезалось.
+    const pg = P.children, a = Math.floor(x), b = Math.ceil(x);
+    const h = Math.abs(x - i) < 0.01 ? pg[i].offsetHeight : Math.max(pg[a]?.offsetHeight || 0, pg[b]?.offsetHeight || 0);
+    if (h && h !== this._ph) { this._ph = h; P.style.height = `${h}px`; }
+  }
+  _pageSettled() {
+    this._onPagesScroll();
+    // Страница пролистана, а экран прокручен ниже её начала — подняться к началу страницы.
+    const r = this._pagesEl.getBoundingClientRect(), nav = this._navEl.getBoundingClientRect();
+    if (r.top < nav.bottom - 1) this._pagesEl.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+  _goPage(i) {
+    i = clamp(i, 0, PAGES.length - 1);
+    const P = this._pagesEl;
+    P.scrollTo({ left: i * P.clientWidth, behavior: "smooth" });
   }
 
   _schedule() {
@@ -611,6 +674,7 @@ class HomePanelCard extends HTMLElement {
         return this._update(true);
       }
       case "tab": this._tab = d.t; return this._update();
+      case "page": return this._goPage(+d.p);
       case "layer": this._layers.has(d.l) ? this._layers.delete(d.l) : this._layers.add(d.l); return this._update();
       case "room": return this._openModal("room", d.room);
       case "roomlights": return this._roomLights(ROOM[d.room]);
