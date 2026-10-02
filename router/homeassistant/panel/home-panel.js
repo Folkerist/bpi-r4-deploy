@@ -3,7 +3,7 @@
 "use strict";
 // ─── Ядро: конфигурация квартиры, форматирование, значки ────────────────────────────────────────────────────
 
-const HP_VERSION = "12554cdd";
+const HP_VERSION = "f937cdc3";
 
 // Комнаты: зона HA, что в ней есть, как она нарисована на плане и как её зовут пылесосы.
 const ROOMS = [
@@ -128,6 +128,66 @@ const STATIONS = [
   ["media_player.yandex_station_r10cv31007wqfn", "Станция Миди", "vannaia"],
   ["media_player.yandex_station_lp00000000000047571100008ab064b1", "Станция Лайт", "prikhozhaia"],
 ];
+
+// Что попросить у Алисы: команды из справки Яндекса (alice.yandex.ru/support/ru/station/skills/).
+// Кнопка отправляет фразу на выбранную колонку (play_media с типом command) — как будто её сказали вслух.
+// plus — нужна опция «Алиса Плюс».
+const ALICE = [
+  { id: "music", name: "Музыка", icon: "music-circle-outline", color: "#f472b6", items: [
+    ["Моя волна", "waves", "Включи мою волну"],
+    ["Мои любимые", "heart-outline", "Включи мою музыку"],
+    ["Что-то новое", "new-box", "Включи что-нибудь новенькое"],
+    ["Популярное", "fire", "Запусти самое популярное"],
+    ["Весёлое", "emoticon-happy-outline", "Включи радостное"],
+    ["Спокойное", "leaf", "Включи спокойную музыку"],
+    ["Для вечеринки", "party-popper", "Включи музыку для вечеринки"],
+    ["Дискотека 80-х", "record-player", "Давай послушаем дискотеку 80-х"] ] },
+  { id: "radio", name: "Радио", icon: "radio", color: "#fb923c", items: [
+    ["Любое радио", "radio", "Включи радио"],
+    ["Русское радио", "radio-tower", "Включи «Русское радио»"],
+    ["Европа Плюс", "broadcast", "Включи «Европу Плюс»"],
+    ["Ретро FM", "record-player", "Включи «Ретро FM»"],
+    ["Авторадио", "car-side", "Включи «Авторадио»"],
+    ["Маяк", "lighthouse", "Включи «Маяк»"],
+    ["Радио JAZZ", "saxophone", "Поставь «Радио JAZZ»"],
+    ["Детское радио", "teddy-bear", "Включи «Детское радио»"] ] },
+  { id: "show", name: "Шоу и книги", icon: "microphone-variant", color: "#fbbf24", items: [
+    ["Утреннее шоу", "weather-sunset-up", "Включи утреннее шоу"],
+    ["Вечернее шоу", "weather-sunset-down", "Включи вечернее шоу"],
+    ["Новости", "newspaper-variant-outline", "Расскажи новости"],
+    ["Продолжить книгу", "book-open-page-variant-outline", "Продолжи аудиокнигу"],
+    ["Подкаст", "podcast", "Включи подкаст"],
+    ["Этот день в истории", "calendar-star", "Расскажи про этот день в истории"] ] },
+  { id: "kids", name: "Детям", icon: "teddy-bear", color: "#34d399", items: [
+    ["Сказка", "book-open-variant", "Расскажи сказку"],
+    ["Детские песни", "music-box-outline", "Включи детские песни"],
+    ["Колыбельная", "baby-face-outline", "Включи колыбельную"],
+    ["Детское радио", "radio", "Включи «Детское радио»"],
+    ["Зарядка", "run", "Давай сделаем зарядку", true],
+    ["Игра 3–5 лет", "home-heart", "Хочу в домик", true],
+    ["Игра 5–8 лет", "rocket-launch-outline", "Хочу всё знать", true],
+    ["Пора спать", "bed-outline", "Мне пора спать", true] ] },
+  { id: "games", name: "Игры", icon: "puzzle-outline", color: "#a78bfa", items: [
+    ["Угадай животное", "paw", "Давай сыграем в «Угадай животное»"],
+    ["Загадки", "head-question-outline", "Давай сыграем в загадки"],
+    ["Угадай песню", "music-note-outline", "Давай сыграем в «Угадай песню»"],
+    ["Города", "city-variant-outline", "Давай сыграем в города"],
+    ["Верю — не верю", "scale-balance", "Давай сыграем в «Верю — не верю»"],
+    ["Найди лишнее", "shape-outline", "Давай сыграем в «Найди лишнее»"],
+    ["Угадай число", "numeric", "Давай сыграем в «Угадай число»"],
+    ["Квест про космос", "rocket-outline", "Давай сыграем в квест про космос"] ] },
+  { id: "sleep", name: "Сон и звуки", icon: "weather-night", color: "#60a5fa", items: [
+    ["Шум дождя", "weather-pouring", "Включи шум дождя"],
+    ["Шум океана", "waves", "Давай послушаем шум океана"],
+    ["Пение птиц", "bird", "Поставь пение птиц"],
+    ["Костёр", "campfire", "Включи звук костра"],
+    ["Кот мурлычет", "cat", "Включи мурчание кота"],
+    ["Белый шум", "blur", "Включи белый шум"],
+    ["Выключить через 30 минут", "timer-sand", "Выключись через 30 минут"],
+    ["Выключить через час", "timer-outline", "Выключись через час"] ] },
+];
+// Кнопка ▶ на молчащей колонке: если продолжать нечего — так.
+const ALICE_DEFAULT = ["Моя волна", "Включи мою волну"];
 
 // Сущности ленты событий.
 const LOG_ENTITIES = [DOOR, CAMERA_MOTION, VAC.qrevo.entity, VAC.s5.entity,
@@ -364,7 +424,8 @@ button.pill:hover { background:var(--card-hi); transform:translateY(-1px); }
 .page { flex:0 0 100%; min-width:0; scroll-snap-align:start; scroll-snap-stop:always; padding:0 var(--px) 30px;
   display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--gap); align-items:start; }
 .page.p-home { grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); }
-.page.p-plan { grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); }
+.page.p-flat { grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); }
+.page.p-music { grid-template-columns:minmax(0,1fr) minmax(0,1.5fr); }
 .col { display:flex; flex-direction:column; gap:var(--gap); min-width:0; }
 .hourly, .tabs { overscroll-behavior-x:contain; }
 .card { min-width:0; position:relative; background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:20px;
@@ -593,7 +654,31 @@ input[type=range] { -webkit-appearance:none; appearance:none; flex:1; height:6px
   background-image:linear-gradient(90deg,var(--rc,#f472b6),var(--rc,#f472b6)); background-size:var(--p,50%) 100%; background-repeat:no-repeat; }
 input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.4); border:3px solid var(--rc,#f472b6); }
 input[type=range]::-moz-range-thumb { width:16px; height:16px; border-radius:50%; background:#fff; border:3px solid var(--rc,#f472b6); }
-.stations { display:flex; gap:6px; flex-wrap:wrap; margin-top:14px; }
+.stations { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 18px; }
+.where { color:var(--sub); font-size:12.5px; font-weight:700; margin:-4px 0 8px; }
+.media .st { padding:9px 13px; font-size:14px; border-radius:13px; }
+.ctrls button[disabled] { opacity:.35; cursor:default; transform:none; }
+/* ─ Попросить Алису ─ */
+.acats { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:6px; padding:5px; border-radius:18px; background:var(--tile); border:1px solid var(--line); margin-bottom:14px; }
+.acats button { min-height:58px; border-radius:13px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:6px 4px;
+  font-size:13px; font-weight:700; color:var(--sub); transition:all .2s; text-align:center; line-height:1.1; }
+.acats button ha-icon { --mdc-icon-size:22px; }
+.acats button.on { background:var(--card-hi); color:var(--text); box-shadow:inset 0 0 0 2px var(--ac); } .acats button.on ha-icon { color:var(--ac); }
+.acmds { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.acmd { position:relative; display:flex; align-items:center; gap:12px; min-height:72px; padding:12px 14px; border-radius:18px; text-align:left;
+  background:var(--tile); border:1px solid var(--line); transition:transform .15s, background .2s, border-color .2s; }
+.acmd:hover { background:var(--tile-hi); border-color:var(--line2); } .acmd:active { transform:scale(.97); }
+.acmd[disabled] { opacity:.4; cursor:default; }
+.acmd .ai { flex:0 0 auto; width:46px; height:46px; border-radius:15px; display:grid; place-items:center; color:var(--ac);
+  background:color-mix(in srgb, var(--ac) 16%, transparent); }
+.acmd .ai ha-icon { --mdc-icon-size:24px; }
+.acmd .at { min-width:0; display:flex; flex-direction:column; gap:3px; }
+.acmd .at b { font-size:16px; font-weight:800; line-height:1.15; }
+.acmd .at small { color:var(--sub); font-size:12.5px; font-weight:500; line-height:1.25; }
+.acmd .plus { position:absolute; top:8px; right:10px; font-size:10px; font-weight:800; letter-spacing:.04em; color:var(--ac);
+  background:color-mix(in srgb, var(--ac) 14%, transparent); border-radius:7px; padding:2px 6px; }
+.ahint { display:flex; align-items:center; gap:8px; margin-top:14px; color:var(--sub); font-size:13px; line-height:1.35; }
+.ahint ha-icon { --mdc-icon-size:18px; flex:0 0 auto; }
 .st { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:11px; background:var(--tile); border:1px solid var(--line); font-size:12.5px; font-weight:700; color:var(--sub); }
 .st i { width:7px; height:7px; border-radius:50%; background:var(--faint); }
 .st.play i { background:var(--pink); box-shadow:0 0 0 3px rgba(244,114,182,.25); } .st.sel { color:var(--text); border-color:var(--line2); background:var(--tile-hi); }
@@ -696,10 +781,15 @@ input[type=range]::-moz-range-thumb { width:16px; height:16px; border-radius:50%
 .confirm .rowbtns { justify-content:flex-end; }
 
 /* ─ Адаптив ─ */
-@media (max-width:1000px) { .root { padding:16px 14px 28px; } .pages { --px:14px; } .page, .page.p-home, .page.p-plan { grid-template-columns:minmax(0,1fr); }
+@media (max-width:1000px) { .root { padding:16px 14px 28px; } .pages { --px:14px; } .page, .page[class] { grid-template-columns:minmax(0,1fr); }
   .col { display:contents; } .pnav { margin-bottom:14px; }
   .mcols, .cams { grid-template-columns:1fr; } .chips { grid-template-columns:repeat(2,1fr); } }
-@media (max-width:640px) { .pnav button { flex-direction:column; gap:2px; height:52px; font-size:11.5px; } .pnav button ha-icon { --mdc-icon-size:19px; }
+@media (max-width:640px) { .root { padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .pnav { position:fixed; top:auto; left:8px; right:8px; bottom:calc(8px + env(safe-area-inset-bottom, 0px)); z-index:20; margin:0; max-width:none; border-radius:22px; }
+  .pnav button { flex-direction:column; gap:3px; height:58px; font-size:12px; } .pnav button ha-icon { --mdc-icon-size:24px; }
+  .pages { scroll-margin-top:calc(var(--header-height, 0px) + 8px); }
+  .toast { bottom:calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .acats { grid-template-columns:repeat(3,minmax(0,1fr)); } .acmds { grid-template-columns:1fr; }
   .qa { grid-template-columns:repeat(2,1fr); } .qt { min-height:112px; } .rooms { grid-template-columns:1fr; }
   header { gap:8px; } .pill { height:46px; padding:0 12px; font-size:14px; } .pill .muted { display:none; } .qt .qn { font-size:15px; } .iconbtn { width:46px; height:46px; }
   .clock { order:-1; width:100%; font-size:44px; } .greet { flex-basis:100%; } .stats { grid-template-columns:repeat(2,1fr); }
@@ -848,17 +938,19 @@ function renderPlan(hass, opts = {}) {
 }
 
 // ─── Панель ──────────────────────────────────────────────────────────────────────────────────────────────────
-const SECTIONS = ["hdr", "hub", "wx", "clim", "health", "quick", "rooms", "plan", "vac", "cam", "media", "feed"];
-// Страницы листаются вбок. cols — колонки на широком экране; на телефоне карточки идут одна под другой в том же порядке.
+const SECTIONS = ["hdr", "hub", "wx", "clim", "health", "quick", "rooms", "plan", "vac", "cam", "media", "alice", "feed"];
+// Разделы панели. Листаются вбок или вкладками (на телефоне вкладки внизу, как в приложениях).
+// cols — колонки на широком экране; на телефоне карточки идут одна под другой в том же порядке.
 const PAGES = [
-  { id: "home", name: "Главная", icon: "home-variant-outline", cols: [["quick", "rooms"], ["hub"]] },
-  { id: "plan", name: "План", icon: "floor-plan", cols: [["plan"], ["vac"]] },
+  { id: "home", name: "Дом", icon: "home-variant-outline", cols: [["quick", "rooms"], ["hub"]] },
+  { id: "flat", name: "Квартира", icon: "floor-plan", cols: [["plan"], ["vac"]] },
+  { id: "music", name: "Музыка", icon: "music-circle-outline", cols: [["media"], ["alice"]] },
   { id: "climate", name: "Климат", icon: "thermometer", cols: [["clim"], ["wx"]] },
-  { id: "media", name: "Камера", icon: "cctv", cols: [["cam"], ["media"]] },
-  { id: "events", name: "События", icon: "timeline-clock-outline", cols: [["health"], ["feed"]] },
+  { id: "safety", name: "Охрана", icon: "shield-home-outline", cols: [["cam", "health"], ["feed"]] },
 ];
+const PAGE_IX = Object.fromEntries(PAGES.map((p, i) => [p.id, i]));
 const SEC_CLASS = { hub: "hubc", wx: "wx", clim: "climc", health: "health", quick: "quick", rooms: "rooms-c", plan: "planc",
-  vac: "vac", cam: "camc", media: "media", feed: "feedc" };
+  vac: "vac", cam: "camc", media: "media", alice: "alicec", feed: "feedc" };
 
 class HomePanelCard extends HTMLElement {
   constructor() {
@@ -872,6 +964,7 @@ class HomePanelCard extends HTMLElement {
     this._vacWho = null;
     this._vacView = "plan";
     this._mediaSel = null;
+    this._aliceCat = ALICE[0].id;
     this._logFilter = "all";
     this._forecast = { daily: [], hourly: [] };
     this._hist = {};
@@ -981,8 +1074,9 @@ class HomePanelCard extends HTMLElement {
   _pageSettled() {
     this._onPagesScroll();
     // Страница пролистана, а экран прокручен ниже её начала — подняться к началу страницы.
-    const r = this._pagesEl.getBoundingClientRect(), nav = this._navEl.getBoundingClientRect();
-    if (r.top < nav.bottom - 1) this._pagesEl.scrollIntoView({ block: "start", behavior: "smooth" });
+    const r = this._pagesEl.getBoundingClientRect(), nav = this._navEl;
+    const top = getComputedStyle(nav).position === "fixed" ? 0 : nav.getBoundingClientRect().bottom - 1;
+    if (r.top < top) this._pagesEl.scrollIntoView({ block: "start", behavior: "smooth" });
   }
   _goPage(i) {
     i = clamp(i, 0, PAGES.length - 1);
@@ -1297,7 +1391,7 @@ class HomePanelCard extends HTMLElement {
       ${tile(lit.length ? "on-amber" : "", lit.length ? "lightbulb-group" : "lightbulb-group-outline", "Свет", lit.length ? `${lit.length} из ${ALL_LIGHTS.length} горит` : "всё выключено", `data-act="modal" data-m="lights"`)}
       ${tile(cleaning.length ? "on-violet" : "", "robot-vacuum", "Пылесосы", vacText, `data-act="modal" data-m="vacuum"`)}
       ${tile(cam ? "on-red" : "", "cctv", "Камера", cam ? "движение!" : `тихо · ${isNaN(camLast) ? "—" : agoShort(camLast)}`, `data-act="modal" data-m="camera"`)}
-      ${tile(playing.length ? "on-pink" : "", playing.length ? "music" : "music-note-outline", "Музыка", playing.length ? esc(STATIONS.find(([e]) => e === playing[0][0])[1]) + (playing.length > 1 ? ` +${playing.length - 1}` : "") : "тишина", `data-act="modal" data-m="media"`)}
+      ${tile(playing.length ? "on-pink" : "", playing.length ? "music" : "music-note-outline", "Музыка", playing.length ? esc(STATIONS.find(([e]) => e === playing[0][0])[1]) + (playing.length > 1 ? ` +${playing.length - 1}` : "") : "тишина", `data-act="page" data-p="${PAGE_IX.music}"`)}
       ${tile(door ? "on-red" : "", door ? "door-open" : "door-closed-lock", "Дверь", door ? `открыта${dm ? " " + dm + " мин" : ""}` : "закрыта", `data-act="modal" data-m="events" data-a="door"`)}
       ${tile("on-cyan", "home-thermometer-outline", "Климат", `${fmt1(t)}° · ${fmt0(hm)}%`, `data-act="modal" data-m="climate"`)}
       ${tile("", "lightbulb-off-outline", "Выключить", "весь свет в квартире", `data-act="alloff"`)}
@@ -1402,19 +1496,41 @@ class HomePanelCard extends HTMLElement {
     const st = this._station();
     if (!st) return `<div class="card-h"><h2>Музыка</h2></div><div class="empty">Колонки не найдены</div>`;
     const a = st.s.attributes, play = st.s.state === "playing", pic = a.entity_picture ? this._url(a.entity_picture) : "";
-    const vol = Math.round((a.volume_level ?? 0) * 100);
-    const title = a.media_title || (play ? "Играет" : "Ничего не играет");
-    const artist = a.media_artist || (a.media_title ? "" : "Скажите «Алиса, включи музыку»");
-    return `<div class="card-h"><h2>Музыка</h2><div class="meta">${STATIONS.filter(([e]) => this._v(e) === "playing").length || "0"} из ${STATIONS.length} играют</div>
-        <button class="go" data-act="modal" data-m="media">${ico("chevron-right")}</button></div>
+    const vol = Math.round((a.volume_level ?? 0) * 100), off = st.s.state === "unavailable";
+    const resume = this._canResume(st.s);
+    const title = off ? "Колонка не на связи" : a.media_title || (play ? "Играет" : "Тишина");
+    const artist = off ? "" : a.media_artist || (a.media_title ? (play ? "" : "на паузе") : `Нажмите ${play ? "" : "▶"} — включится «${ALICE_DEFAULT[0]}»`);
+    const nPlay = STATIONS.filter(([e]) => this._v(e) === "playing").length;
+    return `<div class="card-h"><h2>Музыка</h2><div class="meta">${nPlay ? `играет: <b>${nPlay}</b>` : "везде тихо"}</div>
+        <button class="go" data-act="modal" data-m="media" title="Все колонки и объявления">${ico("chevron-right")}</button></div>
+      <div class="where">Колонка в комнате</div>
+      <div class="stations">${STATIONS.filter(([e]) => this._s(e)).map(([e, n, r]) => `<button class="st ${this._v(e) === "playing" ? "play" : ""} ${e === st.e ? "sel" : ""}" data-act="msel" data-e="${e}" title="${esc(n)}"><i></i>${esc(ROOM[r]?.name || n)}</button>`).join("")}</div>
       <div class="mus"><div class="disk ${play ? "spin" : ""}"><div class="lab" style="${pic ? `background-image:url('${esc(pic)}')` : ""}">${pic ? "" : ico("music-note")}</div></div>
         <div class="info"><div class="tt">${esc(title)}</div><div class="ar">${esc(artist)}</div>
-          <span class="src">${ico("speaker")}${esc(st.n)} · ${esc(ROOM[st.r]?.name || "")}</span>
-          <div class="ctrls"><button data-act="media" data-e="${st.e}" data-c="prev">${ico("skip-previous")}</button>
-            <button class="play" data-act="media" data-e="${st.e}" data-c="pp">${ico(play ? "pause" : "play")}</button>
-            <button data-act="media" data-e="${st.e}" data-c="next">${ico("skip-next")}</button></div></div></div>
-      <div class="vol">${ico(vol ? "volume-medium" : "volume-off")}<input type="range" min="0" max="100" value="${vol}" data-in="vol" data-e="${st.e}" style="--p:${vol}%"><b style="min-width:34px;color:var(--text)">${vol}</b></div>
-      <div class="stations">${STATIONS.filter(([e]) => this._s(e)).map(([e, n]) => `<button class="st ${this._v(e) === "playing" ? "play" : ""} ${e === st.e ? "sel" : ""}" data-act="msel" data-e="${e}"><i></i>${esc(ROOM[STATIONS.find((x) => x[0] === e)[2]]?.name || n)}</button>`).join("")}</div>`;
+          <div class="ctrls"><button data-act="media" data-e="${st.e}" data-c="prev" title="Назад" ${resume || play ? "" : "disabled"}>${ico("skip-previous")}</button>
+            <button class="play" data-act="media" data-e="${st.e}" data-c="pp" title="${play ? "Пауза" : resume ? "Продолжить" : "Включить «" + ALICE_DEFAULT[0] + "»"}">${ico(play ? "pause" : "play")}</button>
+            <button data-act="media" data-e="${st.e}" data-c="next" title="Дальше" ${resume || play ? "" : "disabled"}>${ico("skip-next")}</button></div></div></div>
+      <div class="vol">${ico(vol ? "volume-medium" : "volume-off")}<input type="range" min="0" max="100" value="${vol}" data-in="vol" data-e="${st.e}" style="--p:${vol}%" aria-label="Громкость"><b style="min-width:34px;color:var(--text)">${vol}</b></div>`;
+  }
+  // На паузе с треком — можно продолжить; пустая колонка (idle, нет трека) на «play» молчит.
+  _canResume(s) { return s && s.state === "paused" && !!s.attributes.media_title; }
+  _alice(e, cmd, label) {
+    const st = STATIONS.find((x) => x[0] === e), where = ROOM[st?.[2]]?.name || st?.[1] || "колонка";
+    return this._call("media_player", "play_media", { entity_id: e, media_content_type: "command", media_content_id: cmd },
+      `${where}: «${label}»`);
+  }
+
+  // ─── Попросить Алису: каталог команд по темам, видна одна тема ───
+  sig_alice() { return `${this._aliceCat}|${this._station()?.e}|${this._isDark()}`; }
+  r_alice() {
+    const st = this._station(), cat = ALICE.find((c) => c.id === this._aliceCat) || ALICE[0];
+    const where = st ? ROOM[st.r]?.name || st.n : "—";
+    return `<div class="card-h"><h2>Попросить Алису</h2><div class="meta">на колонке: <b>${esc(where)}</b></div></div>
+      <div class="acats">${ALICE.map((c) => `<button class="${c.id === cat.id ? "on" : ""}" style="--ac:${c.color}" data-act="acat" data-c="${c.id}">${ico(c.icon)}<span>${c.name}</span></button>`).join("")}</div>
+      <div class="acmds" style="--ac:${cat.color}">${cat.items.map(([name, icon, cmd, plus], i) =>
+        `<button class="acmd" data-act="alice" data-i="${i}" ${st ? "" : "disabled"}><span class="ai">${ico(icon)}</span>
+          <span class="at"><b>${esc(name)}</b><small>«Алиса, ${esc(cmd.charAt(0).toLowerCase() + cmd.slice(1))}»</small></span>${plus ? `<span class="plus" title="Нужна опция «Алиса Плюс»">Плюс</span>` : ""}</button>`).join("")}</div>
+      <div class="ahint">${ico("gesture-tap")}Нажмите — колонка сделает сама. Или скажите эти слова вслух.${cat.id === "games" ? " В игре отвечайте колонке голосом, закончить — «Алиса, хватит»." : ""}</div>`;
   }
 
   // ─── Лента событий ───
@@ -1538,7 +1654,14 @@ class HomePanelCard extends HTMLElement {
       case "select": return this._call("select", "select_option", { entity_id: d.e, option: d.o });
       case "fan": return this._call("vacuum", "set_fan_speed", { entity_id: d.e, fan_speed: d.o });
       case "press": return this._confirm(`Запустить сценарий Roborock «${d.n}»?`, () => this._call("button", "press", { entity_id: d.e }, `Сценарий «${d.n}» запущен`), "Запустить", "play-circle-outline");
+      case "acat": this._aliceCat = d.c; return this._update();
+      case "alice": {
+        const st = this._station(), it = (ALICE.find((c) => c.id === this._aliceCat) || ALICE[0]).items[+d.i];
+        return st && it && this._alice(st.e, it[2], it[0]);
+      }
       case "media": {
+        // Пустая колонка на «play» молчит — тогда просим Алису включить «Мою волну».
+        if (d.c === "pp") { const s = this._s(d.e); if (s && s.state !== "playing" && !this._canResume(s)) return this._alice(d.e, ALICE_DEFAULT[1], ALICE_DEFAULT[0]); }
         const svc = { pp: "media_play_pause", next: "media_next_track", prev: "media_previous_track", stop: "media_stop" }[d.c];
         return this._call("media_player", svc, { entity_id: d.e });
       }

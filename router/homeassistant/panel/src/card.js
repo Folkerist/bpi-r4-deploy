@@ -1,15 +1,17 @@
 // ─── Панель ──────────────────────────────────────────────────────────────────────────────────────────────────
-const SECTIONS = ["hdr", "hub", "wx", "clim", "health", "quick", "rooms", "plan", "vac", "cam", "media", "feed"];
-// Страницы листаются вбок. cols — колонки на широком экране; на телефоне карточки идут одна под другой в том же порядке.
+const SECTIONS = ["hdr", "hub", "wx", "clim", "health", "quick", "rooms", "plan", "vac", "cam", "media", "alice", "feed"];
+// Разделы панели. Листаются вбок или вкладками (на телефоне вкладки внизу, как в приложениях).
+// cols — колонки на широком экране; на телефоне карточки идут одна под другой в том же порядке.
 const PAGES = [
-  { id: "home", name: "Главная", icon: "home-variant-outline", cols: [["quick", "rooms"], ["hub"]] },
-  { id: "plan", name: "План", icon: "floor-plan", cols: [["plan"], ["vac"]] },
+  { id: "home", name: "Дом", icon: "home-variant-outline", cols: [["quick", "rooms"], ["hub"]] },
+  { id: "flat", name: "Квартира", icon: "floor-plan", cols: [["plan"], ["vac"]] },
+  { id: "music", name: "Музыка", icon: "music-circle-outline", cols: [["media"], ["alice"]] },
   { id: "climate", name: "Климат", icon: "thermometer", cols: [["clim"], ["wx"]] },
-  { id: "media", name: "Камера", icon: "cctv", cols: [["cam"], ["media"]] },
-  { id: "events", name: "События", icon: "timeline-clock-outline", cols: [["health"], ["feed"]] },
+  { id: "safety", name: "Охрана", icon: "shield-home-outline", cols: [["cam", "health"], ["feed"]] },
 ];
+const PAGE_IX = Object.fromEntries(PAGES.map((p, i) => [p.id, i]));
 const SEC_CLASS = { hub: "hubc", wx: "wx", clim: "climc", health: "health", quick: "quick", rooms: "rooms-c", plan: "planc",
-  vac: "vac", cam: "camc", media: "media", feed: "feedc" };
+  vac: "vac", cam: "camc", media: "media", alice: "alicec", feed: "feedc" };
 
 class HomePanelCard extends HTMLElement {
   constructor() {
@@ -23,6 +25,7 @@ class HomePanelCard extends HTMLElement {
     this._vacWho = null;
     this._vacView = "plan";
     this._mediaSel = null;
+    this._aliceCat = ALICE[0].id;
     this._logFilter = "all";
     this._forecast = { daily: [], hourly: [] };
     this._hist = {};
@@ -132,8 +135,9 @@ class HomePanelCard extends HTMLElement {
   _pageSettled() {
     this._onPagesScroll();
     // Страница пролистана, а экран прокручен ниже её начала — подняться к началу страницы.
-    const r = this._pagesEl.getBoundingClientRect(), nav = this._navEl.getBoundingClientRect();
-    if (r.top < nav.bottom - 1) this._pagesEl.scrollIntoView({ block: "start", behavior: "smooth" });
+    const r = this._pagesEl.getBoundingClientRect(), nav = this._navEl;
+    const top = getComputedStyle(nav).position === "fixed" ? 0 : nav.getBoundingClientRect().bottom - 1;
+    if (r.top < top) this._pagesEl.scrollIntoView({ block: "start", behavior: "smooth" });
   }
   _goPage(i) {
     i = clamp(i, 0, PAGES.length - 1);
@@ -448,7 +452,7 @@ class HomePanelCard extends HTMLElement {
       ${tile(lit.length ? "on-amber" : "", lit.length ? "lightbulb-group" : "lightbulb-group-outline", "Свет", lit.length ? `${lit.length} из ${ALL_LIGHTS.length} горит` : "всё выключено", `data-act="modal" data-m="lights"`)}
       ${tile(cleaning.length ? "on-violet" : "", "robot-vacuum", "Пылесосы", vacText, `data-act="modal" data-m="vacuum"`)}
       ${tile(cam ? "on-red" : "", "cctv", "Камера", cam ? "движение!" : `тихо · ${isNaN(camLast) ? "—" : agoShort(camLast)}`, `data-act="modal" data-m="camera"`)}
-      ${tile(playing.length ? "on-pink" : "", playing.length ? "music" : "music-note-outline", "Музыка", playing.length ? esc(STATIONS.find(([e]) => e === playing[0][0])[1]) + (playing.length > 1 ? ` +${playing.length - 1}` : "") : "тишина", `data-act="modal" data-m="media"`)}
+      ${tile(playing.length ? "on-pink" : "", playing.length ? "music" : "music-note-outline", "Музыка", playing.length ? esc(STATIONS.find(([e]) => e === playing[0][0])[1]) + (playing.length > 1 ? ` +${playing.length - 1}` : "") : "тишина", `data-act="page" data-p="${PAGE_IX.music}"`)}
       ${tile(door ? "on-red" : "", door ? "door-open" : "door-closed-lock", "Дверь", door ? `открыта${dm ? " " + dm + " мин" : ""}` : "закрыта", `data-act="modal" data-m="events" data-a="door"`)}
       ${tile("on-cyan", "home-thermometer-outline", "Климат", `${fmt1(t)}° · ${fmt0(hm)}%`, `data-act="modal" data-m="climate"`)}
       ${tile("", "lightbulb-off-outline", "Выключить", "весь свет в квартире", `data-act="alloff"`)}
@@ -553,19 +557,41 @@ class HomePanelCard extends HTMLElement {
     const st = this._station();
     if (!st) return `<div class="card-h"><h2>Музыка</h2></div><div class="empty">Колонки не найдены</div>`;
     const a = st.s.attributes, play = st.s.state === "playing", pic = a.entity_picture ? this._url(a.entity_picture) : "";
-    const vol = Math.round((a.volume_level ?? 0) * 100);
-    const title = a.media_title || (play ? "Играет" : "Ничего не играет");
-    const artist = a.media_artist || (a.media_title ? "" : "Скажите «Алиса, включи музыку»");
-    return `<div class="card-h"><h2>Музыка</h2><div class="meta">${STATIONS.filter(([e]) => this._v(e) === "playing").length || "0"} из ${STATIONS.length} играют</div>
-        <button class="go" data-act="modal" data-m="media">${ico("chevron-right")}</button></div>
+    const vol = Math.round((a.volume_level ?? 0) * 100), off = st.s.state === "unavailable";
+    const resume = this._canResume(st.s);
+    const title = off ? "Колонка не на связи" : a.media_title || (play ? "Играет" : "Тишина");
+    const artist = off ? "" : a.media_artist || (a.media_title ? (play ? "" : "на паузе") : `Нажмите ${play ? "" : "▶"} — включится «${ALICE_DEFAULT[0]}»`);
+    const nPlay = STATIONS.filter(([e]) => this._v(e) === "playing").length;
+    return `<div class="card-h"><h2>Музыка</h2><div class="meta">${nPlay ? `играет: <b>${nPlay}</b>` : "везде тихо"}</div>
+        <button class="go" data-act="modal" data-m="media" title="Все колонки и объявления">${ico("chevron-right")}</button></div>
+      <div class="where">Колонка в комнате</div>
+      <div class="stations">${STATIONS.filter(([e]) => this._s(e)).map(([e, n, r]) => `<button class="st ${this._v(e) === "playing" ? "play" : ""} ${e === st.e ? "sel" : ""}" data-act="msel" data-e="${e}" title="${esc(n)}"><i></i>${esc(ROOM[r]?.name || n)}</button>`).join("")}</div>
       <div class="mus"><div class="disk ${play ? "spin" : ""}"><div class="lab" style="${pic ? `background-image:url('${esc(pic)}')` : ""}">${pic ? "" : ico("music-note")}</div></div>
         <div class="info"><div class="tt">${esc(title)}</div><div class="ar">${esc(artist)}</div>
-          <span class="src">${ico("speaker")}${esc(st.n)} · ${esc(ROOM[st.r]?.name || "")}</span>
-          <div class="ctrls"><button data-act="media" data-e="${st.e}" data-c="prev">${ico("skip-previous")}</button>
-            <button class="play" data-act="media" data-e="${st.e}" data-c="pp">${ico(play ? "pause" : "play")}</button>
-            <button data-act="media" data-e="${st.e}" data-c="next">${ico("skip-next")}</button></div></div></div>
-      <div class="vol">${ico(vol ? "volume-medium" : "volume-off")}<input type="range" min="0" max="100" value="${vol}" data-in="vol" data-e="${st.e}" style="--p:${vol}%"><b style="min-width:34px;color:var(--text)">${vol}</b></div>
-      <div class="stations">${STATIONS.filter(([e]) => this._s(e)).map(([e, n]) => `<button class="st ${this._v(e) === "playing" ? "play" : ""} ${e === st.e ? "sel" : ""}" data-act="msel" data-e="${e}"><i></i>${esc(ROOM[STATIONS.find((x) => x[0] === e)[2]]?.name || n)}</button>`).join("")}</div>`;
+          <div class="ctrls"><button data-act="media" data-e="${st.e}" data-c="prev" title="Назад" ${resume || play ? "" : "disabled"}>${ico("skip-previous")}</button>
+            <button class="play" data-act="media" data-e="${st.e}" data-c="pp" title="${play ? "Пауза" : resume ? "Продолжить" : "Включить «" + ALICE_DEFAULT[0] + "»"}">${ico(play ? "pause" : "play")}</button>
+            <button data-act="media" data-e="${st.e}" data-c="next" title="Дальше" ${resume || play ? "" : "disabled"}>${ico("skip-next")}</button></div></div></div>
+      <div class="vol">${ico(vol ? "volume-medium" : "volume-off")}<input type="range" min="0" max="100" value="${vol}" data-in="vol" data-e="${st.e}" style="--p:${vol}%" aria-label="Громкость"><b style="min-width:34px;color:var(--text)">${vol}</b></div>`;
+  }
+  // На паузе с треком — можно продолжить; пустая колонка (idle, нет трека) на «play» молчит.
+  _canResume(s) { return s && s.state === "paused" && !!s.attributes.media_title; }
+  _alice(e, cmd, label) {
+    const st = STATIONS.find((x) => x[0] === e), where = ROOM[st?.[2]]?.name || st?.[1] || "колонка";
+    return this._call("media_player", "play_media", { entity_id: e, media_content_type: "command", media_content_id: cmd },
+      `${where}: «${label}»`);
+  }
+
+  // ─── Попросить Алису: каталог команд по темам, видна одна тема ───
+  sig_alice() { return `${this._aliceCat}|${this._station()?.e}|${this._isDark()}`; }
+  r_alice() {
+    const st = this._station(), cat = ALICE.find((c) => c.id === this._aliceCat) || ALICE[0];
+    const where = st ? ROOM[st.r]?.name || st.n : "—";
+    return `<div class="card-h"><h2>Попросить Алису</h2><div class="meta">на колонке: <b>${esc(where)}</b></div></div>
+      <div class="acats">${ALICE.map((c) => `<button class="${c.id === cat.id ? "on" : ""}" style="--ac:${c.color}" data-act="acat" data-c="${c.id}">${ico(c.icon)}<span>${c.name}</span></button>`).join("")}</div>
+      <div class="acmds" style="--ac:${cat.color}">${cat.items.map(([name, icon, cmd, plus], i) =>
+        `<button class="acmd" data-act="alice" data-i="${i}" ${st ? "" : "disabled"}><span class="ai">${ico(icon)}</span>
+          <span class="at"><b>${esc(name)}</b><small>«Алиса, ${esc(cmd.charAt(0).toLowerCase() + cmd.slice(1))}»</small></span>${plus ? `<span class="plus" title="Нужна опция «Алиса Плюс»">Плюс</span>` : ""}</button>`).join("")}</div>
+      <div class="ahint">${ico("gesture-tap")}Нажмите — колонка сделает сама. Или скажите эти слова вслух.${cat.id === "games" ? " В игре отвечайте колонке голосом, закончить — «Алиса, хватит»." : ""}</div>`;
   }
 
   // ─── Лента событий ───
@@ -689,7 +715,14 @@ class HomePanelCard extends HTMLElement {
       case "select": return this._call("select", "select_option", { entity_id: d.e, option: d.o });
       case "fan": return this._call("vacuum", "set_fan_speed", { entity_id: d.e, fan_speed: d.o });
       case "press": return this._confirm(`Запустить сценарий Roborock «${d.n}»?`, () => this._call("button", "press", { entity_id: d.e }, `Сценарий «${d.n}» запущен`), "Запустить", "play-circle-outline");
+      case "acat": this._aliceCat = d.c; return this._update();
+      case "alice": {
+        const st = this._station(), it = (ALICE.find((c) => c.id === this._aliceCat) || ALICE[0]).items[+d.i];
+        return st && it && this._alice(st.e, it[2], it[0]);
+      }
       case "media": {
+        // Пустая колонка на «play» молчит — тогда просим Алису включить «Мою волну».
+        if (d.c === "pp") { const s = this._s(d.e); if (s && s.state !== "playing" && !this._canResume(s)) return this._alice(d.e, ALICE_DEFAULT[1], ALICE_DEFAULT[0]); }
         const svc = { pp: "media_play_pause", next: "media_next_track", prev: "media_previous_track", stop: "media_stop" }[d.c];
         return this._call("media_player", svc, { entity_id: d.e });
       }

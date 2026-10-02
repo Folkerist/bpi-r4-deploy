@@ -75,7 +75,8 @@ button.pill:hover { background:var(--card-hi); transform:translateY(-1px); }
 .page { flex:0 0 100%; min-width:0; scroll-snap-align:start; scroll-snap-stop:always; padding:0 var(--px) 30px;
   display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--gap); align-items:start; }
 .page.p-home { grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); }
-.page.p-plan { grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); }
+.page.p-flat { grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); }
+.page.p-music { grid-template-columns:minmax(0,1fr) minmax(0,1.5fr); }
 .col { display:flex; flex-direction:column; gap:var(--gap); min-width:0; }
 .hourly, .tabs { overscroll-behavior-x:contain; }
 .card { min-width:0; position:relative; background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:20px;
@@ -304,7 +305,31 @@ input[type=range] { -webkit-appearance:none; appearance:none; flex:1; height:6px
   background-image:linear-gradient(90deg,var(--rc,#f472b6),var(--rc,#f472b6)); background-size:var(--p,50%) 100%; background-repeat:no-repeat; }
 input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.4); border:3px solid var(--rc,#f472b6); }
 input[type=range]::-moz-range-thumb { width:16px; height:16px; border-radius:50%; background:#fff; border:3px solid var(--rc,#f472b6); }
-.stations { display:flex; gap:6px; flex-wrap:wrap; margin-top:14px; }
+.stations { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 18px; }
+.where { color:var(--sub); font-size:12.5px; font-weight:700; margin:-4px 0 8px; }
+.media .st { padding:9px 13px; font-size:14px; border-radius:13px; }
+.ctrls button[disabled] { opacity:.35; cursor:default; transform:none; }
+/* ─ Попросить Алису ─ */
+.acats { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:6px; padding:5px; border-radius:18px; background:var(--tile); border:1px solid var(--line); margin-bottom:14px; }
+.acats button { min-height:58px; border-radius:13px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:6px 4px;
+  font-size:13px; font-weight:700; color:var(--sub); transition:all .2s; text-align:center; line-height:1.1; }
+.acats button ha-icon { --mdc-icon-size:22px; }
+.acats button.on { background:var(--card-hi); color:var(--text); box-shadow:inset 0 0 0 2px var(--ac); } .acats button.on ha-icon { color:var(--ac); }
+.acmds { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.acmd { position:relative; display:flex; align-items:center; gap:12px; min-height:72px; padding:12px 14px; border-radius:18px; text-align:left;
+  background:var(--tile); border:1px solid var(--line); transition:transform .15s, background .2s, border-color .2s; }
+.acmd:hover { background:var(--tile-hi); border-color:var(--line2); } .acmd:active { transform:scale(.97); }
+.acmd[disabled] { opacity:.4; cursor:default; }
+.acmd .ai { flex:0 0 auto; width:46px; height:46px; border-radius:15px; display:grid; place-items:center; color:var(--ac);
+  background:color-mix(in srgb, var(--ac) 16%, transparent); }
+.acmd .ai ha-icon { --mdc-icon-size:24px; }
+.acmd .at { min-width:0; display:flex; flex-direction:column; gap:3px; }
+.acmd .at b { font-size:16px; font-weight:800; line-height:1.15; }
+.acmd .at small { color:var(--sub); font-size:12.5px; font-weight:500; line-height:1.25; }
+.acmd .plus { position:absolute; top:8px; right:10px; font-size:10px; font-weight:800; letter-spacing:.04em; color:var(--ac);
+  background:color-mix(in srgb, var(--ac) 14%, transparent); border-radius:7px; padding:2px 6px; }
+.ahint { display:flex; align-items:center; gap:8px; margin-top:14px; color:var(--sub); font-size:13px; line-height:1.35; }
+.ahint ha-icon { --mdc-icon-size:18px; flex:0 0 auto; }
 .st { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:11px; background:var(--tile); border:1px solid var(--line); font-size:12.5px; font-weight:700; color:var(--sub); }
 .st i { width:7px; height:7px; border-radius:50%; background:var(--faint); }
 .st.play i { background:var(--pink); box-shadow:0 0 0 3px rgba(244,114,182,.25); } .st.sel { color:var(--text); border-color:var(--line2); background:var(--tile-hi); }
@@ -407,10 +432,15 @@ input[type=range]::-moz-range-thumb { width:16px; height:16px; border-radius:50%
 .confirm .rowbtns { justify-content:flex-end; }
 
 /* ─ Адаптив ─ */
-@media (max-width:1000px) { .root { padding:16px 14px 28px; } .pages { --px:14px; } .page, .page.p-home, .page.p-plan { grid-template-columns:minmax(0,1fr); }
+@media (max-width:1000px) { .root { padding:16px 14px 28px; } .pages { --px:14px; } .page, .page[class] { grid-template-columns:minmax(0,1fr); }
   .col { display:contents; } .pnav { margin-bottom:14px; }
   .mcols, .cams { grid-template-columns:1fr; } .chips { grid-template-columns:repeat(2,1fr); } }
-@media (max-width:640px) { .pnav button { flex-direction:column; gap:2px; height:52px; font-size:11.5px; } .pnav button ha-icon { --mdc-icon-size:19px; }
+@media (max-width:640px) { .root { padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .pnav { position:fixed; top:auto; left:8px; right:8px; bottom:calc(8px + env(safe-area-inset-bottom, 0px)); z-index:20; margin:0; max-width:none; border-radius:22px; }
+  .pnav button { flex-direction:column; gap:3px; height:58px; font-size:12px; } .pnav button ha-icon { --mdc-icon-size:24px; }
+  .pages { scroll-margin-top:calc(var(--header-height, 0px) + 8px); }
+  .toast { bottom:calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .acats { grid-template-columns:repeat(3,minmax(0,1fr)); } .acmds { grid-template-columns:1fr; }
   .qa { grid-template-columns:repeat(2,1fr); } .qt { min-height:112px; } .rooms { grid-template-columns:1fr; }
   header { gap:8px; } .pill { height:46px; padding:0 12px; font-size:14px; } .pill .muted { display:none; } .qt .qn { font-size:15px; } .iconbtn { width:46px; height:46px; }
   .clock { order:-1; width:100%; font-size:44px; } .greet { flex-basis:100%; } .stats { grid-template-columns:repeat(2,1fr); }
