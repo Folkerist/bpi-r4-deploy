@@ -186,6 +186,16 @@ const ALICE = [
 // Кнопка ▶ на молчащей колонке: если продолжать нечего — так.
 const ALICE_DEFAULT = ["Моя волна", "Включи мою волну"];
 
+// Кнопки-сценарии на главной: скрипты HA (router/homeassistant/scripts.yaml), в основе — сценарии «Дома с Алисой».
+const SCENES = [
+  { id: "leave", script: "script.home_leave", name: "Я ухожу", icon: "exit-run", grad: "linear-gradient(135deg,#fb923c,#f43f5e)",
+    ok: "Да, ухожу", bye: "Хорошего дня! Свет и музыка выключены" },
+  { id: "night", script: "script.home_night", name: "Спокойной ночи", icon: "weather-night", grad: "linear-gradient(135deg,#818cf8,#4338ca)",
+    ok: "Спокойной ночи", bye: "Спокойной ночи! Всё выключено" },
+  { id: "morning", script: "script.home_morning", name: "Утро", icon: "weather-sunset-up", grad: "linear-gradient(135deg,#fde047,#f59e0b)",
+    ok: "Доброе утро", bye: "Доброе утро! Алиса включает утреннее шоу" },
+];
+
 // Сущности ленты событий.
 const LOG_ENTITIES = [DOOR, CAMERA_MOTION, VAC.qrevo.entity, VAC.s5.entity,
   ...ROOMS.flatMap((r) => [...(r.motion || []), ...(r.lights || [])]), ...STATIONS.map((s) => s[0])];

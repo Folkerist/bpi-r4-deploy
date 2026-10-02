@@ -3,7 +3,7 @@
 "use strict";
 // ─── Ядро: конфигурация квартиры, форматирование, значки ────────────────────────────────────────────────────
 
-const HP_VERSION = "f937cdc3";
+const HP_VERSION = "4e099f8c";
 
 // Комнаты: зона HA, что в ней есть, как она нарисована на плане и как её зовут пылесосы.
 const ROOMS = [
@@ -188,6 +188,16 @@ const ALICE = [
 ];
 // Кнопка ▶ на молчащей колонке: если продолжать нечего — так.
 const ALICE_DEFAULT = ["Моя волна", "Включи мою волну"];
+
+// Кнопки-сценарии на главной: скрипты HA (router/homeassistant/scripts.yaml), в основе — сценарии «Дома с Алисой».
+const SCENES = [
+  { id: "leave", script: "script.home_leave", name: "Я ухожу", icon: "exit-run", grad: "linear-gradient(135deg,#fb923c,#f43f5e)",
+    ok: "Да, ухожу", bye: "Хорошего дня! Свет и музыка выключены" },
+  { id: "night", script: "script.home_night", name: "Спокойной ночи", icon: "weather-night", grad: "linear-gradient(135deg,#818cf8,#4338ca)",
+    ok: "Спокойной ночи", bye: "Спокойной ночи! Всё выключено" },
+  { id: "morning", script: "script.home_morning", name: "Утро", icon: "weather-sunset-up", grad: "linear-gradient(135deg,#fde047,#f59e0b)",
+    ok: "Доброе утро", bye: "Доброе утро! Алиса включает утреннее шоу" },
+];
 
 // Сущности ленты событий.
 const LOG_ENTITIES = [DOOR, CAMERA_MOTION, VAC.qrevo.entity, VAC.s5.entity,
@@ -777,6 +787,24 @@ input[type=range]::-moz-range-thumb { width:16px; height:16px; border-radius:50%
   animation:toast 3.2s ease both; pointer-events:none; }
 .toast ha-icon { color:var(--green); }
 @keyframes toast { 0% { opacity:0; transform:translate(-50%,20px) } 10%,85% { opacity:1; transform:translate(-50%,0) } 100% { opacity:0; transform:translate(-50%,10px) } }
+/* ─ Сценарии ─ */
+.card.scenesc { padding:12px; }
+.scenes { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.sc { position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:flex-start; gap:4px; min-height:118px; padding:14px 16px;
+  border-radius:20px; text-align:left; background:var(--tile); border:1px solid var(--line); transition:transform .15s, background .2s; }
+.sc::before { content:""; position:absolute; inset:0; background:var(--g); opacity:.12; transition:opacity .25s; pointer-events:none; }
+.sc:hover::before { opacity:.2; } .sc:active { transform:scale(.97); }
+.sc .si { width:48px; height:48px; border-radius:16px; display:grid; place-items:center; background:var(--g); color:#fff; margin-bottom:6px;
+  box-shadow:0 10px 24px -12px rgba(0,0,0,.6); }
+.sc .si ha-icon { --mdc-icon-size:26px; }
+.sc .sn { font-size:17px; font-weight:800; line-height:1.15; }
+.sc .ss { font-size:13px; font-weight:600; color:var(--sub); line-height:1.25; }
+.sc.warn .ss { color:var(--red); }
+.sc.run .si { animation:pulse 1.4s infinite; }
+.csteps { list-style:none; margin:0 0 20px; padding:0; display:flex; flex-direction:column; gap:8px; }
+.csteps li { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:14px; background:var(--tile); font-size:15.5px; font-weight:600; line-height:1.3; }
+.csteps li ha-icon { --mdc-icon-size:22px; color:var(--sub); flex:0 0 auto; }
+.csteps li.warn { background:rgba(248,113,113,.12); color:var(--red); } .csteps li.warn ha-icon { color:var(--red); }
 .confirm p { font-size:16px; color:var(--sub); margin:0 0 20px; line-height:1.5; }
 .confirm .rowbtns { justify-content:flex-end; }
 
@@ -789,7 +817,8 @@ input[type=range]::-moz-range-thumb { width:16px; height:16px; border-radius:50%
   .pnav button { flex-direction:column; gap:3px; height:58px; font-size:12px; } .pnav button ha-icon { --mdc-icon-size:24px; }
   .pages { scroll-margin-top:calc(var(--header-height, 0px) + 8px); }
   .toast { bottom:calc(96px + env(safe-area-inset-bottom, 0px)); }
-  .acats { grid-template-columns:repeat(3,minmax(0,1fr)); } .acmds { grid-template-columns:1fr; }
+  .acats { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .scenes { gap:8px; } .sc { min-height:112px; padding:12px; } .sc .si { width:42px; height:42px; } .sc .sn { font-size:15px; } .sc .ss { font-size:12px; } .acmds { grid-template-columns:1fr; }
   .qa { grid-template-columns:repeat(2,1fr); } .qt { min-height:112px; } .rooms { grid-template-columns:1fr; }
   header { gap:8px; } .pill { height:46px; padding:0 12px; font-size:14px; } .pill .muted { display:none; } .qt .qn { font-size:15px; } .iconbtn { width:46px; height:46px; }
   .clock { order:-1; width:100%; font-size:44px; } .greet { flex-basis:100%; } .stats { grid-template-columns:repeat(2,1fr); }
@@ -938,18 +967,18 @@ function renderPlan(hass, opts = {}) {
 }
 
 // ─── Панель ──────────────────────────────────────────────────────────────────────────────────────────────────
-const SECTIONS = ["hdr", "hub", "wx", "clim", "health", "quick", "rooms", "plan", "vac", "cam", "media", "alice", "feed"];
+const SECTIONS = ["hdr", "scenes", "hub", "wx", "clim", "health", "quick", "rooms", "plan", "vac", "cam", "media", "alice", "feed"];
 // Разделы панели. Листаются вбок или вкладками (на телефоне вкладки внизу, как в приложениях).
 // cols — колонки на широком экране; на телефоне карточки идут одна под другой в том же порядке.
 const PAGES = [
-  { id: "home", name: "Дом", icon: "home-variant-outline", cols: [["quick", "rooms"], ["hub"]] },
+  { id: "home", name: "Дом", icon: "home-variant-outline", cols: [["scenes", "quick", "rooms"], ["hub"]] },
   { id: "flat", name: "Квартира", icon: "floor-plan", cols: [["plan"], ["vac"]] },
   { id: "music", name: "Музыка", icon: "music-circle-outline", cols: [["media"], ["alice"]] },
   { id: "climate", name: "Климат", icon: "thermometer", cols: [["clim"], ["wx"]] },
   { id: "safety", name: "Охрана", icon: "shield-home-outline", cols: [["cam", "health"], ["feed"]] },
 ];
 const PAGE_IX = Object.fromEntries(PAGES.map((p, i) => [p.id, i]));
-const SEC_CLASS = { hub: "hubc", wx: "wx", clim: "climc", health: "health", quick: "quick", rooms: "rooms-c", plan: "planc",
+const SEC_CLASS = { scenes: "scenesc", hub: "hubc", wx: "wx", clim: "climc", health: "health", quick: "quick", rooms: "rooms-c", plan: "planc",
   vac: "vac", cam: "camc", media: "media", alice: "alicec", feed: "feedc" };
 
 class HomePanelCard extends HTMLElement {
@@ -1399,6 +1428,35 @@ class HomePanelCard extends HTMLElement {
     </div>`;
   }
 
+  // ─── Сценарии: «Я ухожу», «Спокойной ночи», «Утро» ───
+  sig_scenes() { return this._sig([...ALL_LIGHTS, DOOR, VAC.qrevo.entity, VAC.s5.entity, "sun.sun", ...SCENES.map((s) => s.script)]); }
+  // Что сделает сценарий — для подписи на кнопке и для окна подтверждения.
+  _sceneInfo(sc) {
+    const lit = this._lightsOn().length, door = this._on(DOOR), dark = this._v("sun.sun") !== "above_horizon";
+    const vacs = [VAC.qrevo, VAC.s5].filter((v) => ["cleaning", "paused"].includes(this._v(v.entity)));
+    const lamps = (n) => `${n} ${plural(n, ["лампу", "лампы", "ламп"])}`;
+    if (sc.id === "leave") return {
+      sub: lit ? `погасит ${lamps(lit)} и музыку` : "погасит свет и музыку",
+      steps: [["lightbulb-group-off-outline", lit ? `Выключу свет — сейчас горит ${lamps(lit)}` : "Выключу свет во всём доме"],
+              ["speaker-off", "Остановлю музыку на всех колонках"]] };
+    if (sc.id === "night") return {
+      sub: door ? "дверь открыта!" : "погасит всё в доме", warn: door,
+      steps: [["lightbulb-group-off-outline", "Выключу свет, ТВ, фитолампу и гирлянду"], ["speaker-off", "Остановлю колонки"],
+              ...vacs.map((v) => ["robot-vacuum", `${v.title} пылесос поедет на базу`]),
+              ...(door ? [["door-open", "Входная дверь открыта — закройте её", "warn"]] : [])] };
+    return {
+      sub: "утреннее шоу на кухне",
+      steps: [...(dark ? [["lightbulb-on-outline", "Включу свет над столом на кухне"]] : []),
+              ["weather-sunset-up", "Алиса на кухне включит утреннее шоу: погода, новости, музыка"]] };
+  }
+  r_scenes() {
+    return `<div class="scenes">${SCENES.map((sc) => {
+      const i = this._sceneInfo(sc), run = this._v(sc.script) === "on";
+      return `<button class="sc ${run ? "run" : ""} ${i.warn ? "warn" : ""}" data-act="scene" data-s="${sc.id}" style="--g:${sc.grad}">
+        <span class="si">${ico(sc.icon)}</span><span class="sn">${sc.name}</span><span class="ss">${run ? "выполняется…" : esc(i.sub)}</span></button>`;
+    }).join("")}</div>`;
+  }
+
   // ─── Комнаты ───
   sig_rooms() { return this._sig(ROOMS.flatMap((r) => [r.temp, r.hum, ...(r.lights || []), ...(r.motion || []), ...(r.media || []), r.problem, r.door]).filter(Boolean), this._tab + "|" + Math.floor(Date.now() / 60000)); }
   r_rooms() {
@@ -1583,9 +1641,9 @@ class HomePanelCard extends HTMLElement {
     el.innerHTML = `<div class="toast">${ico(err ? "alert-circle" : "check-circle")}${esc(text)}</div>`;
     clearTimeout(this._toastT); this._toastT = setTimeout(() => (el.innerHTML = ""), 3300);
   }
-  _confirm(text, fn, ok = "Да", icon = "help-circle-outline") {
+  _confirm(text, fn, ok = "Да", icon = "help-circle-outline", extra = {}) {
     this._pending = fn; this._prevModal = this._modal;
-    this._openModal("confirm", { text, ok, icon });
+    this._openModal("confirm", { text, ok, icon, ...extra });
   }
   _toggle(id) {
     const dom = id.split(".")[0];
@@ -1655,6 +1713,11 @@ class HomePanelCard extends HTMLElement {
       case "fan": return this._call("vacuum", "set_fan_speed", { entity_id: d.e, fan_speed: d.o });
       case "press": return this._confirm(`Запустить сценарий Roborock «${d.n}»?`, () => this._call("button", "press", { entity_id: d.e }, `Сценарий «${d.n}» запущен`), "Запустить", "play-circle-outline");
       case "acat": this._aliceCat = d.c; return this._update();
+      case "scene": {
+        const sc = SCENES.find((x) => x.id === d.s); if (!sc) return;
+        return this._confirm(`${sc.name}?`, () => this._call("script", "turn_on", { entity_id: sc.script }, sc.bye), sc.ok, sc.icon,
+          { title: sc.name, grad: sc.grad, steps: this._sceneInfo(sc).steps });
+      }
       case "alice": {
         const st = this._station(), it = (ALICE.find((c) => c.id === this._aliceCat) || ALICE[0]).items[+d.i];
         return st && it && this._alice(st.e, it[2], it[0]);
@@ -1769,8 +1832,10 @@ Object.assign(HomePanelCard.prototype, {
 
   // ─── Подтверждение ───
   m_confirm(a) {
-    return { cls: "sm", html: `<div class="confirm">${this._mh(a.icon, "linear-gradient(135deg,#a78bfa,#6366f1)", "Подтвердите", "")}
-      <p>${esc(a.text)}</p><div class="rowbtns"><button class="sbtn" data-act="no">Отмена</button><button class="sbtn pri" data-act="yes">${esc(a.ok)}</button></div></div>` };
+    // steps: [[значок, текст, "warn"?], ...] — список «что произойдёт» вместо одной фразы.
+    const steps = a.steps ? `<ul class="csteps">${a.steps.map(([i, t, w]) => `<li class="${w || ""}">${ico(i)}<span>${esc(t)}</span></li>`).join("")}</ul>` : "";
+    return { cls: "sm", html: `<div class="confirm">${this._mh(a.icon, a.grad || "linear-gradient(135deg,#a78bfa,#6366f1)", a.title || "Подтвердите", "")}
+      ${steps || `<p>${esc(a.text)}</p>`}<div class="rowbtns"><button class="sbtn" data-act="no">Отмена</button><button class="sbtn pri" data-act="yes">${esc(a.ok)}</button></div></div>` };
   },
 
   // ─── Свет ───

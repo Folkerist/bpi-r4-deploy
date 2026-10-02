@@ -72,8 +72,10 @@ Object.assign(HomePanelCard.prototype, {
 
   // ─── Подтверждение ───
   m_confirm(a) {
-    return { cls: "sm", html: `<div class="confirm">${this._mh(a.icon, "linear-gradient(135deg,#a78bfa,#6366f1)", "Подтвердите", "")}
-      <p>${esc(a.text)}</p><div class="rowbtns"><button class="sbtn" data-act="no">Отмена</button><button class="sbtn pri" data-act="yes">${esc(a.ok)}</button></div></div>` };
+    // steps: [[значок, текст, "warn"?], ...] — список «что произойдёт» вместо одной фразы.
+    const steps = a.steps ? `<ul class="csteps">${a.steps.map(([i, t, w]) => `<li class="${w || ""}">${ico(i)}<span>${esc(t)}</span></li>`).join("")}</ul>` : "";
+    return { cls: "sm", html: `<div class="confirm">${this._mh(a.icon, a.grad || "linear-gradient(135deg,#a78bfa,#6366f1)", a.title || "Подтвердите", "")}
+      ${steps || `<p>${esc(a.text)}</p>`}<div class="rowbtns"><button class="sbtn" data-act="no">Отмена</button><button class="sbtn pri" data-act="yes">${esc(a.ok)}</button></div></div>` };
   },
 
   // ─── Свет ───

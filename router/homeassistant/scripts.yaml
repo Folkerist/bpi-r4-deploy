@@ -102,3 +102,60 @@ fp_vacuum_together:
       target: {entity_id: "{{ mode_sel }}"}
       data:
         option: "{{ mode_before if mode_before in ['vacuum', 'vac_and_mop', 'mop', 'custom', 'smart_mode'] else 'vac_and_mop' }}"
+
+# ─── Сценарии для кнопок на панели «Дом» ───────────────────────────────────────────────────────────────────────
+# Основа — свои сценарии в «Доме с Алисой»: колонке отправляется фраза сценария (play_media, тип command), и Алиса
+# выполняет его так же, как сказанный голосом. Свет из HA выключается и отдельно — на случай, если колонка не ответит.
+
+# «Я ухожу» — сценарий Яндекса «Я ухожу»: весь свет в доме выключить, все колонки остановить.
+home_leave:
+  alias: Я ухожу
+  icon: mdi:exit-run
+  mode: single
+  sequence:
+    - action: media_player.play_media
+      target: {entity_id: media_player.yandex_station_lp00000000000047571100008ab064b1}  # Лайт в прихожей
+      data: {media_content_type: command, media_content_id: Я ухожу}
+    - action: homeassistant.turn_off
+      target: &all_lights
+        entity_id: [light.zal_yeelight_hall, light.zal_yeelight_hall_ambilight, switch.light_kitchen_main,
+                    switch.light_kitchen_perimeter, light.spalnia_yeelight_bed, light.spalnia_yeelight_bed_ambilight,
+                    switch.light_entry_main, switch.light_entry_perimeter, switch.light_hall_main,
+                    switch.light_hall_perimeter, switch.light_corridor, switch.light_bath, switch.light_wc,
+                    switch.light_storage]
+
+# «Спокойной ночи» — сценарий Яндекса «Ночной режим» (его фраза «Выключи все»: свет, ТВ, колонки, фитолампа,
+# динамики, гирлянда) + то, чего нет в Яндексе: пылесосы, которые убирают, — на базу.
+home_night:
+  alias: Спокойной ночи
+  icon: mdi:weather-night
+  mode: single
+  sequence:
+    - action: media_player.play_media
+      target: {entity_id: media_player.yandex_station_x11bmg2000x29z}  # Макс в спальне
+      data: {media_content_type: command, media_content_id: Выключи все}
+    - action: homeassistant.turn_off
+      target: *all_lights
+    - action: script.turn_off
+      target: {entity_id: script.fp_vacuum_together}
+    - repeat:
+        for_each: [vacuum.koridor_roborock_qrevo, vacuum.roborock_s5_8159_robot_cleaner]
+        sequence:
+          - if: "{{ states(repeat.item) in ['cleaning', 'paused'] }}"
+            then:
+              - action: vacuum.return_to_base
+                target: {entity_id: "{{ repeat.item }}"}
+
+# «Утро» — если ещё темно, свет над столом на кухне; утреннее шоу Алисы (погода, новости, музыка) на кухонной Станции.
+home_morning:
+  alias: Доброе утро
+  icon: mdi:weather-sunset-up
+  mode: single
+  sequence:
+    - if: "{{ is_state('sun.sun', 'below_horizon') }}"
+      then:
+        - action: switch.turn_on
+          target: {entity_id: switch.light_kitchen_main}
+    - action: media_player.play_media
+      target: {entity_id: media_player.yandex_tv_t60jcw202w4z1k}  # ТВ Станция на кухне
+      data: {media_content_type: command, media_content_id: Включи утреннее шоу}

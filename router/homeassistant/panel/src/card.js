@@ -1,16 +1,16 @@
 // ─── Панель ──────────────────────────────────────────────────────────────────────────────────────────────────
-const SECTIONS = ["hdr", "hub", "wx", "clim", "health", "quick", "rooms", "plan", "vac", "cam", "media", "alice", "feed"];
+const SECTIONS = ["hdr", "scenes", "hub", "wx", "clim", "health", "quick", "rooms", "plan", "vac", "cam", "media", "alice", "feed"];
 // Разделы панели. Листаются вбок или вкладками (на телефоне вкладки внизу, как в приложениях).
 // cols — колонки на широком экране; на телефоне карточки идут одна под другой в том же порядке.
 const PAGES = [
-  { id: "home", name: "Дом", icon: "home-variant-outline", cols: [["quick", "rooms"], ["hub"]] },
+  { id: "home", name: "Дом", icon: "home-variant-outline", cols: [["scenes", "quick", "rooms"], ["hub"]] },
   { id: "flat", name: "Квартира", icon: "floor-plan", cols: [["plan"], ["vac"]] },
   { id: "music", name: "Музыка", icon: "music-circle-outline", cols: [["media"], ["alice"]] },
   { id: "climate", name: "Климат", icon: "thermometer", cols: [["clim"], ["wx"]] },
   { id: "safety", name: "Охрана", icon: "shield-home-outline", cols: [["cam", "health"], ["feed"]] },
 ];
 const PAGE_IX = Object.fromEntries(PAGES.map((p, i) => [p.id, i]));
-const SEC_CLASS = { hub: "hubc", wx: "wx", clim: "climc", health: "health", quick: "quick", rooms: "rooms-c", plan: "planc",
+const SEC_CLASS = { scenes: "scenesc", hub: "hubc", wx: "wx", clim: "climc", health: "health", quick: "quick", rooms: "rooms-c", plan: "planc",
   vac: "vac", cam: "camc", media: "media", alice: "alicec", feed: "feedc" };
 
 class HomePanelCard extends HTMLElement {
@@ -460,6 +460,35 @@ class HomePanelCard extends HTMLElement {
     </div>`;
   }
 
+  // ─── Сценарии: «Я ухожу», «Спокойной ночи», «Утро» ───
+  sig_scenes() { return this._sig([...ALL_LIGHTS, DOOR, VAC.qrevo.entity, VAC.s5.entity, "sun.sun", ...SCENES.map((s) => s.script)]); }
+  // Что сделает сценарий — для подписи на кнопке и для окна подтверждения.
+  _sceneInfo(sc) {
+    const lit = this._lightsOn().length, door = this._on(DOOR), dark = this._v("sun.sun") !== "above_horizon";
+    const vacs = [VAC.qrevo, VAC.s5].filter((v) => ["cleaning", "paused"].includes(this._v(v.entity)));
+    const lamps = (n) => `${n} ${plural(n, ["лампу", "лампы", "ламп"])}`;
+    if (sc.id === "leave") return {
+      sub: lit ? `погасит ${lamps(lit)} и музыку` : "погасит свет и музыку",
+      steps: [["lightbulb-group-off-outline", lit ? `Выключу свет — сейчас горит ${lamps(lit)}` : "Выключу свет во всём доме"],
+              ["speaker-off", "Остановлю музыку на всех колонках"]] };
+    if (sc.id === "night") return {
+      sub: door ? "дверь открыта!" : "погасит всё в доме", warn: door,
+      steps: [["lightbulb-group-off-outline", "Выключу свет, ТВ, фитолампу и гирлянду"], ["speaker-off", "Остановлю колонки"],
+              ...vacs.map((v) => ["robot-vacuum", `${v.title} пылесос поедет на базу`]),
+              ...(door ? [["door-open", "Входная дверь открыта — закройте её", "warn"]] : [])] };
+    return {
+      sub: "утреннее шоу на кухне",
+      steps: [...(dark ? [["lightbulb-on-outline", "Включу свет над столом на кухне"]] : []),
+              ["weather-sunset-up", "Алиса на кухне включит утреннее шоу: погода, новости, музыка"]] };
+  }
+  r_scenes() {
+    return `<div class="scenes">${SCENES.map((sc) => {
+      const i = this._sceneInfo(sc), run = this._v(sc.script) === "on";
+      return `<button class="sc ${run ? "run" : ""} ${i.warn ? "warn" : ""}" data-act="scene" data-s="${sc.id}" style="--g:${sc.grad}">
+        <span class="si">${ico(sc.icon)}</span><span class="sn">${sc.name}</span><span class="ss">${run ? "выполняется…" : esc(i.sub)}</span></button>`;
+    }).join("")}</div>`;
+  }
+
   // ─── Комнаты ───
   sig_rooms() { return this._sig(ROOMS.flatMap((r) => [r.temp, r.hum, ...(r.lights || []), ...(r.motion || []), ...(r.media || []), r.problem, r.door]).filter(Boolean), this._tab + "|" + Math.floor(Date.now() / 60000)); }
   r_rooms() {
@@ -644,9 +673,9 @@ class HomePanelCard extends HTMLElement {
     el.innerHTML = `<div class="toast">${ico(err ? "alert-circle" : "check-circle")}${esc(text)}</div>`;
     clearTimeout(this._toastT); this._toastT = setTimeout(() => (el.innerHTML = ""), 3300);
   }
-  _confirm(text, fn, ok = "Да", icon = "help-circle-outline") {
+  _confirm(text, fn, ok = "Да", icon = "help-circle-outline", extra = {}) {
     this._pending = fn; this._prevModal = this._modal;
-    this._openModal("confirm", { text, ok, icon });
+    this._openModal("confirm", { text, ok, icon, ...extra });
   }
   _toggle(id) {
     const dom = id.split(".")[0];
@@ -716,6 +745,11 @@ class HomePanelCard extends HTMLElement {
       case "fan": return this._call("vacuum", "set_fan_speed", { entity_id: d.e, fan_speed: d.o });
       case "press": return this._confirm(`Запустить сценарий Roborock «${d.n}»?`, () => this._call("button", "press", { entity_id: d.e }, `Сценарий «${d.n}» запущен`), "Запустить", "play-circle-outline");
       case "acat": this._aliceCat = d.c; return this._update();
+      case "scene": {
+        const sc = SCENES.find((x) => x.id === d.s); if (!sc) return;
+        return this._confirm(`${sc.name}?`, () => this._call("script", "turn_on", { entity_id: sc.script }, sc.bye), sc.ok, sc.icon,
+          { title: sc.name, grad: sc.grad, steps: this._sceneInfo(sc).steps });
+      }
       case "alice": {
         const st = this._station(), it = (ALICE.find((c) => c.id === this._aliceCat) || ALICE[0]).items[+d.i];
         return st && it && this._alice(st.e, it[2], it[0]);
