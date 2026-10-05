@@ -17,6 +17,17 @@ if (q.get("demo")) {
   set("vacuum.koridor_roborock_qrevo", "cleaning"); set("sensor.fp_vacuum_room", "kukhnia"); set("sensor.koridor_roborock_qrevo_cleaning_progress", "42");
   if (q.get("demo") === "2") { set("binary_sensor.e4aaec6dff8c_contact", "on"); set("sensor.fp_door_open_min", "4"); set("binary_sensor.c700_motion", "on"); }
 }
+// ?lbdemo=1 — неделя истории лотка (визиты и вес), ?lbdemo=2 — ещё и кошка внутри и полный ящик.
+if (q.get("lbdemo")) {
+  const LB = "sensor.koridor_smart_litter_box_cs1_", day = 86400;
+  const d0 = new Date(); d0.setHours(12, 0, 0, 0);
+  snap.history[LB + "visits_today"] = [5, 7, 4, 6, 8, 5].flatMap((n, i) => [{ s: String(n), lu: d0 / 1000 - (6 - i) * day }]);
+  snap.history[LB + "cat_weight"] = [5.02, 5.06, 5.05, 5.1, 5.08, 5.12].map((w, i) => ({ s: String(w), lu: d0 / 1000 - (6 - i) * day }));
+  if (q.get("lbdemo") === "2") {
+    const s = (id, v) => { if (states[id]) states[id] = { ...states[id], state: v }; };
+    s("sensor.koridor_smart_litter_box_cs1_activity", "cat_inside"); s("binary_sensor.koridor_smart_litter_box_cs1_waste_bin_full", "on");
+  }
+}
 const listeners = [];
 const hass = {
   states, entities, devices, areas, user: snap.user, config: snap.config, language: "ru", locale: { language: "ru" },
@@ -31,7 +42,7 @@ const hass = {
       states[id] = { ...s, state: st, last_changed: new Date().toISOString(), last_updated: new Date().toISOString() }; }
     push(); return Promise.resolve();
   },
-  callWS(msg) { if (msg.type === "history/history_during_period") return Promise.resolve(snap.history); return Promise.resolve(null); },
+  callWS(msg) { if (msg.type === "history/history_during_period") return Promise.resolve(Object.fromEntries((msg.entity_ids || []).map((id) => [id, snap.history[id] || []]))); return Promise.resolve(null); },
   connection: { subscribeMessage(cb, msg) {
     setTimeout(() => {
       if (msg.type === "weather/subscribe_forecast") cb(msg.forecast_type === "daily" ? snap.forecast_daily : snap.forecast_hourly);

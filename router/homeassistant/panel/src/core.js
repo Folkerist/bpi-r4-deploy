@@ -197,6 +197,33 @@ const SCENES = [
 ];
 
 // Сущности ленты событий.
+// Лоток homerunPET CS106 в коридоре (своя интеграция router/homeassistant/custom_components/homerun).
+const LB_ID = (dom, key) => `${dom}.koridor_smart_litter_box_cs1_${key}`;
+const LITTER = {
+  online: LB_ID("binary_sensor", "online"), binFull: LB_ID("binary_sensor", "waste_bin_full"),
+  tankLow: LB_ID("binary_sensor", "litter_reservoir_low"), drumLow: LB_ID("binary_sensor", "drum_litter_low"),
+  problem: LB_ID("binary_sensor", "problem"), faults: LB_ID("sensor", "faults"),
+  clean: LB_ID("button", "clean_now"), add: LB_ID("button", "add_litter"),
+  delay: LB_ID("number", "cleaning_delay_after_the_cat_leaves"), task: LB_ID("sensor", "activity"),
+  visits: LB_ID("sensor", "visits_today"), lastVisit: LB_ID("sensor", "last_visit"), weight: LB_ID("sensor", "cat_weight"),
+  dur: LB_ID("sensor", "last_visit_duration"), cleans: LB_ID("sensor", "cleanings_today"), lastClean: LB_ID("sensor", "last_cleaning"),
+  fw: LB_ID("sensor", "firmware"), auto: LB_ID("switch", "auto_clean"), night: LB_ID("switch", "night_mode"),
+  lock: LB_ID("switch", "child_lock"), kitten: LB_ID("switch", "kitten_protection"), refill: LB_ID("switch", "auto_litter_refill"),
+  cover: LB_ID("switch", "auto_cover"),
+};
+const LITTER_TASK = { idle: "Чисто и готов", cleaning: "Убирает", refilling: "Досыпает наполнитель", litter_cleaning: "Чистит наполнитель",
+  leveling: "Разравнивает", entrance_up: "Вход поднят", resetting: "Возвращается в исходное", cat_inside: "Кошка внутри" };
+// [сущность, название, подпись, значок]
+const LITTER_SWITCHES = [
+  [LITTER.auto, "Автоуборка", "сама убирает после визита", "robot-happy-outline"],
+  [LITTER.night, "Ночной режим", "не убирает ночью, 22:00–08:00", "weather-night"],
+  [LITTER.refill, "Автодосыпание", "подсыпает наполнитель из бака", "grain"],
+  [LITTER.cover, "Автоприкапывание", "закапывает сразу после визита", "shovel"],
+  [LITTER.kitten, "Защита котят", "не убирает при лёгком весе", "baby-face-outline"],
+  [LITTER.lock, "Защита от детей", "блокирует кнопки на лотке", "lock-outline"],
+];
+const LITTER_DELAYS = [1, 3, 5, 10, 15, 30, 60];
+
 const LOG_ENTITIES = [DOOR, CAMERA_MOTION, VAC.qrevo.entity, VAC.s5.entity,
   ...ROOMS.flatMap((r) => [...(r.motion || []), ...(r.lights || [])]), ...STATIONS.map((s) => s[0])];
 
@@ -229,6 +256,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const plural = (n, f) => { n = Math.abs(n) % 100; const n1 = n % 10;
   return f[n > 10 && n < 20 ? 2 : n1 > 1 && n1 < 5 ? 1 : n1 === 1 ? 0 : 2]; };
 const fmt1 = (v) => (v == null || isNaN(v) ? "—" : (Math.round(v * 10) / 10).toFixed(1).replace(".", ","));
+const fmt2 = (v) => (v == null || isNaN(v) ? "—" : (Math.round(v * 100) / 100).toFixed(2).replace(".", ","));
 const fmt0 = (v) => (v == null || isNaN(v) ? "—" : String(Math.round(v)));
 const pad2 = (n) => String(n).padStart(2, "0");
 const hhmm = (d) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
@@ -336,6 +364,31 @@ function robotSvg(color, battery, active, size = 92) {
       <circle cx="50" cy="42" r="2.2" fill="${color}" class="lidar"/>
       <path d="M37 60 Q50 67 63 60" fill="none" stroke="var(--robot-line)" stroke-width="2" stroke-linecap="round"/>
     </g>
+  </svg>`;
+}
+
+// «3 мин 5 с», «50 с».
+function fmtDur(s) {
+  if (s == null || isNaN(s)) return "—";
+  s = Math.round(s); const m = Math.floor(s / 60), r = s % 60;
+  return m ? `${m} мин${r ? " " + r + " с" : ""}` : `${r} с`;
+}
+
+// Лоток CS106: барабан на подставке. mode — idle | clean | cat | bad | off; color — цвет кольца.
+function litterSvg(mode, color, size = 150) {
+  const c = 2 * Math.PI * 64;
+  return `<svg class="lsvg m-${mode}" width="${size}" height="${size}" viewBox="0 0 160 160" style="--c:${color}">
+    <circle cx="80" cy="80" r="64" fill="none" stroke="var(--ring-bg)" stroke-width="4"/>
+    <circle class="lring" cx="80" cy="80" r="64" fill="none" stroke="${color}" stroke-width="4" stroke-linecap="round"
+      stroke-dasharray="${mode === "clean" ? (c * 0.28).toFixed(1) + " " + c.toFixed(1) : c.toFixed(1) + " 0"}" transform="rotate(-90 80 80)"/>
+    <rect x="38" y="112" width="84" height="16" rx="8" fill="var(--robot-top)" stroke="var(--robot-line)"/>
+    <g class="ldrum"><circle cx="80" cy="76" r="40" fill="var(--robot)" stroke="${color}" stroke-opacity=".55" stroke-width="2"/>
+      <path d="M48 64 A40 40 0 0 1 112 64" fill="none" stroke="var(--robot-line)" stroke-width="2" stroke-dasharray="4 6"/></g>
+    <ellipse cx="80" cy="84" rx="23" ry="20" fill="var(--bg2)" stroke="var(--robot-line)" stroke-width="1.5"/>
+    <path d="M60 96 Q80 104 100 96" fill="none" stroke="var(--amber)" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
+    ${mode === "cat" ? `<g class="lcat"><path d="M66 92 L66 72 L72 79 L88 79 L94 72 L94 92 Q80 100 66 92Z" fill="var(--amber)"/>
+      <circle cx="74" cy="86" r="2" fill="#2a1a00"/><circle cx="86" cy="86" r="2" fill="#2a1a00"/></g>` : ""}
+    <circle cx="80" cy="121" r="2.5" fill="${mode === "off" ? "var(--faint)" : color}" class="lled"/>
   </svg>`;
 }
 

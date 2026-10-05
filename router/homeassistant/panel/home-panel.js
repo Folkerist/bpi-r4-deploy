@@ -3,7 +3,7 @@
 "use strict";
 // ─── Ядро: конфигурация квартиры, форматирование, значки ────────────────────────────────────────────────────
 
-const HP_VERSION = "4e099f8c";
+const HP_VERSION = "f771da1b";
 
 // Комнаты: зона HA, что в ней есть, как она нарисована на плане и как её зовут пылесосы.
 const ROOMS = [
@@ -200,6 +200,33 @@ const SCENES = [
 ];
 
 // Сущности ленты событий.
+// Лоток homerunPET CS106 в коридоре (своя интеграция router/homeassistant/custom_components/homerun).
+const LB_ID = (dom, key) => `${dom}.koridor_smart_litter_box_cs1_${key}`;
+const LITTER = {
+  online: LB_ID("binary_sensor", "online"), binFull: LB_ID("binary_sensor", "waste_bin_full"),
+  tankLow: LB_ID("binary_sensor", "litter_reservoir_low"), drumLow: LB_ID("binary_sensor", "drum_litter_low"),
+  problem: LB_ID("binary_sensor", "problem"), faults: LB_ID("sensor", "faults"),
+  clean: LB_ID("button", "clean_now"), add: LB_ID("button", "add_litter"),
+  delay: LB_ID("number", "cleaning_delay_after_the_cat_leaves"), task: LB_ID("sensor", "activity"),
+  visits: LB_ID("sensor", "visits_today"), lastVisit: LB_ID("sensor", "last_visit"), weight: LB_ID("sensor", "cat_weight"),
+  dur: LB_ID("sensor", "last_visit_duration"), cleans: LB_ID("sensor", "cleanings_today"), lastClean: LB_ID("sensor", "last_cleaning"),
+  fw: LB_ID("sensor", "firmware"), auto: LB_ID("switch", "auto_clean"), night: LB_ID("switch", "night_mode"),
+  lock: LB_ID("switch", "child_lock"), kitten: LB_ID("switch", "kitten_protection"), refill: LB_ID("switch", "auto_litter_refill"),
+  cover: LB_ID("switch", "auto_cover"),
+};
+const LITTER_TASK = { idle: "Чисто и готов", cleaning: "Убирает", refilling: "Досыпает наполнитель", litter_cleaning: "Чистит наполнитель",
+  leveling: "Разравнивает", entrance_up: "Вход поднят", resetting: "Возвращается в исходное", cat_inside: "Кошка внутри" };
+// [сущность, название, подпись, значок]
+const LITTER_SWITCHES = [
+  [LITTER.auto, "Автоуборка", "сама убирает после визита", "robot-happy-outline"],
+  [LITTER.night, "Ночной режим", "не убирает ночью, 22:00–08:00", "weather-night"],
+  [LITTER.refill, "Автодосыпание", "подсыпает наполнитель из бака", "grain"],
+  [LITTER.cover, "Автоприкапывание", "закапывает сразу после визита", "shovel"],
+  [LITTER.kitten, "Защита котят", "не убирает при лёгком весе", "baby-face-outline"],
+  [LITTER.lock, "Защита от детей", "блокирует кнопки на лотке", "lock-outline"],
+];
+const LITTER_DELAYS = [1, 3, 5, 10, 15, 30, 60];
+
 const LOG_ENTITIES = [DOOR, CAMERA_MOTION, VAC.qrevo.entity, VAC.s5.entity,
   ...ROOMS.flatMap((r) => [...(r.motion || []), ...(r.lights || [])]), ...STATIONS.map((s) => s[0])];
 
@@ -232,6 +259,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const plural = (n, f) => { n = Math.abs(n) % 100; const n1 = n % 10;
   return f[n > 10 && n < 20 ? 2 : n1 > 1 && n1 < 5 ? 1 : n1 === 1 ? 0 : 2]; };
 const fmt1 = (v) => (v == null || isNaN(v) ? "—" : (Math.round(v * 10) / 10).toFixed(1).replace(".", ","));
+const fmt2 = (v) => (v == null || isNaN(v) ? "—" : (Math.round(v * 100) / 100).toFixed(2).replace(".", ","));
 const fmt0 = (v) => (v == null || isNaN(v) ? "—" : String(Math.round(v)));
 const pad2 = (n) => String(n).padStart(2, "0");
 const hhmm = (d) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
@@ -339,6 +367,31 @@ function robotSvg(color, battery, active, size = 92) {
       <circle cx="50" cy="42" r="2.2" fill="${color}" class="lidar"/>
       <path d="M37 60 Q50 67 63 60" fill="none" stroke="var(--robot-line)" stroke-width="2" stroke-linecap="round"/>
     </g>
+  </svg>`;
+}
+
+// «3 мин 5 с», «50 с».
+function fmtDur(s) {
+  if (s == null || isNaN(s)) return "—";
+  s = Math.round(s); const m = Math.floor(s / 60), r = s % 60;
+  return m ? `${m} мин${r ? " " + r + " с" : ""}` : `${r} с`;
+}
+
+// Лоток CS106: барабан на подставке. mode — idle | clean | cat | bad | off; color — цвет кольца.
+function litterSvg(mode, color, size = 150) {
+  const c = 2 * Math.PI * 64;
+  return `<svg class="lsvg m-${mode}" width="${size}" height="${size}" viewBox="0 0 160 160" style="--c:${color}">
+    <circle cx="80" cy="80" r="64" fill="none" stroke="var(--ring-bg)" stroke-width="4"/>
+    <circle class="lring" cx="80" cy="80" r="64" fill="none" stroke="${color}" stroke-width="4" stroke-linecap="round"
+      stroke-dasharray="${mode === "clean" ? (c * 0.28).toFixed(1) + " " + c.toFixed(1) : c.toFixed(1) + " 0"}" transform="rotate(-90 80 80)"/>
+    <rect x="38" y="112" width="84" height="16" rx="8" fill="var(--robot-top)" stroke="var(--robot-line)"/>
+    <g class="ldrum"><circle cx="80" cy="76" r="40" fill="var(--robot)" stroke="${color}" stroke-opacity=".55" stroke-width="2"/>
+      <path d="M48 64 A40 40 0 0 1 112 64" fill="none" stroke="var(--robot-line)" stroke-width="2" stroke-dasharray="4 6"/></g>
+    <ellipse cx="80" cy="84" rx="23" ry="20" fill="var(--bg2)" stroke="var(--robot-line)" stroke-width="1.5"/>
+    <path d="M60 96 Q80 104 100 96" fill="none" stroke="var(--amber)" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
+    ${mode === "cat" ? `<g class="lcat"><path d="M66 92 L66 72 L72 79 L88 79 L94 72 L94 92 Q80 100 66 92Z" fill="var(--amber)"/>
+      <circle cx="74" cy="86" r="2" fill="#2a1a00"/><circle cx="86" cy="86" r="2" fill="#2a1a00"/></g>` : ""}
+    <circle cx="80" cy="121" r="2.5" fill="${mode === "off" ? "var(--faint)" : color}" class="lled"/>
   </svg>`;
 }
 
@@ -809,6 +862,92 @@ input[type=range]::-moz-range-thumb { width:16px; height:16px; border-radius:50%
 .confirm .rowbtns { justify-content:flex-end; }
 
 /* ─ Адаптив ─ */
+/* ─ Лоток ─ */
+.page.p-cat { grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); }
+.ldot { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--green); margin-right:7px; box-shadow:0 0 0 3px rgba(52,211,153,.18); vertical-align:1px; }
+.lbx { display:flex; align-items:center; gap:22px; }
+.lart { flex:none; display:grid; place-items:center; }
+.lsvg { display:block; overflow:visible; }
+.lsvg .lring { transition:stroke-dasharray .6s; }
+.lsvg.m-clean .lring { animation:lspin 1.6s linear infinite; transform-origin:80px 80px; }
+.lsvg.m-clean .ldrum { animation:lspin 3.2s linear infinite; transform-origin:80px 76px; }
+.lsvg.m-cat .lcat { animation:lpeek 2.4s ease-in-out infinite; transform-origin:80px 96px; }
+.lsvg.m-bad .lring { animation:lblink 1.4s ease-in-out infinite; }
+.lsvg.m-off { filter:grayscale(1); opacity:.55; }
+.lsvg .lled { filter:drop-shadow(0 0 4px var(--c)); }
+@keyframes lspin { to { transform:rotate(360deg); } }
+@keyframes lpeek { 50% { transform:translateY(3px) scale(.97); } }
+@keyframes lblink { 50% { opacity:.35; } }
+.linfo { min-width:0; flex:1; }
+.lst { font-size:clamp(24px,2.2vw,32px); font-weight:800; letter-spacing:-.02em; line-height:1.1; }
+.lsub { color:var(--sub); font-size:15px; font-weight:600; margin-top:6px; min-height:20px; }
+.lfacts { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+.lfacts span { display:inline-flex; align-items:center; gap:6px; padding:6px 11px; border-radius:12px; background:var(--tile); border:1px solid var(--line); font-size:13px; font-weight:600; color:var(--sub); }
+.lfacts span b { color:var(--text); font-weight:800; }
+.lfacts ha-icon { --mdc-icon-size:15px; }
+.ltanks { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:18px; }
+.lt { display:flex; flex-direction:column; gap:6px; padding:12px; border-radius:16px; background:var(--tile); border:1px solid var(--line); min-width:0; }
+.lt .li { width:36px; height:36px; border-radius:12px; display:grid; place-items:center; background:rgba(52,211,153,.14); color:var(--green); }
+.lt .li ha-icon { --mdc-icon-size:19px; }
+.lt .ln { font-size:12.5px; color:var(--sub); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lt .lv { font-weight:800; font-size:15px; }
+.lt.bad { border-color:rgba(248,113,113,.5); background:linear-gradient(160deg,rgba(248,113,113,.14),transparent); }
+.lt.bad .li { background:linear-gradient(135deg,#fca5a5,#ef4444); color:#3b0505; animation:pulse 1.6s infinite; } .lt.bad .lv { color:var(--red); }
+.lt.unk .li { background:var(--tile-hi); color:var(--faint); }
+.lbtns { display:grid; grid-template-columns:1.4fr 1fr; gap:10px; }
+.lbtns .bigbtn { margin-top:16px; }
+.ldel { padding:16px; border-radius:20px; background:linear-gradient(160deg,rgba(56,189,248,.12),rgba(56,189,248,.02)); border:1px solid rgba(56,189,248,.35); transition:all .3s; }
+.ldel.off { background:var(--tile); border-color:var(--line); }
+.ldel.off .ldv b, .ldel.off .lpre { opacity:.45; }
+.ldh { display:flex; align-items:center; gap:12px; }
+.ldh > div:first-child { flex:1; min-width:0; }
+.ldk { font-weight:800; font-size:16px; } .lds { color:var(--sub); font-size:13px; font-weight:600; margin-top:3px; }
+.ldv { display:flex; align-items:center; gap:6px; }
+.ldv b { min-width:74px; text-align:center; font-size:34px; font-weight:800; letter-spacing:-.03em; line-height:1; }
+.ldv b small { font-size:13px; color:var(--sub); font-weight:700; margin-left:3px; letter-spacing:0; }
+.ldv button { width:42px; height:42px; border-radius:14px; display:grid; place-items:center; background:var(--tile-hi); border:1px solid var(--line); transition:all .2s; }
+.ldv button:hover:not([disabled]) { background:var(--cyan); color:#032033; border-color:transparent; }
+.ldv button[disabled], .lpre button[disabled] { opacity:.35; cursor:default; }
+.lpre { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:14px; }
+.lpre button { height:38px; border-radius:12px; background:var(--tile-hi); border:1px solid var(--line); font-weight:800; font-size:14px; color:var(--sub); transition:all .2s; }
+.lpre button.on { background:linear-gradient(135deg,#67e8f9,#0ea5e9); color:#032033; border-color:transparent; box-shadow:0 8px 22px -10px rgba(14,165,233,.9); }
+.lsw { margin-top:10px; }
+.lsw .lrow { padding:9px 4px; border-bottom:1px solid var(--line); }
+.lsw .lrow:last-child { border-bottom:0; }
+.lsw .lrow.na { opacity:.45; }
+.lsw .ln small { display:block; color:var(--sub); font-size:12.5px; font-weight:500; margin-top:1px; }
+.lri { width:38px; height:38px; flex:none; border-radius:12px; display:grid; place-items:center; background:var(--tile-hi); color:var(--sub); transition:all .3s; }
+.lri ha-icon { --mdc-icon-size:19px; }
+.lri.on { background:rgba(56,189,248,.16); color:var(--cyan); }
+.tog[disabled] { opacity:.4; cursor:default; }
+.lfw { display:flex; align-items:center; gap:8px; margin-top:12px; color:var(--faint); font-size:12.5px; font-weight:600; }
+.lfw ha-icon { --mdc-icon-size:15px; }
+.lstats { margin-top:0; }
+.lstats .stat .v { font-size:22px; }
+.lsec { display:flex; align-items:center; gap:10px; margin:18px 0 8px; font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--sub); font-weight:700; }
+.lsec span { margin-left:auto; display:flex; align-items:center; gap:6px; letter-spacing:0; text-transform:none; font-size:12px; font-weight:600; }
+.lsec .lg-b { width:10px; height:10px; border-radius:3px; background:var(--amber); display:inline-block; }
+.lsec .lg-w { width:14px; height:3px; border-radius:2px; background:var(--violet); display:inline-block; margin-left:8px; }
+.ltlw { position:relative; height:44px; }
+.ltl { width:100%; height:44px; display:block; }
+.ltl .gl { stroke:var(--line2); stroke-width:1; vector-effect:non-scaling-stroke; }
+.ltd { position:absolute; inset:0 8px; }
+.ltd i { position:absolute; top:26px; transform:translate(-50%,-50%); border-radius:50%; background:var(--amber); opacity:.9;
+  box-shadow:0 0 0 4px rgba(251,191,36,.18), 0 4px 14px -4px rgba(245,158,11,.9); }
+.ltax { display:flex; justify-content:space-between; color:var(--faint); font-size:11.5px; font-weight:600; margin-top:2px; }
+.lweek { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
+.lwd { display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0; }
+.lwd span { font-size:11.5px; color:var(--sub); font-weight:600; white-space:nowrap; }
+.lwd.today span { color:var(--text); font-weight:800; }
+.lwb { position:relative; width:100%; height:96px; border-radius:12px; background:var(--tile); border:1px solid var(--line); overflow:hidden; }
+.lwb i { position:absolute; left:22%; right:22%; bottom:0; border-radius:8px 8px 0 0; background:linear-gradient(180deg,var(--amber),rgba(245,158,11,.35)); transition:height .6s; }
+.lwd:not(.today) .lwb i { opacity:.55; }
+.lwb s { position:absolute; left:10%; right:10%; height:3px; margin-bottom:-1.5px; border-radius:2px; background:var(--violet); box-shadow:0 0 10px var(--violet); }
+.lwb em { position:absolute; top:6px; left:0; right:0; text-align:center; font-style:normal; font-weight:800; font-size:13px; }
+.lfeed { max-height:none; }
+@media (max-width:640px) { .lbx { gap:14px; } .lsvg { width:116px; height:116px; } .ltanks { gap:8px; } .lt { padding:10px; }
+  .lpre { grid-template-columns:repeat(4,1fr); } .lstats { grid-template-columns:repeat(2,1fr); } .lwb { height:80px; } .lwd span { font-size:10.5px; }
+  .ldv b { min-width:58px; font-size:28px; } .lds { display:none; } .ldk { font-size:15px; } .lt .ln { white-space:normal; line-height:1.2; } }
 @media (max-width:1000px) { .root { padding:16px 14px 28px; } .pages { --px:14px; } .page, .page[class] { grid-template-columns:minmax(0,1fr); }
   .col { display:contents; } .pnav { margin-bottom:14px; }
   .mcols, .cams { grid-template-columns:1fr; } .chips { grid-template-columns:repeat(2,1fr); } }
@@ -967,7 +1106,7 @@ function renderPlan(hass, opts = {}) {
 }
 
 // ─── Панель ──────────────────────────────────────────────────────────────────────────────────────────────────
-const SECTIONS = ["hdr", "scenes", "hub", "wx", "clim", "health", "quick", "rooms", "plan", "vac", "cam", "media", "alice", "feed"];
+const SECTIONS = ["hdr", "scenes", "hub", "wx", "clim", "health", "quick", "rooms", "plan", "vac", "cam", "media", "alice", "feed", "litter", "litset", "catst"];
 // Разделы панели. Листаются вбок или вкладками (на телефоне вкладки внизу, как в приложениях).
 // cols — колонки на широком экране; на телефоне карточки идут одна под другой в том же порядке.
 const PAGES = [
@@ -976,10 +1115,11 @@ const PAGES = [
   { id: "music", name: "Музыка", icon: "music-circle-outline", cols: [["media"], ["alice"]] },
   { id: "climate", name: "Климат", icon: "thermometer", cols: [["clim"], ["wx"]] },
   { id: "safety", name: "Охрана", icon: "shield-home-outline", cols: [["cam", "health"], ["feed"]] },
+  { id: "cat", name: "Лоток", icon: "cat", cols: [["litter", "litset"], ["catst"]] },
 ];
 const PAGE_IX = Object.fromEntries(PAGES.map((p, i) => [p.id, i]));
 const SEC_CLASS = { scenes: "scenesc", hub: "hubc", wx: "wx", clim: "climc", health: "health", quick: "quick", rooms: "rooms-c", plan: "planc",
-  vac: "vac", cam: "camc", media: "media", alice: "alicec", feed: "feedc" };
+  vac: "vac", cam: "camc", media: "media", alice: "alicec", feed: "feedc", litter: "litc", litset: "litset", catst: "catc" };
 
 class HomePanelCard extends HTMLElement {
   constructor() {
@@ -1019,7 +1159,7 @@ class HomePanelCard extends HTMLElement {
     this._timers = [
       setInterval(() => this._tick(), 1000),
       setInterval(() => this._refreshCam(false), 6000),
-      setInterval(() => this._loadHistory(), 10 * 60000),
+      setInterval(() => { this._loadHistory(); this._loadLitterHistory(); }, 10 * 60000),
     ];
     if (this._hass && !this._subscribed) this._subscribe();
   }
@@ -1166,6 +1306,7 @@ class HomePanelCard extends HTMLElement {
       this._sigs.feed = null; this._schedule();
     }, { type: "logbook/event_stream", start_time: new Date(Date.now() - 12 * 3600e3).toISOString(), entity_ids: LOG_ENTITIES }));
     this._loadHistory();
+    this._loadLitterHistory();
   }
 
   async _loadHistory() {
@@ -1229,6 +1370,11 @@ class HomePanelCard extends HTMLElement {
     if (this._on(QREVO.waterShortage)) out.push({ sev: "bad", icon: "water-off", text: "Qrevo: нет воды", sub: "долейте бак чистой воды" });
     if (this._on(QREVO.cleanBox)) out.push({ sev: "warn", icon: "cup-water", text: "Станция Qrevo: бак чистой воды", sub: "проверьте бак" });
     if (this._on(QREVO.dirtyBox)) out.push({ sev: "warn", icon: "delete-variant", text: "Станция Qrevo: бак грязной воды", sub: "пора вылить" });
+    if (this._on(LITTER.binFull)) out.push({ sev: "warn", icon: "delete-variant", text: "Лоток: мусорный ящик полон", sub: "пора вынести" });
+    if (this._on(LITTER.tankLow)) out.push({ sev: "warn", icon: "pail-outline", text: "Лоток: мало наполнителя в баке", sub: "досыпьте наполнитель" });
+    if (this._on(LITTER.drumLow)) out.push({ sev: "warn", icon: "grain", text: "Лоток: мало наполнителя в барабане", sub: "нажмите «Досыпать»" });
+    if (this._on(LITTER.problem)) out.push({ sev: "bad", icon: "alert-circle-outline", text: "Лоток: неисправность", sub: (this._a(LITTER.faults, "codes") || []).join(", ") || "посмотрите в приложении" });
+    if (this._s(LITTER.online) && this._v(LITTER.online) === "off") out.push({ sev: "warn", icon: "lan-disconnect", text: "Лоток не в сети", sub: "коридор" });
     for (const v of [VAC.qrevo, VAC.s5]) if (this._v(v.entity) === "error") out.push({ sev: "bad", icon: "robot-vacuum-alert", text: `${v.model}: ошибка`, sub: "посмотрите в приложении" });
     const skip = new Set(["sensor.vivo_x200_battery_level", "sensor.planshet_battery_level", VAC.qrevo.battery, VAC.s5.battery]);
     const ents = h.entities || {}, devs = h.devices || {}, areas = h.areas || {};
@@ -1256,7 +1402,8 @@ class HomePanelCard extends HTMLElement {
   }
 
   // ─── Шапка ───
-  sig_hdr() { return this._sig([WEATHER, PERSON, ...TRACKERS.flatMap((t) => [t[0], t[1]]), DOOR, CAMERA_MOTION, ZIGBEE, QREVO.waterShortage],
+  sig_hdr() { return this._sig([WEATHER, PERSON, ...TRACKERS.flatMap((t) => [t[0], t[1]]), DOOR, CAMERA_MOTION, ZIGBEE, QREVO.waterShortage,
+    LITTER.binFull, LITTER.tankLow, LITTER.drumLow, LITTER.problem, LITTER.online],
     `${this._theme}|${Math.floor(Date.now() / 60000)}|${this._isDark()}|${Object.keys(this._hass.states).length}`); }
   r_hdr() {
     const now = new Date(), name = this._hass.user?.name || "";
@@ -1387,7 +1534,7 @@ class HomePanelCard extends HTMLElement {
   }
 
   // ─── Состояние устройств ───
-  sig_health() { return this._sig([BACKUP, ZIGBEE], `${Object.values(this._hass.states).filter((s) => s.state === "unavailable" || s.attributes.device_class === "battery").map((s) => s.state).join(",")}|${this._v(DOOR)}|${this._v(QREVO.waterShortage)}`); }
+  sig_health() { return this._sig([BACKUP, ZIGBEE], `${Object.values(this._hass.states).filter((s) => s.state === "unavailable" || s.attributes.device_class === "battery").map((s) => s.state).join(",")}|${this._v(DOOR)}|${this._v(QREVO.waterShortage)}|${[LITTER.binFull, LITTER.tankLow, LITTER.drumLow, LITTER.problem, LITTER.online].map((e) => this._v(e)).join()}`); }
   r_health() {
     const is = this._issues().filter((i) => i.icon !== "door-open" && i.icon !== "cctv");
     const b = Date.parse(this._v(BACKUP));
@@ -1628,6 +1775,156 @@ class HomePanelCard extends HTMLElement {
     return `<div class="ev"><span class="ei" style="color:${e.c}">${ico(e.icon)}</span><span class="et">${esc(e.t)}${e.sub ? `<small>${esc(e.sub)}</small>` : ""}</span><span class="ew">${agoShort(e.when)}</span></div>`;
   }
 
+  // ─── Лоток ───
+  _lbState() {
+    const task = this._v(LITTER.task), online = this._on(LITTER.online), s = this._s(LITTER.online);
+    if (!s || s.state === "unavailable") return { mode: "off", color: "var(--faint)", text: "Нет данных", task };
+    if (!online) return { mode: "off", color: "var(--faint)", text: "Не в сети", task };
+    if (this._on(LITTER.problem)) return { mode: "bad", color: "var(--red)", text: "Неисправность", task };
+    if (task === "cat_inside") return { mode: "cat", color: "var(--amber)", text: LITTER_TASK.cat_inside, task };
+    if (task && task !== "idle" && LITTER_TASK[task]) return { mode: "clean", color: "var(--violet)", text: LITTER_TASK[task], task };
+    if (this._on(LITTER.binFull)) return { mode: "bad", color: "var(--red)", text: "Ящик полон", task };
+    return { mode: "idle", color: "var(--green)", text: LITTER_TASK.idle, task };
+  }
+  // Когда лоток уберёт после последнего визита (если автоуборка включена и после визита ещё не убирал).
+  _lbEta() {
+    const v = Date.parse(this._v(LITTER.lastVisit)), c = Date.parse(this._v(LITTER.lastClean));
+    if (!this._on(LITTER.auto) || isNaN(v) || (!isNaN(c) && c >= v)) return null;
+    const delay = this._lbPending ?? this._n(LITTER.delay) ?? 0, dur = this._n(LITTER.dur) || 0;
+    return v + (dur + delay * 60) * 1000;
+  }
+  _lbVisits() {
+    return (this._a(LITTER.visits, "visits") || []).map((x) => ({ t: Date.parse(x.time), w: x.weight_g, d: x.duration_s }))
+      .filter((x) => !isNaN(x.t)).sort((a, b) => a.t - b.t);
+  }
+  sig_litter() { return this._sig(Object.values(LITTER), Math.floor(Date.now() / 60000) + "|" + (this._lbPending ?? "")); }
+  r_litter() {
+    if (!this._s(LITTER.online)) return `<div class="card-h"><h2>Лоток</h2></div><div class="empty">Интеграция homerunPET не найдена</div>`;
+    const st = this._lbState(), now = Date.now(), online = st.mode !== "off";
+    const lv = Date.parse(this._v(LITTER.lastVisit)), lc = Date.parse(this._v(LITTER.lastClean)), eta = this._lbEta();
+    let sub;
+    if (st.mode === "clean") sub = "барабан вращается — не мешайте";
+    else if (st.mode === "cat") sub = this._on(LITTER.auto) ? "уберёт, когда кошка выйдет" : "автоуборка выключена";
+    else if (eta) sub = eta > now ? `уберёт в ${hhmm(new Date(eta))} · через ${Math.max(1, Math.round((eta - now) / 60000))} мин` : "сейчас начнёт уборку";
+    else if (!isNaN(lc)) sub = `убрано ${agoShort(lc)} назад`;
+    else sub = "";
+    const tank = (id, icon, name, okText, badText) => {
+      const s = this._s(id), bad = this._on(id), unk = !s || s.state === "unavailable" || s.state === "unknown";
+      return `<div class="lt ${unk ? "unk" : bad ? "bad" : "ok"}"><span class="li">${ico(icon)}</span><span class="ln">${name}</span>
+        <span class="lv">${unk ? "—" : bad ? badText : okText}</span></div>`;
+    };
+    return `<div class="card-h"><h2>Лоток</h2><div class="meta">${online ? `<span class="ldot"></span>в сети · коридор` : `<b class="accent-red">не в сети</b>`}</div></div>
+      <div class="lbx">
+        <div class="lart">${litterSvg(st.mode, st.color)}</div>
+        <div class="linfo"><div class="lst" style="color:${st.color}">${esc(st.text)}</div>
+          <div class="lsub">${esc(sub)}</div>
+          <div class="lfacts"><span>${ico("paw")}<b>${fmt0(this._n(LITTER.visits))}</b> ${plural(this._n(LITTER.visits) || 0, ["визит", "визита", "визитов"])} сегодня</span>
+            <span>${ico("broom")}<b>${fmt0(this._n(LITTER.cleans))}</b> ${plural(this._n(LITTER.cleans) || 0, ["уборка", "уборки", "уборок"])}</span>
+            ${!isNaN(lv) ? `<span>${ico("clock-outline")}визит ${agoShort(lv)} назад</span>` : ""}</div></div>
+      </div>
+      <div class="ltanks">
+        ${tank(LITTER.binFull, "delete-variant", "Ящик отходов", "пустой", "полон")}
+        ${tank(LITTER.tankLow, "pail-outline", "Бак наполнителя", "есть", "мало")}
+        ${tank(LITTER.drumLow, "grain", "Барабан", "хватает", "мало")}
+      </div>
+      <div class="lbtns"><button class="bigbtn" data-act="lbclean" ${online ? "" : "disabled"}>${ico("broom")}Убрать сейчас</button>
+        <button class="bigbtn ghost" data-act="lbadd" ${online ? "" : "disabled"}>${ico("tray-arrow-down")}Досыпать</button></div>`;
+  }
+
+  sig_litset() { return this._sig([LITTER.delay, LITTER.online, ...LITTER_SWITCHES.map((x) => x[0])], String(this._lbPending ?? "")); }
+  r_litset() {
+    if (!this._s(LITTER.delay)) return `<div class="card-h"><h2>Настройки лотка</h2></div><div class="empty">Нет данных</div>`;
+    const auto = this._on(LITTER.auto), cur = this._lbPending ?? this._n(LITTER.delay), dis = this._v(LITTER.delay) === "unavailable";
+    const fw = this._v(LITTER.fw);
+    return `<div class="card-h"><h2>Настройки лотка</h2></div>
+      <div class="ldel ${auto ? "" : "off"}">
+        <div class="ldh"><div><div class="ldk">Уборка после ухода кошки</div><div class="lds">${auto ? "через столько минут лоток уберёт сам" : "автоуборка выключена"}</div></div>
+          <div class="ldv"><button data-act="lbdelay" data-d="-1" ${dis || cur <= 1 ? "disabled" : ""} aria-label="Меньше">${ico("minus")}</button>
+            <b>${fmt0(cur)}<small>мин</small></b>
+            <button data-act="lbdelay" data-d="1" ${dis || cur >= 60 ? "disabled" : ""} aria-label="Больше">${ico("plus")}</button></div></div>
+        <div class="lpre">${LITTER_DELAYS.map((m) => `<button class="${m === cur ? "on" : ""}" data-act="lbdelay" data-v="${m}" ${dis ? "disabled" : ""}>${m}</button>`).join("")}</div>
+      </div>
+      <div class="lsw">${LITTER_SWITCHES.map(([e, n, sub, icon]) => { const s = this._s(e); if (!s) return "";
+        const on = s.state === "on", na = s.state === "unavailable";
+        return `<div class="lrow ${na ? "na" : ""}"><span class="lri ${on ? "on" : ""}">${ico(icon)}</span><span class="ln">${n}<small>${sub}</small></span>
+          <button class="tog cy ${on ? "on" : ""}" data-act="toggle" data-e="${e}" ${na ? "disabled" : ""} aria-label="${esc(n)}"></button></div>`; }).join("")}</div>
+      ${fw && fw !== "unavailable" ? `<div class="lfw">${ico("chip")}Прошивка ${esc(fw)}</div>` : ""}`;
+  }
+
+  sig_catst() { return this._sig([LITTER.visits, LITTER.weight, LITTER.dur, LITTER.cleans, LITTER.lastVisit],
+    Math.floor(Date.now() / 60000) + "|" + Object.values(this._lhist || {}).reduce((s, a) => s + a.length, 0)); }
+  // По дням за неделю: визиты (максимум счётчика за день) и средний вес.
+  _lbWeek() {
+    const H = this._lhist || {}, days = [], d0 = new Date(); d0.setHours(0, 0, 0, 0);
+    for (let i = 6; i >= 0; i--) {
+      const a = d0.getTime() - i * 86400e3, b = a + 86400e3, inDay = (p) => p[0] >= a && p[0] < b;
+      const vis = (H[LITTER.visits] || []).filter(inDay).map((p) => p[1]), ws = (H[LITTER.weight] || []).filter(inDay).map((p) => p[1]);
+      if (i === 0) { const v = this._n(LITTER.visits), w = this._n(LITTER.weight); if (v != null) vis.push(v); if (w != null) ws.push(w); }
+      days.push({ t: a, visits: vis.length ? Math.max(...vis) : null, weight: avg(ws) });
+    }
+    return days;
+  }
+  r_catst() {
+    if (!this._s(LITTER.visits)) return `<div class="card-h"><h2>Кошка</h2></div><div class="empty">Нет данных</div>`;
+    const visits = this._lbVisits(), w = this._n(LITTER.weight), week = this._lbWeek();
+    const durs = visits.map((x) => x.d).filter((x) => x != null), avgDur = avg(durs);
+    const wk = week.filter((d) => d.weight != null), w0 = wk.length > 1 ? wk[0].weight : null;
+    const dW = w != null && w0 != null ? w - w0 : null;
+    const vDays = week.filter((d) => d.visits != null), avgVis = avg(vDays.map((d) => d.visits));
+    const stat = (k, v, s) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+    // Шкала дня: визиты точками, 0–24 ч. Подписи — обычным текстом, чтобы не растягивались вместе с рисунком.
+    const W = 600, Hh = 44, day0 = new Date().setHours(0, 0, 0, 0), X = (ts) => 8 + ((ts - day0) / 86400e3) * (W - 16);
+    let tl = `<svg class="ltl" viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none"><line class="gl" x1="8" x2="${W - 8}" y1="26" y2="26"/>`;
+    for (let h = 0; h <= 24; h += 6) { const x = 8 + (h / 24) * (W - 16); tl += `<line class="gl" x1="${x}" x2="${x}" y1="22" y2="30"/>`; }
+    const nx = X(Date.now()); tl += `<line x1="${nx}" x2="${nx}" y1="4" y2="34" stroke="var(--cyan)" stroke-width="1.5" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/></svg>`;
+    const dots = visits.map((v) => { const r = 9 + clamp((v.d || 60) / 30, 0, 8);
+      return `<i style="left:${((v.t - day0) / 86400e3 * 100).toFixed(2)}%;width:${r}px;height:${r}px" title="${hhmm(new Date(v.t))} · ${v.w ? fmt2(v.w / 1000) + " кг · " : ""}${fmtDur(v.d)}"></i>`; }).join("");
+    tl = `<div class="ltlw">${tl}<div class="ltd">${dots}</div></div><div class="ltax"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>`;
+    // Неделя: столбики визитов и линия веса.
+    const maxV = Math.max(4, ...week.map((d) => d.visits || 0));
+    const ws2 = week.map((d) => d.weight).filter((x) => x != null), wlo = ws2.length ? Math.min(...ws2) - 0.15 : 0, whi = ws2.length ? Math.max(...ws2) + 0.15 : 1;
+    const bars = week.map((d, i) => { const today = i === 6, h = d.visits != null ? Math.max(6, (d.visits / maxV) * 100) : 0;
+      const wy = d.weight != null ? 100 - ((d.weight - wlo) / (whi - wlo || 1)) * 100 : null;
+      return `<div class="lwd ${today ? "today" : ""}" title="${d.visits != null ? d.visits + " визитов" : "нет данных"}${d.weight != null ? " · " + fmt2(d.weight) + " кг" : ""}">
+        <div class="lwb"><i style="height:${h}%"></i>${wy != null ? `<s style="bottom:${(100 - wy).toFixed(1)}%"></s>` : ""}<em>${d.visits ?? ""}</em></div>
+        <span>${today ? "сегодня" : WD[new Date(d.t).getDay()]}</span></div>`; }).join("");
+    const rows = visits.slice().reverse().slice(0, 6).map((v) =>
+      `<div class="ev"><span class="ei" style="color:var(--amber)">${ico("paw")}</span><span class="et">${hhmm(new Date(v.t))}<small>${v.w ? fmt2(v.w / 1000) + " кг" : "вес —"}</small></span><span class="ew">${fmtDur(v.d)}</span></div>`).join("");
+    return `<div class="card-h"><h2>Кошка</h2><div class="meta">${visits.length ? `последний визит <b>${hhmm(new Date(visits[visits.length - 1].t))}</b>` : "сегодня визитов не было"}</div></div>
+      <div class="stats lstats">
+        ${stat("Вес", `${fmt2(w)}<small> кг</small>`, dW != null ? `${dW >= 0 ? "+" : "−"}${fmt2(Math.abs(dW))} кг за неделю` : "по последнему визиту")}
+        ${stat("Визитов", fmt0(this._n(LITTER.visits)), avgVis != null && vDays.length > 1 ? `в среднем ${fmt1(avgVis)} в день` : "сегодня")}
+        ${stat("В лотке", fmtDur(avgDur), "в среднем за визит")}
+        ${stat("Уборок", fmt0(this._n(LITTER.cleans)), "сегодня")}
+      </div>
+      <div class="lsec">Сегодня</div>${tl}
+      <div class="lsec">Неделя<span><i class="lg-b"></i>визиты <i class="lg-w"></i>вес</span></div><div class="lweek">${bars}</div>
+      ${rows ? `<div class="lsec">Визиты</div><div class="feed lfeed">${rows}</div>` : ""}`;
+  }
+  async _loadLitterHistory() {
+    const h = this._hass; if (!h?.callWS || !h.states[LITTER.visits]) return;
+    try {
+      const res = await h.callWS({ type: "history/history_during_period", start_time: new Date(Date.now() - 7 * 86400e3).toISOString(),
+        entity_ids: [LITTER.visits, LITTER.weight], minimal_response: true, no_attributes: true, significant_changes_only: false });
+      const out = {};
+      for (const id of [LITTER.visits, LITTER.weight]) {
+        out[id] = (res?.[id] || []).map((x) => [(x.lu ?? x.lc ?? 0) * 1000, parseFloat(x.s)]).filter((p) => !isNaN(p[1]) && p[0] > 0);
+      }
+      this._lhist = out; this._sigs.catst = null; this._schedule();
+    } catch (e) { console.warn("home-panel litter history", e); }
+  }
+  // Задержку двигают кнопками подряд — отправляем последнее значение через 0,8 с.
+  _lbDelay(d) {
+    const cur = this._lbPending ?? this._n(LITTER.delay) ?? 5;
+    const v = clamp(d.v != null ? +d.v : cur + +d.d, 1, 60);
+    this._lbPending = v; this._sigs.litset = null; this._sigs.litter = null; this._update();
+    clearTimeout(this._lbT);
+    this._lbT = setTimeout(() => {
+      Promise.resolve(this._call("number", "set_value", { entity_id: LITTER.delay, value: v }, `Лоток уберёт через ${v} мин после визита`))
+        .finally(() => setTimeout(() => { this._lbPending = null; this._sigs.litset = null; this._schedule(); }, 1500));
+    }, 800);
+  }
+
   // ─── Действия ───
   _call(domain, service, data, toast) {
     const p = this._hass.callService(domain, service, data);
@@ -1732,6 +2029,9 @@ class HomePanelCard extends HTMLElement {
       case "ttsmode": this._ttsMode = d.m; return this._renderModal(true);
       case "tts": return this._tts();
       case "phrase": { const i = this.shadowRoot.getElementById("tts-text"); if (i) { i.value = d.t; i.focus(); } return; }
+      case "lbclean": return this._confirm("Убрать лоток сейчас?", () => this._call("button", "press", { entity_id: LITTER.clean }, "Лоток начал уборку"), "Убрать", "broom");
+      case "lbadd": return this._confirm("Досыпать одну порцию наполнителя из бака?", () => this._call("button", "press", { entity_id: LITTER.add }, "Лоток досыпает наполнитель"), "Досыпать", "tray-arrow-down");
+      case "lbdelay": return this._lbDelay(d);
       case "alloff": return this._confirm("Выключить весь свет в квартире?", () => this._call("homeassistant", "turn_off", { entity_id: ALL_LIGHTS }, "Весь свет выключен"), "Выключить", "lightbulb-group-off-outline");
       case "allon": return this._confirm("Включить основной свет во всех комнатах?", () => this._call("homeassistant", "turn_on", { entity_id: MAIN_LIGHTS }, "Свет включён везде"), "Включить", "lightbulb-group-outline");
       case "cleanroom": {
