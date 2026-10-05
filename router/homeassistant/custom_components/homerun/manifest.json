@@ -1,0 +1,12 @@
+{
+  "domain": "homerun",
+  "name": "homerunPET",
+  "codeowners": [],
+  "config_flow": true,
+  "documentation": "https://github.com/folkerist/bpi-r4-deploy/tree/main/router/homeassistant/custom_components/homerun",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/folkerist/bpi-r4-deploy/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

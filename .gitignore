@@ -21,3 +21,5 @@ my_files/luci-app-wifimgr/docs/test-results-*.md
 # Снимок реального HA для превью панели (личные данные, токены камеры)
 router/homeassistant/panel/preview/*.local.json
 router/homeassistant/panel/preview/vendor/
+__pycache__/
+.pytest_cache/
