@@ -280,6 +280,7 @@ class HomerunClient:
         await self.action(serial, "ManualShovel", '{"value":null}')
 
     async def level_litter(self, serial: str) -> None:
+        """Not on the CS106 (code 4000); the app hides it for EZVIZ boxes."""
         await self.action(serial, "ManualLayingCatLitter", "1")
 
     async def refill_litter(self, serial: str, portions: int = 1) -> None:

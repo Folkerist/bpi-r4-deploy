@@ -140,9 +140,6 @@
       "clean_now": {
         "name": "Clean now"
       },
-      "level_litter": {
-        "name": "Level litter"
-      },
       "refill_litter": {
         "name": "Add litter"
       }

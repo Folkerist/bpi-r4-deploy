@@ -1,4 +1,9 @@
-"""Buttons: clean now, level litter, refill litter (one portion)."""
+"""Buttons: clean now, add litter (one portion).
+
+The app offers exactly these on EZVIZ boxes (DataUtils.getCatLitterBoxActionList);
+ManualLayingCatLitter answers code 4000 on the CS106, manual deodorization needs a
+bound camera module.
+"""
 
 from __future__ import annotations
 
@@ -22,7 +27,6 @@ class HomerunButtonDescription(ButtonEntityDescription):
 
 BUTTONS: tuple[HomerunButtonDescription, ...] = (
     HomerunButtonDescription(key="clean_now", press=lambda c, s: c.clean_now(s)),
-    HomerunButtonDescription(key="level_litter", press=lambda c, s: c.level_litter(s)),
     HomerunButtonDescription(key="refill_litter", press=lambda c, s: c.refill_litter(s, 1)),
 )
 

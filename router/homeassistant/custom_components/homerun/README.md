@@ -47,7 +47,6 @@ sh router/homeassistant/homerun-deploy.sh   # копирует в /config/custom
 | `switch` Ночной режим | `NightMode.Switch`; окно `StartTimeInt`/`EndTimeInt` (сек. от полуночи) остаётся как на лотке |
 | `switch` Защита от детей / Защита котят / Автодосыпание / Автоприкапывание | `ChildLock` / `KittenProtection` / `AutomaticSandAddingSwitch` / `AutomaticBurial` |
 | `button` Убрать сейчас | действие `ManualShovel`, тело `{"value":null}` |
-| `button` Разровнять наполнитель | действие `ManualLayingCatLitter`, тело `1` |
 | `button` Досыпать наполнитель | действие `AutomaticSand`, тело `1` (одна порция) |
 | `sensor` Работа | `MachineTask`: ожидание, уборка, досыпание, чистка, разравнивание, вход поднят, возврат, кошка внутри |
 | `sensor` Визитов сегодня (+ список визитов в атрибутах), Последний визит, Вес кошки, Длительность визита | `/app/v1/devicesToiletData/list` (вес в граммах, длительность в секундах) |
@@ -66,7 +65,7 @@ sh router/homeassistant/homerun-deploy.sh   # копирует в /config/custom
 управление недоступно: облако не может передать ему команду.
 
 Не вынесены намеренно: `Operate` (поднять/сбросить вход), `SystemReset` (сброс к заводским),
-`RemoteReboot`, `DeviceMode` и `ThresholdAddLitter` (значения не подтверждены на этой прошивке).
+`RemoteReboot`, `ManualLayingCatLitter`, `ManualAirClean`, `DeviceMode` и `ThresholdAddLitter` (значения не подтверждены на этой прошивке).
 
 ## Протокол (из APK 3.6.7 и живой проверки)
 
@@ -86,9 +85,9 @@ sh router/homeassistant/homerun-deploy.sh   # копирует в /config/custom
 - Пароль при входе: `MD5(appkey + пароль + соль)[7:27]` (`api/signing.py`).
 
 Проверено вживую 05.10.2026: чтение всех настроек, ёмкостей, визитов и уборок; запись
-`AutoShovel` (тем же значением, 5 мин) принята облаком. Команды «Убрать сейчас», «Разровнять»,
-«Досыпать» в живую не нажимались: тела сверены с кодом приложения
-(`DeviceCatLitterBoxFragment.SetManualShovel` и др.).
+`AutoShovel` (тем же значением, 5 мин) принята облаком. «Убрать сейчас» работает из HA. Набор кнопок — как в приложении для этой модели
+(`DataUtils.getCatLitterBoxActionList`): `ManualLayingCatLitter` («разровнять») CS106 отвечает
+кодом 4000, ручное удаление запаха (`ManualAirClean`) уходит на модуль-камеру, которой у CS106 нет.
 
 ### Не подтверждено
 
