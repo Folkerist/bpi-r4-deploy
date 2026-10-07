@@ -35,3 +35,10 @@ PPE (flow_offloading_hw) ускоряет только кабель, до Wi-Fi 
 - Ожидается: +2 hwmon для PHY на `mdio-bus:18` и `mdio-bus:1c` (`mdio_bus:18`/`mdio_bus:1c`), ~45–55 °C; WAN/SFP работают как раньше.
 - Эталон со стандартным модулем (07.10.2026): WAN (AS21010 на `mdio-bus:1c`) ↔ RB5009, 1000/Full, ping `-s 1400` 60/60, 0% loss, avg 0.53 ms, errors 0 (dropped RX 6 / TX 4 при поднятии линка). Сохранено в `/root/wan-before.txt`, `/root/as21-before.txt`. На время теста: `network.wan.defaultroute=0`, `peerdns=0`, потом удалить и `ifdown wan`.
 - Результат (08.10.2026, r36928, 6.18.55): модуль из PR загружен (taint O), появились `mdio_bus:18` 50.7 °C и `mdio_bus:1c` 60.3 °C, WAN 1000/Full, ping 60/60. Модуль лежит в `/overlay/upper/lib/modules/6.18.55/as21xxx.ko` — при следующем обновлении НЕ сохранять (prepare исключает lib/modules/), иначе 10G-порты не поднимутся на другом ядре.
+
+## Обновление r36539 → r36928 (08.10.2026)
+- owut upgrade с `-r forkop,luci-app-forkop,luci-i18n-forkop-ru,sing-box-extended,byedpi,luci-theme-proton2025,luci-app-temp-status,luci-i18n-temp-status-ru`.
+- Ловушка: первая загрузка на встроенном overlay, а вторая подхватила СТАРЫЙ extroot (uuid-проверка на fitblk проходит). Лечили: `uci -c <fitrw>/upper/etc/config set fstab.extroot.enabled=0`, потом extroot пересоздан начисто (UUID d52d95ff-…), архив старого: `/mnt/nvme/old-extroot-r36539.tgz`. sysupgrade-prepare.sh теперь сам кладёт uci-defaults, выключающий старый extroot.
+- docker-graceful: перезапуск контейнеров после загрузки (unless-stopped + docker stop = не стартуют).
+- Вернули вручную: тема proton2025 (install.sh), luci-app-temp-status 0.8.1 (+ru, тянет luci-lua-runtime). forkop/sing-box/byedpi НЕ ставили (не используются, конфиги сохранены).
+- as21xxx.ko из PR 24990 лежит в overlay (taint O) — только для 6.18.55.
