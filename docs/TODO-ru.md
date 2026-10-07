@@ -33,3 +33,4 @@ PPE (flow_offloading_hw) ускоряет только кабель, до Wi-Fi 
 - План: после обновления до свежего snapshot собрать `as21xxx.ko` с патчами 978/979 из PR в официальном SDK той же сборки, подменить `/lib/modules/$(uname -r)/as21xxx.ko` (оригинал сохранить), перезагрузиться.
 - До патча (r36539, 6.18.52): 11 hwmon, `hwmon4..7` = `mdio_bus:10_mii:00..03` (MxL862xx), датчиков AS21010 нет. Список в `/root/hwmon-before.txt`.
 - Ожидается: +2 hwmon для PHY на `mdio-bus:18` и `mdio-bus:1c` (`mdio_bus:18`/`mdio_bus:1c`), ~45–55 °C; WAN/SFP работают как раньше.
+- Эталон со стандартным модулем (07.10.2026): WAN (AS21010 на `mdio-bus:1c`) ↔ RB5009, 1000/Full, ping `-s 1400` 60/60, 0% loss, avg 0.53 ms, errors 0 (dropped RX 6 / TX 4 при поднятии линка). Сохранено в `/root/wan-before.txt`, `/root/as21-before.txt`. На время теста: `network.wan.defaultroute=0`, `peerdns=0`, потом удалить и `ifdown wan`.
