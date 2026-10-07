@@ -43,7 +43,7 @@ sysupgrade -l 2>/dev/null | sort -u > "$KEEP"
 echo; echo "== files on the overlay that belong to no package (added by hand / by scripts)"
 echo "   KEEP = saved by sysupgrade, LOST = will disappear"
 find "$UP" -xdev -type f 2>/dev/null | sed "s#^$UP##" | grep -vE \
-	'^/(etc/config/|etc/apk/|lib/apk/|usr/lib/apk/|etc/uci-defaults/|etc/\.extroot-uuid|etc/\.|tmp/|var/|root/\.ash_history)' |
+	'^/(etc/config/|etc/apk/|lib/apk/|usr/lib/apk/|etc/uci-defaults/|etc/\.extroot-uuid|etc/\.|etc/board\.json|etc/urandom\.seed|usr/share/sing-box/|tmp/|var/|root/\.ash_history)' |
 while read -r f; do
 	owned "$f" && continue
 	if grep -qxF "$f" "$KEEP"; then echo "KEEP $f"; else echo "LOST $f"; fi
