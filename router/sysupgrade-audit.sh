@@ -76,6 +76,10 @@ echo; echo "== docker (data outside the firmware)"
 docker ps -a --format '{{.Names}}  {{.Image}}  {{.Status}}' 2>/dev/null
 uci -q get dockerd.globals.data_root
 
+echo; echo "== size of the settings backup (kept files, must fit in RAM)"
+du -sh /root 2>/dev/null
+sysupgrade -b /tmp/.bk.$$.tgz >/dev/null 2>&1 && ls -lh /tmp/.bk.$$.tgz | awk '{print "backup:", $5}'; rm -f /tmp/.bk.$$.tgz
+
 echo; echo "== disks"
 df -h | grep -E '^/dev/'
 } > "$OUT" 2>&1
