@@ -46,7 +46,7 @@ CPU                                         : MediaTek MT7988A # Main CPU/SoC, e
 CPU Cores_numcores_                         : 4 # Number of CPU cores
 CPU MHz                                     : 1800 # pure number without 'MHz'
 Flash MB_mbflashs                           : 256NAND, eMMC, microSD # CTRL+click for multiselect
-RAM MB_mbram                                : 8192 # .
+RAM MB_mbram                                : more than 4GB # .
 Ethernet 100M ports_numethport              : - # Number of 100Mbit ethernet ports
 Ethernet 1Gbit ports_numethport             : 1 # Number of 1Gbit ethernet ports
 Ethernet 2.5Gbit ports_numethport           : 4 # Number of 2.5Gbit ethernet ports
