@@ -1,5 +1,7 @@
 # OpenWrt issue: BPI-R4 Pro 8X PCIe link down (pextp clocks gated by clk_disable_unused)
 
+> Отправлено: https://github.com/openwrt/openwrt/issues/25706
+
 > Как отправить: https://github.com/openwrt/openwrt/issues/new/choose → «Bug report».
 > Заголовок взять из строки **Title** ниже, остальное раскидать по полям формы
 > (или вставить целиком в описание). Патч 980 — в `patches/pcie-6.18/` этого репозитория,
