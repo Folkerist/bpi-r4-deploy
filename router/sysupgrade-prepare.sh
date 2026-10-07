@@ -55,6 +55,24 @@ for p in $THIRD; do grep -qxF "$p" /root/pkgs-world.txt && echo "$p" >> /root/pk
 grep -vxF -f /root/pkgs-third-party.txt /root/pkgs-world.txt > /root/pkgs-asu.txt
 echo "pkgs: $(wc -l < /root/pkgs-world.txt) installed, third-party (not buildable by ASU): $(tr '\n' ' ' < /root/pkgs-third-party.txt)"
 
+# After a sysupgrade the first boot runs on the internal overlay (fstab is restored late), but
+# the next boot mounts the OLD extroot again (its uuid check passes on this eMMC/fitblk layout):
+# old r365xx files on top of the new firmware. Disable the extroot on the first boot of a
+# different firmware revision; recreate it fresh afterwards.
+if [ "$(uci -q get fstab.extroot.enabled)" = 1 ]; then
+	. /etc/openwrt_release
+	cat > /etc/uci-defaults/99-disable-old-extroot <<EOT
+#!/bin/sh
+. /etc/openwrt_release
+[ "\$DISTRIB_REVISION" = "$DISTRIB_REVISION" ] && exit 1
+uci -q set fstab.extroot.enabled='0' && uci commit fstab
+logger -t sysupgrade "old extroot disabled after upgrade from $DISTRIB_REVISION"
+exit 0
+EOT
+	keep /etc/uci-defaults/99-disable-old-extroot
+	echo "+ extroot will be disabled on the first boot of the new firmware"
+fi
+
 # where the extroot lives now (needed to re-attach it after the upgrade)
 block info 2>/dev/null | grep mmcblk0p6 > /root/extroot-before-upgrade.txt
 uci -q show fstab.extroot >> /root/extroot-before-upgrade.txt

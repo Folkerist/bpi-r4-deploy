@@ -23,6 +23,8 @@
   Ошибки mDNS `Network is unreachable` на интерфейсах без IPv6 — шум.
 - `/etc/init.d/docker-graceful` (router/docker/docker-graceful): корректная остановка контейнеров при
   перезагрузке (раньше при жёсткой остановке портился `.storage/bluetooth.passive_update_processor`).
+  С 08.10.2026 запоминает работавшие контейнеры в `/etc/docker-graceful.running` и запускает их при загрузке:
+  `docker stop` считается ручной остановкой, и `restart: unless-stopped` после перезагрузки их не поднимал.
 - HACS: предлагалась установка `docker exec homeassistant bash -c 'wget -qO - https://get.hacs.xyz | bash -'`;
   состояние не подтверждено — проверить `ls /mnt/nvme/homeassistant/config/custom_components/`.
 - HACS установлен (подтверждено пользователем).
