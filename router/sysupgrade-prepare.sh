@@ -18,7 +18,7 @@ for l in /etc/rc.d/*docker-graceful; do keep "$l"; done
 UP=/overlay/upper
 sysupgrade -l 2>/dev/null | sort -u > /tmp/.keep.$$
 find "$UP" -xdev -type f 2>/dev/null | sed "s#^$UP##" | grep -vE \
-	'^/(etc/config/|etc/apk/|lib/apk/|usr/lib/apk/|etc/uci-defaults/|etc/\.extroot-uuid|etc/\.|etc/board\.json|etc/urandom\.seed|usr/share/sing-box/|tmp/|var/|root/\.ash_history|usr/lib/python|usr/lib/node_modules|opt/)' |
+	'^/(etc/config/|etc/apk/|lib/apk/|usr/lib/apk/|etc/uci-defaults/|etc/\.extroot-uuid|etc/\.|etc/board\.json|etc/urandom\.seed|usr/share/sing-box/|tmp/|var/|root/\.ash_history|usr/lib/python|usr/lib/node_modules|opt/|lib/modules/)' |
 while read -r f; do
 	grep -qxF "$f" /tmp/.keep.$$ && continue
 	apk info -W "$f" >/dev/null 2>&1 && continue
