@@ -36,7 +36,7 @@ Supported in **SNAPSHOT** (main branch, kernel 6.18) only. Not in 25.12 or older
   "paging": false,
   "rotate": true,
   "shownColumns": ["model", "version", "supportedcurrentrel", "firmwareopenwrtinstallurl", "firmwareopenwrtupgradeurl", "firmwareoemstockurl"],
-  "filterColumns": {"brand": "^Sinovoip$", "model": "^Banana Pi BPi-R4 Pro"}
+  "filterColumns": {"brand": "^Sinovoip$", "model": "^Banana Pi BPI-R4 Pro"}
 } -->
 
 Images: [[https://firmware-selector.openwrt.org/?version=SNAPSHOT&target=mediatek%2Ffilogic&id=bananapi_bpi-r4-pro-8x|Firmware Selector (8X)]], [[https://firmware-selector.openwrt.org/?version=SNAPSHOT&target=mediatek%2Ffilogic&id=bananapi_bpi-r4-pro-4e|Firmware Selector (4E)]].
