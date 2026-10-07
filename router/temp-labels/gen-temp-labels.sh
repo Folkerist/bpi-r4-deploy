@@ -36,6 +36,13 @@ for h in /sys/class/hwmon/hwmon*; do
 			[ "$(hexdump -v -e '/1 "%02x"' "$d/of_node/phy-handle" 2>/dev/null)" = "$ph" ] && port=$(basename "$d")
 		done
 	fi
+	# 10G copper PHYs (Aeonsemi AS21010): the LAN one is unattached while its port is switched to SFP
+	case "$(basename "$(readlink -f $h/device/driver 2>/dev/null)")" in
+		*Aeonsemi*|*AS21*)
+			if [ -n "$port" ]; then add "$(cat $h/name) / temp1" "10G $port PHY (AS21010)"
+			else add "$(cat $h/name) / temp1" "10G LAN PHY (AS21010, порт в режиме SFP)"; fi
+			continue ;;
+	esac
 	[ -n "$port" ] && add "$(cat $h/name) / temp1" "Port $port PHY" || add "$(cat $h/name) / temp1" "Switch PHY ${h##*hwmon}"
 done
 
