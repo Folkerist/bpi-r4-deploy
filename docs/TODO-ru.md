@@ -28,3 +28,8 @@ PPE (flow_offloading_hw) ускоряет только кабель, до Wi-Fi 
 ## 3. Upstream
 
 - Отправить в OpenWrt патч 980 (`pextp_p0..p3_sel` как CLK_IS_CRITICAL), чтобы убрать `clk_ignore_unused`.
+
+## Tested-by для openwrt/openwrt#24990 (температура AS21xxx)
+- План: после обновления до свежего snapshot собрать `as21xxx.ko` с патчами 978/979 из PR в официальном SDK той же сборки, подменить `/lib/modules/$(uname -r)/as21xxx.ko` (оригинал сохранить), перезагрузиться.
+- До патча (r36539, 6.18.52): 11 hwmon, `hwmon4..7` = `mdio_bus:10_mii:00..03` (MxL862xx), датчиков AS21010 нет. Список в `/root/hwmon-before.txt`.
+- Ожидается: +2 hwmon для PHY на `mdio-bus:18` и `mdio-bus:1c` (`mdio_bus:18`/`mdio_bus:1c`), ~45–55 °C; WAN/SFP работают как раньше.
