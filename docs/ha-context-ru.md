@@ -20,6 +20,11 @@
 - HA: `http://<адрес роутера>:8123`, интеграция Matter подключена: `ws://localhost:5580/ws`.
 - Matter Server при старте ходит в DCL (`on.dcl.csa-iot.org`) — напрямую из РФ недоступен, пущен через
   forkop/туннель (`domain_suffix csa-iot.org`). Порт 5580 открывается только после загрузки vendor info.
+  После переезда за RB5009 (forkop выключен): `csa-iot.org` идёт через mihomo на RB5009 (DNS static FWD →
+  MihomoProxyRoS, группа category-anticensorship). Напрямую DCL отвечает 200, но данные зависают (замедление),
+  и сервер висит на `Fetching the latest vendor info from DCL` без таймаута. Лечение 08.10.2026: на RB5009
+  `/ip dns cache flush` (был закэширован прямой адрес), на BPI `/etc/init.d/dnsmasq restart`,
+  `docker restart matter-server`; проверка `curl https://on.dcl.csa-iot.org/dcl/vendorinfo/vendors` ~3 с.
   Ошибки mDNS `Network is unreachable` на интерфейсах без IPv6 — шум.
 - `/etc/init.d/docker-graceful` (router/docker/docker-graceful): корректная остановка контейнеров при
   перезагрузке (раньше при жёсткой остановке портился `.storage/bluetooth.passive_update_processor`).
