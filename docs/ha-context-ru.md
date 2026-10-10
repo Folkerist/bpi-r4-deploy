@@ -278,6 +278,13 @@
   srcnat masquerade out-interface=bridge dst!=192.168.88.0/24. На BPI-R4 `router/lte-backup/lte-backup.sh`:
   правила `iif br-lan` → main (suppress_prefixlength 0) / table 100 (default dev wwan0, hotplug 45-lte-backup).
   Тест: при выключенном ISP-main RB5009 вышел в интернет с IP Yota. Откат: `sh /root/lte-backup.sh undo`.
+- Отдача в интернет (10.10.2026): тариф 1000/1000, но отдача была 230–350 Мбит/с и по кабелю (Mac 2,5G), и по Wi-Fi.
+  Причина — GPON-стик HSGQ-XPON-Stick в sfp-sfpplus1 RB5009 работает только на 2.5G-baseX (1G линк не поднимает),
+  flow control нет: RB5009 шлёт пачки на 2,5 Гбит/с, стик (GPON вверх ~1,24 Гбит/с) переполняется и молча теряет.
+  Исправление на RB5009: `/queue type add name=cake-up kind=cake cake-bandwidth=900M cake-diffserv=besteffort`,
+  `/queue interface set [find interface=sfp-sfpplus1] queue=cake-up` → отдача 232 → 774 Мбит/с (Яндекс, Mac по кабелю),
+  загрузка 1009. Откат: `queue=only-hardware-queue` + `/queue type remove cake-up`. Очередей simple/tree нет.
+  Wi-Fi BPI здесь ни при чём: iperf3 Pixel 9 Pro ↔ BPI на 6 ГГц (EHT 160 МГц, точка на 320) — 1,63/1,73 Гбит/с.
 - Доступ к HA снаружи нужен: через Back To Home или пир WireGuard на RB5009 (не проброс порта).
 
 ## Как работаем
