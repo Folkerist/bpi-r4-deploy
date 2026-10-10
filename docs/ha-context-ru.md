@@ -285,6 +285,9 @@
   `/queue interface set [find interface=sfp-sfpplus1] queue=cake-up` → отдача 232 → 774 Мбит/с (Яндекс, Mac по кабелю),
   загрузка 1009. Откат: `queue=only-hardware-queue` + `/queue type remove cake-up`. Очередей simple/tree нет.
   Wi-Fi BPI здесь ни при чём: iperf3 Pixel 9 Pro ↔ BPI на 6 ГГц (EHT 160 МГц, точка на 320) — 1,63/1,73 Гбит/с.
+  Проверка 11.10.2026 тестом на BPI (speedtest.sh, отдача на Selectel empty.php, 10 ГБ, 16 потоков):
+  cake 950M — 767, cake 900M — 760, без cake — 277 Мбит/с. Стик подтверждён; потолок ~765 одинаков при 900/950,
+  значит дальше ограничивает провайдер (GPON/OLT), не RB5009. Оставлен cake 950M.
 - Доступ к HA снаружи нужен: через Back To Home или пир WireGuard на RB5009 (не проброс порта).
 
 ## Как работаем
