@@ -2,7 +2,7 @@
 # /usr/bin/speedtest.sh - speed test for LuCI (Status -> Speed test).
 #   speedtest.sh start main|lte [SIZE] [MODE] [STREAMS]   run in the background
 #       main = default route, lte = bound to the modem
-#       SIZE    = 10|100|1000|10000: MB downloaded per download test (upload: at most 100 MB per test)
+#       SIZE    = 10|100|1000|10000: MB transferred per test (download and upload alike)
 #       MODE    = both|dl|up: download and upload, download only, upload only (default both)
 #       STREAMS = comma list of 1,4,8,16,32: one test per stream count and direction (default 1,4)
 #   speedtest.sh status           current/last result as JSON
@@ -15,6 +15,7 @@ ST=$DIR/state.json
 HIST=/root/speedtest-history.txt
 URL_DL=http://speedtest.selectel.ru/10GB	# 10 GiB file, supports byte ranges
 URL_UP=https://speed.cloudflare.com/__up
+UPCHUNK=104857600	# Cloudflare rejects a body over ~500 MB (413): upload in 100 MB requests
 PING_HOST=77.88.8.8
 
 uptime_s() { cut -d' ' -f1 /proc/uptime; }
@@ -54,6 +55,18 @@ show_status() {
 
 sig() { sed -n "s/^$1='\{0,1\}\([^']*\)'\{0,1\}$/\1/p" /tmp/modem-signal 2>/dev/null | head -1; }
 
+# one upload stream: BYTES of zeros in UPCHUNK requests, streamed (chunked) so nothing is held in memory;
+# stops at the test's time limit ($end) or on the first failed request
+upstream() {
+	left=$1
+	while [ $left -gt 0 ] && [ "$(uptime_s | cut -d. -f1)" -lt $end ]; do
+		c=$UPCHUNK; [ $left -lt $c ] && c=$left
+		head -c $c /dev/zero | curl $CURL -m $T -s -o /dev/null -X POST -T - \
+			-w '%{speed_upload} %{size_upload}\n' $URL_UP || break
+		left=$((left - c))
+	done
+}
+
 # one test: d<N> = download, u<N> = upload, N parallel streams sharing the volume
 measure() {
 	k=$1 n=${1#?} i=0
@@ -69,12 +82,13 @@ measure() {
 			i=$((i + 1))
 		done
 	else
-		total=$((UPMB * 1048576))
+		total=$((SIZE * 1048576))
 		prog tx $total; state true $k
 		part=$((total / n)) t0=$(uptime_s)
+		end=$(($(uptime_s | cut -d. -f1) + T))
 		while [ $i -lt $n ]; do
-			head -c $part /dev/zero | curl $CURL -m 60 -s -o /dev/null -X POST --data-binary @- \
-				-w '%{speed_upload} %{size_upload}\n' $URL_UP > $DIR/s.$i &
+			[ $i -eq $((n - 1)) ] && part=$((total - i * part))
+			upstream $part > $DIR/s.$i &
 			i=$((i + 1))
 		done
 	fi
@@ -112,9 +126,8 @@ run() {
 	PING=$(echo "$out" | sed -n 's#.*= [0-9.]*/\([0-9.]*\)/.*#\1#p')
 	LOSS=$(echo "$out" | sed -n 's/.* \([0-9]*\)% packet loss.*/\1/p')
 
-	# the whole chosen volume is downloaded (time limit only as a safety net); upload: at most 100 MB
+	# the whole chosen volume is sent each way (time limit per test only as a safety net)
 	case "$SIZE" in 10) T=30 ;; 100) T=90 ;; 1000) T=400 ;; *) T=1800 ;; esac
-	UPMB=$SIZE; [ "$UPMB" -gt 100 ] && UPMB=100
 
 	for k in $TESTS; do measure $k; done
 
@@ -136,8 +149,8 @@ case "$1" in
 			case "$n" in 1|4|8|16|32) ;; *) echo '{"error":"streams"}'; exit 1 ;; esac
 		done
 		[ -n "$STREAMS" ] || { echo '{"error":"streams"}'; exit 1; }
-		# 10 GB = 10+ GB of download traffic: fixed line only (upload is capped at 100 MB anyway)
-		[ "$2" = lte ] && [ "$SIZE" = 10000 ] && [ "$MODE" != up ] && { echo '{"error":"lte10g"}'; exit 1; }
+		# 10 GB = 10+ GB of traffic: fixed line only
+		[ "$2" = lte ] && [ "$SIZE" = 10000 ] && { echo '{"error":"lte10g"}'; exit 1; }
 		if [ -f $DIR/pid ] && kill -0 "$(cat $DIR/pid)" 2>/dev/null; then echo '{"error":"busy"}'; exit 0; fi
 		TESTS=""
 		[ "$MODE" = up ] || for n in $STREAMS; do TESTS="$TESTS d$n"; done

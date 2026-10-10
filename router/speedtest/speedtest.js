@@ -22,7 +22,7 @@ var SIZES = [
 	[ 10, '10 МБ', 'быстро' ],
 	[ 100, '100 МБ', 'точнее' ],
 	[ 1000, '1 ГБ', 'высокая точность' ],
-	[ 10000, '10 ГБ', 'для быстрой оптики, несколько минут; скачивание — только основной интернет' ]
+	[ 10000, '10 ГБ', 'для быстрой оптики, несколько минут; только основной интернет' ]
 ];
 
 var MODES = [
@@ -595,7 +595,7 @@ return view.extend({
 				row('Режим: ', this.modeButtons),
 				row('Потоки: ', this.streamButtons.concat([
 					E('span', { 'style': 'opacity:.7' }, ' можно выбрать несколько — каждый вариант будет отдельным замером') ])),
-				row('Объём скачивания: ', this.sizeButtons),
+				row('Объём: ', this.sizeButtons),
 				this.hint,
 				E('div', {}, this.buttons),
 				this.status
@@ -606,12 +606,12 @@ return view.extend({
 		]);
 	},
 
-	/* expected traffic of the chosen test, MB: every stream count is a separate test; upload is capped at 100 MB */
+	/* expected traffic of the chosen test, MB: every stream count is a separate test of the full volume */
 	traffic: function() {
 		var n = this.streams.length;
 		return {
 			dl: this.mode != 'up' ? this.size * n : 0,
-			up: this.mode != 'dl' ? Math.min(this.size, 100) * n : 0
+			up: this.mode != 'dl' ? this.size * n : 0
 		};
 	},
 
@@ -625,26 +625,20 @@ return view.extend({
 		mark(this.sizeButtons, function(i) { return SIZES[i][0] == self.size; });
 		mark(this.modeButtons, function(i) { return MODES[i][0] == self.mode; });
 		mark(this.streamButtons, function(i) { return self.streams.indexOf(STREAMS[i]) >= 0; });
-		/* the size only matters for download; upload always sends up to 100 MB per test */
-		this.sizeButtons.forEach(function(b) { b.style.opacity = self.mode == 'up' ? '.5' : ''; });
 		this.buttons.forEach(function(b) { b.disabled = self.busy; });
-		if (this.size == 10000 && this.mode != 'up') this.buttons[1].disabled = true;
+		if (this.size == 10000) this.buttons[1].disabled = true;
 
 		savePrefs({ size: this.size, mode: this.mode, streams: this.streams });
 
-		var sz = SIZES.filter(function(s) { return s[0] == self.size; })[0], t = this.traffic(), parts = [];
-		if (this.mode == 'up')
-			parts.push('Только отдача: объём скачивания не используется, отдаётся до 100 МБ на каждый замер');
-		else
-			parts.push(sz[2]);
+		var sz = SIZES.filter(function(s) { return s[0] == self.size; })[0], t = this.traffic(), parts = [ sz[2] ];
 		parts.push('трафик ≈ ' + fmtBytes((t.dl + t.up) * 1048576) +
 			(t.dl && t.up ? ' (↓ ' + fmtBytes(t.dl * 1048576) + ', ↑ ' + fmtBytes(t.up * 1048576) + ')' : ''));
 		parts.push(this.streams.length + ' ' + plural(this.streams.length, 'замер', 'замера', 'замеров') +
 			(this.mode == 'both' ? ' в каждую сторону' : ''));
 		var hint = parts.join(', ') + '.';
-		if (this.size == 10 && this.mode != 'up' && this.streams[this.streams.length - 1] >= 16)
-			hint += ' На 10 МБ при 16–32 потоках каждому потоку достаётся слишком мало данных — скачивание покажет меньше реального, лучше взять 100 МБ или больше.';
-		if (this.size == 1000 && this.mode != 'up')
+		if (this.size == 10 && this.streams[this.streams.length - 1] >= 16)
+			hint += ' На 10 МБ при 16–32 потоках каждому потоку достаётся слишком мало данных — тест покажет меньше реального, лучше взять 100 МБ или больше.';
+		if (this.size == 1000)
 			hint += ' На LTE тест займёт несколько минут.';
 		dom.content(this.hint, hint);
 	},
@@ -672,10 +666,10 @@ return view.extend({
 
 	start: function(iface) {
 		var self = this, t = this.traffic(), total = fmtBytes((t.dl + t.up) * 1048576);
-		if (this.size == 10000 && this.mode != 'up' && iface == 'lte')
+		if (this.size == 10000 && iface == 'lte')
 			return;
-		if (this.size == 10000 && this.mode != 'up' &&
-		    !confirm('Тест 10 ГБ скачает около ' + total + ' и займёт несколько минут. Продолжить?'))
+		if (this.size == 10000 &&
+		    !confirm('Тест 10 ГБ передаст около ' + total + ' и займёт несколько минут. Продолжить?'))
 			return;
 		if (iface == 'lte' && t.dl + t.up >= 1000 &&
 		    !confirm('Тест через LTE израсходует около ' + total + ' мобильного трафика. Продолжить?'))
