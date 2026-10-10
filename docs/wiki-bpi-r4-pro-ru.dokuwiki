@@ -1,0 +1,170 @@
+====== Sinovoip BananaPi BPI-R4 Pro ======
+
+//Это перевод страницы [[toh:sinovoip:bananapi_bpi-r4_pro|Sinovoip BananaPi BPI-R4 Pro]]. Если версии расходятся, актуальна английская.//
+
+Banana Pi BPI-R4 Pro выпускается в двух вариантах, у каждого свой образ OpenWrt:
+  * **BPI-R4 Pro 8X** (''bananapi_bpi-r4-pro-8x''): 8 ГБ ОЗУ, 2 порта 10G (каждый RJ45 или SFP+)
+  * **BPI-R4 Pro 4E** (''bananapi_bpi-r4-pro-4e''): 4 ГБ ОЗУ, комбинированный WAN 2.5G (RJ45 или SFP)
+
+Страница написана по опыту работы с **8X**. Сведения о 4E приветствуются.
+
+===== Основные характеристики =====
+
+  * **Процессор**: MediaTek MT7988A (Filogic 880: 4x ARM Cortex-A73, 1,8 ГГц)
+  * **ОЗУ**: 8 ГБ DDR4 (8X), 4 ГБ (4E)
+  * **Накопители**:
+    * eMMC 8 ГБ
+    * SPI-NAND 256 МБ
+    * слот microSD (общий контроллер с eMMC, см. раздел «Выбор eMMC или microSD»)
+    * 2x M.2 Key-M (PCIe 3.0 x1) для NVMe SSD (CN13, CN14)
+  * **Сеть (8X)**:
+    * 1x 10G WAN: RJ45 (PHY Aeonsemi AS21010) **или** SFP+ (выбирается оверлеем)
+    * 1x 10G LAN: RJ45 (PHY Aeonsemi AS21010) **или** SFP+ (выбирается оверлеем)
+    * 4x 2.5G RJ45 LAN (коммутатор MaxLinear MxL86252C, драйвер DSA ''mxl862xx'')
+    * 1x 1G RJ45 LAN (встроенный коммутатор MT7988)
+  * **Wi-Fi**: 2x miniPCIe (PCIe 3.0 x2) для платы Wi-Fi 7, например BPI-R4-NIC-BE14 (MT7996)
+  * **Модем**: 3x M.2 Key-B с USB 3.2 для модулей 4G/5G; два из них (CN15, CN18) делят линии PCIe со слотами Key-M
+  * **Прочее**: 1x USB 3.2, 1x USB 2.0, отладочная консоль через USB Type-C, разъём на 26 контактов, ШИМ-вентилятор, часы реального времени (PCF8563)
+
+Документация производителя: https://docs.banana-pi.org/en/BPI-R4_Pro/BananaPi_BPI-R4_Pro
+
+===== Поддержка в OpenWrt =====
+
+Поддерживается только в **SNAPSHOT** (ветка main, ядро 6.18). В 25.12 и более ранних выпусках (ядро 6.12) платы нет. В стабильный выпуск поддержка попадёт со следующей веткой выпуска.
+
+<!-- ToH: {
+  "source": "json",
+  "dom": "t",
+  "paging": false,
+  "rotate": true,
+  "shownColumns": ["model", "version", "supportedcurrentrel", "firmwareopenwrtinstallurl", "firmwareopenwrtupgradeurl", "firmwareoemstockurl"],
+  "filterColumns": {"brand": "^Sinovoip$", "model": "^Banana Pi BPI-R4 Pro"}
+} -->
+
+Образы: [[https://firmware-selector.openwrt.org/?version=SNAPSHOT&target=mediatek%2Ffilogic&id=bananapi_bpi-r4-pro-8x|Firmware Selector (8X)]], [[https://firmware-selector.openwrt.org/?version=SNAPSHOT&target=mediatek%2Ffilogic&id=bananapi_bpi-r4-pro-4e|Firmware Selector (4E)]].
+
+В профиль образа уже входят драйверы и прошивки для всего, что распаяно на плате: коммутатор MxL862xx, прошивка PHY AS21xxx, SFP, прошивки Wi-Fi MT7996 и WED (WO), NVMe, USB 3, ШИМ-вентилятор, часы, мультиплексор I2C и расширители GPIO. Для модема 4G/5G нужны дополнительные пакеты, см. раздел «Модем LTE/5G».
+
+===== Установка =====
+
+Сборка даёт тот же набор файлов, что и для BPI-R4 (''sdcard.img.gz'', ''snand-preloader.bin'', ''snand-bl31-uboot.fip'', ''emmc-gpt.bin'', ''emmc-preloader.bin'', ''emmc-bl31-uboot.fip'', ''sysupgrade.itb'', ''initramfs-recovery.itb''). Порядок установки (загрузка с SD-карты, затем установка в NAND / eMMC из загрузочного меню U-Boot через последовательную консоль) такой же, как описано на [[toh:sinovoip:bananapi_bpi-r4#installation|странице BPI-R4]] (на английском).
+
+//TODO: особенности этой платы (положение переключателей загрузки, отладочная консоль через USB Type-C).//
+
+===== Обновление прошивки =====
+
+''sysupgrade'' и Attended Sysupgrade (''owut'', LuCI) работают как обычно, с файлом ''*-squashfs-sysupgrade.itb''. Окружение U-Boot (''bootargs'', ''bootconf_extra'', см. ниже) при обновлении **не** затрагивается, поэтому описанные ниже настройки сохраняются.
+
+===== Особенности настройки =====
+
+==== Оверлеи device tree (bootconf_extra в U-Boot) ====
+
+Оборудование, которое делит выводы или линии, выбирается оверлеями device tree. U-Boot применяет их при загрузке. Список хранится в переменной окружения U-Boot ''bootconf_extra'' (оверлеи разделены знаком ''#''). Сначала посмотрите текущее значение:
+
+<code>
+fw_printenv | grep -E '^bootconf'
+</code>
+
+Пример (8X, оба слота NVMe, 10G WAN на RJ45, 10G LAN на SFP+):
+
+<code>
+bootconf=config-mt7988a-bananapi-bpi-r4-pro-8x
+bootconf_emmc=mt7988a-bananapi-bpi-r4-pro-emmc
+bootconf_extra=mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14#mt7988a-bananapi-bpi-r4-pro-8x-wan-phy#mt7988a-bananapi-bpi-r4-pro-8x-lan-sfp
+</code>
+
+^ Оверлей ^ Что включает ^
+| ''mt7988a-bananapi-bpi-r4-pro-cn13'' | слот Key-M CN13 (NVMe) на PCIe 11280000 |
+| ''mt7988a-bananapi-bpi-r4-pro-cn15'' | слот Key-B CN15 на PCIe 11280000 вместо CN13 |
+| ''mt7988a-bananapi-bpi-r4-pro-cn14'' | слот Key-M CN14 (NVMe) на PCIe 11290000 |
+| ''mt7988a-bananapi-bpi-r4-pro-cn18'' | слот Key-B CN18 на PCIe 11290000 вместо CN14 |
+| ''mt7988a-bananapi-bpi-r4-pro-8x-wan-phy'' / ''-wan-sfp'' | 10G WAN как RJ45 / как SFP+ (только один из двух) |
+| ''mt7988a-bananapi-bpi-r4-pro-8x-lan-phy'' / ''-lan-sfp'' | 10G LAN как RJ45 / как SFP+ (только один из двух) |
+| ''mt7988a-bananapi-bpi-r4-pro-emmc'' / ''-sd'' | eMMC или microSD (общий контроллер) |
+
+Из каждой пары указывайте только один оверлей. Пример: переключить 10G WAN с RJ45 на SFP+:
+
+<code>
+fw_printenv -n bootconf_extra > /root/bootconf_extra.orig
+fw_setenv bootconf_extra "mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14#mt7988a-bananapi-bpi-r4-pro-8x-wan-sfp#mt7988a-bananapi-bpi-r4-pro-8x-lan-sfp"
+reboot
+</code>
+
+<WRAP important>
+Опечатка в имени оверлея может помешать плате загрузиться. Держите наготове последовательную консоль. Чтобы вернуть всё назад, прервите загрузку U-Boot и в приглашении ''MT7988>'' выполните ''setenv bootconf_extra <старое значение>'', ''saveenv'', ''reset''.
+</WRAP>
+
+==== Выбор eMMC или microSD ====
+
+У eMMC и microSD один контроллер, поэтому одновременно работает только одно из них. При загрузке с eMMC слотом microSD не пользуйтесь.
+
+===== Известные проблемы =====
+
+==== После загрузки случайно пропадают устройства PCIe («PCIe link down») ====
+
+**Симптом:** после тёплой или холодной перезагрузки одно или несколько устройств PCIe (NVMe SSD, плата Wi-Fi) случайным образом не определяются:
+
+<code>
+mtk-pcie-gen3 11300000.pcie: PCIe link down, current LTSSM state: detect.active (0x1000001)
+mtk-pcie-gen3 11300000.pcie: probe with driver mtk-pcie-gen3 failed with error -110
+</code>
+
+**Причина:** опорные тактовые сигналы PCIe ''pextp_p0_sel''..''pextp_p3_sel'' не привязаны к узлам PCIe в device tree. Поэтому ядро выключает их как неиспользуемые (''clk_disable_unused()''), пока отложенный асинхронный запуск драйвера PCIe ещё поднимает линки. Чем больше слотов занято, тем чаще это происходит. На 8X с BE14 и двумя NVMe SSD все линки поднялись в 2 загрузках из 6.
+
+**Обходной путь:** добавить ''clk_ignore_unused'' в параметры ядра в окружении U-Boot. Настройка переживает sysupgrade.
+
+<code>
+fw_printenv -n bootargs
+fw_setenv bootargs "$(fw_printenv -n bootargs) clk_ignore_unused"
+reboot
+# проверка:
+grep -o clk_ignore_unused /proc/cmdline
+</code>
+
+Результат: 17 загрузок из 17, все линки поднялись. Патч ядра, который помечает эти сигналы как критичные (так сделано в SDK MediaTek), дал 16 из 16. Проблема отслеживается в [[https://github.com/openwrt/openwrt/issues/25706|openwrt/openwrt#25706]]; обходной путь можно будет убрать, когда исправление примут.
+
+Свободный слот Key-M (без SSD) всегда показывает ''detect.quiet'' для своего контроллера. Это нормально.
+
+===== Модем LTE/5G =====
+
+Проверено с Quectel RM520N-GL в слоте M.2 Key-B (USB, QMI). Установка:
+
+<code>
+apk add modemmanager luci-proto-modemmanager kmod-usb-net-qmi-wwan kmod-usb-net-cdc-mbim kmod-usb-serial-option kmod-usb-wdm
+</code>
+
+В ''network.<интерфейс>.device'' указывайте **путь sysfs** модема, а не путь D-Bus: ''/org/freedesktop/ModemManager1/Modem/N'' меняется между загрузками, и интерфейс перестаёт подниматься с ошибкой «couldn't find modem».
+
+<code>
+uci set network.mm.device="$(mmcli -m any -K | sed -n 's/^modem\.generic\.device *: *//p')"
+uci commit network; ifup mm
+</code>
+
+===== Аппаратная часть =====
+
+==== Прошивка коммутатора ====
+
+У коммутатора MxL86252C своя прошивка. Её версия выводится при загрузке:
+
+<code>
+dmesg | grep 'mxl862xx.*firmware'
+# mxl862xx mdio-bus:10: switch ready after 2600ms, firmware 1.0.85 (build 85)
+</code>
+
+Обновить её можно через ''fwupd'' (''apk add fwupd'', затем ''fwupdmgr refresh'' и ''fwupdmgr get-updates''), см. [[https://github.com/openwrt/packages/pull/30470|openwrt/packages#30470]].
+
+==== BPI-R4-NIC-BE14 ====
+
+См. [[toh:sinovoip:bananapi_bpi-r4#bpi-r4-nic-be14|страницу BPI-R4]] (на английском). Плата занимает оба контроллера PCIe x2 (11300000, 11310000).
+
+==== Последовательная консоль ====
+
+//TODO: отладочная консоль через USB Type-C, параметры.//
+
+===== Логи загрузки =====
+
+//TODO//
+
+===== Примечания =====
+
+===== Метки =====

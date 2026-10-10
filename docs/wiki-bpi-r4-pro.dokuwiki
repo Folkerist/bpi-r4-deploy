@@ -1,0 +1,168 @@
+====== Sinovoip BananaPi BPI-R4 Pro ======
+
+Banana Pi BPI-R4 Pro comes in two variants with separate OpenWrt images:
+  * **BPI-R4 Pro 8X** (''bananapi_bpi-r4-pro-8x''): 8 GB RAM, 2x 10G ports (each RJ45 or SFP+)
+  * **BPI-R4 Pro 4E** (''bananapi_bpi-r4-pro-4e''): 4 GB RAM, 2.5G combo WAN (RJ45 or SFP)
+
+This page was started from experience with the **8X**. Information about the 4E is welcome.
+
+===== Hardware highlights =====
+
+  * **SoC**: MediaTek MT7988A (Filogic 880: 4x ARM Cortex-A73 @1.8GHz)
+  * **MEM**: 8 GB DDR4 (8X), 4 GB (4E)
+  * **Storage**:
+    * eMMC 8 GB
+    * SPI-NAND 256 MB
+    * MicroSD slot (shares the controller with eMMC, see [[#boot_media_overlays|boot media overlays]])
+    * 2x M.2 Key-M (PCIe 3.0 x1) for NVMe SSD (CN13, CN14)
+  * **Network (8X)**:
+    * 1x 10G WAN: RJ45 (Aeonsemi AS21010 PHY) **or** SFP+ (selected by overlay)
+    * 1x 10G LAN: RJ45 (Aeonsemi AS21010 PHY) **or** SFP+ (selected by overlay)
+    * 4x 2.5G RJ45 LAN (MaxLinear MxL86252C switch, DSA driver ''mxl862xx'')
+    * 1x 1G RJ45 LAN (MT7988 internal switch)
+  * **Wireless**: 2x miniPCIe (PCIe 3.0 x2) for a Wi-Fi 7 NIC such as BPI-R4-NIC-BE14 (MT7996)
+  * **Modem**: 3x M.2 Key-B with USB 3.2 for 4G/5G modules; two of them (CN15, CN18) share PCIe with the Key-M slots
+  * **Other**: 1x USB 3.2, 1x USB 2.0, USB Type-C debug console, 26-pin header, PWM fan, RTC (PCF8563)
+
+Vendor documentation: https://docs.banana-pi.org/en/BPI-R4_Pro/BananaPi_BPI-R4_Pro
+
+===== OpenWrt support =====
+
+Supported in **SNAPSHOT** (main branch, kernel 6.18) only. Not in 25.12 or older releases, which use kernel 6.12. Support will reach a stable release with the next release branch.
+
+<!-- ToH: {
+  "source": "json",
+  "dom": "t",
+  "paging": false,
+  "rotate": true,
+  "shownColumns": ["model", "version", "supportedcurrentrel", "firmwareopenwrtinstallurl", "firmwareopenwrtupgradeurl", "firmwareoemstockurl"],
+  "filterColumns": {"brand": "^Sinovoip$", "model": "^Banana Pi BPI-R4 Pro"}
+} -->
+
+Images: [[https://firmware-selector.openwrt.org/?version=SNAPSHOT&target=mediatek%2Ffilogic&id=bananapi_bpi-r4-pro-8x|Firmware Selector (8X)]], [[https://firmware-selector.openwrt.org/?version=SNAPSHOT&target=mediatek%2Ffilogic&id=bananapi_bpi-r4-pro-4e|Firmware Selector (4E)]].
+
+The image profile already includes the drivers and firmware for the on-board hardware: MxL862xx switch, AS21xxx PHY firmware, SFP, MT7996 Wi-Fi firmware and WED (WO) firmware, NVMe, USB 3, PWM fan, RTC, I2C mux/GPIO expanders. A 4G/5G modem needs extra packages, see [[#lte_5g_modem|LTE/5G modem]].
+
+===== Installation =====
+
+The build produces the same set of artifacts as the BPI-R4 (''sdcard.img.gz'', ''snand-preloader.bin'', ''snand-bl31-uboot.fip'', ''emmc-gpt.bin'', ''emmc-preloader.bin'', ''emmc-bl31-uboot.fip'', ''sysupgrade.itb'', ''initramfs-recovery.itb''). The procedure (boot from SD card, then install to NAND / eMMC from the U-Boot boot menu over the serial console) is the same as described on the [[toh:sinovoip:bananapi_bpi-r4#installation|BPI-R4 page]].
+
+//TODO: board-specific notes (boot switch positions, debug console on USB Type-C).//
+
+===== Upgrading the firmware =====
+
+''sysupgrade'' / Attended Sysupgrade (''owut'', LuCI) work as usual with ''*-squashfs-sysupgrade.itb''. The U-Boot environment (''bootargs'', ''bootconf_extra'', see below) is **not** touched by sysupgrade, so the settings below survive upgrades.
+
+===== Specific configuration =====
+
+==== Device tree overlays (U-Boot bootconf_extra) ====
+
+Hardware that shares pins or lanes is selected by device tree overlays, which U-Boot applies at boot. The list is stored in the U-Boot environment variable ''bootconf_extra'' (overlays separated by ''#''). Look at it first:
+
+<code>
+fw_printenv | grep -E '^bootconf'
+</code>
+
+Example (8X, both NVMe slots, 10G WAN on RJ45, 10G LAN on SFP+):
+
+<code>
+bootconf=config-mt7988a-bananapi-bpi-r4-pro-8x
+bootconf_emmc=mt7988a-bananapi-bpi-r4-pro-emmc
+bootconf_extra=mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14#mt7988a-bananapi-bpi-r4-pro-8x-wan-phy#mt7988a-bananapi-bpi-r4-pro-8x-lan-sfp
+</code>
+
+^ Overlay ^ Selects ^
+| ''mt7988a-bananapi-bpi-r4-pro-cn13'' | Key-M slot CN13 (NVMe) on PCIe 11280000 |
+| ''mt7988a-bananapi-bpi-r4-pro-cn15'' | Key-B slot CN15 on PCIe 11280000 instead of CN13 |
+| ''mt7988a-bananapi-bpi-r4-pro-cn14'' | Key-M slot CN14 (NVMe) on PCIe 11290000 |
+| ''mt7988a-bananapi-bpi-r4-pro-cn18'' | Key-B slot CN18 on PCIe 11290000 instead of CN14 |
+| ''mt7988a-bananapi-bpi-r4-pro-8x-wan-phy'' / ''-wan-sfp'' | 10G WAN as RJ45 / as SFP+ (only one of the two) |
+| ''mt7988a-bananapi-bpi-r4-pro-8x-lan-phy'' / ''-lan-sfp'' | 10G LAN as RJ45 / as SFP+ (only one of the two) |
+| ''mt7988a-bananapi-bpi-r4-pro-emmc'' / ''-sd'' | eMMC or microSD (shared controller) |
+
+Use only one overlay per pair. Example: switch the 10G WAN from RJ45 to SFP+:
+
+<code>
+fw_printenv -n bootconf_extra > /root/bootconf_extra.orig
+fw_setenv bootconf_extra "mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14#mt7988a-bananapi-bpi-r4-pro-8x-wan-sfp#mt7988a-bananapi-bpi-r4-pro-8x-lan-sfp"
+reboot
+</code>
+
+<WRAP important>
+A typo in an overlay name can make the board fail to boot. Have the serial console ready. To recover, stop U-Boot, then in the ''MT7988>'' prompt run ''setenv bootconf_extra <old value>'', ''saveenv'', ''reset''.
+</WRAP>
+
+==== Boot media overlays ====
+
+eMMC and microSD share one controller: only one of them can be used at a time. When booting from eMMC, do not use the microSD slot.
+
+===== Known issues =====
+
+==== PCIe devices randomly missing after boot ("PCIe link down") ====
+
+**Symptom:** after a warm or cold boot, one or more PCIe devices (NVMe SSD, Wi-Fi NIC) are missing at random:
+
+<code>
+mtk-pcie-gen3 11300000.pcie: PCIe link down, current LTSSM state: detect.active (0x1000001)
+mtk-pcie-gen3 11300000.pcie: probe with driver mtk-pcie-gen3 failed with error -110
+</code>
+
+**Cause:** the PCIe reference clocks ''pextp_p0_sel''..''pextp_p3_sel'' are not referenced by the PCIe nodes in the device tree, so the kernel switches them off as unused (''clk_disable_unused()'') while the deferred, asynchronous PCIe probe is still training the links. The more slots are populated, the more often this happens. Measured on an 8X with BE14 and two NVMe SSDs: 2 of 6 boots brought up all links.
+
+**Workaround:** add ''clk_ignore_unused'' to the kernel command line in the U-Boot environment. It survives sysupgrade.
+
+<code>
+fw_printenv -n bootargs
+fw_setenv bootargs "$(fw_printenv -n bootargs) clk_ignore_unused"
+reboot
+# check:
+grep -o clk_ignore_unused /proc/cmdline
+</code>
+
+Result: 17 of 17 boots with all links up. A kernel patch marking these clocks critical (as MediaTek's SDK does) gave 16 of 16. Tracked in [[https://github.com/openwrt/openwrt/issues/25706|openwrt/openwrt#25706]]; the workaround can be removed once a fix is merged.
+
+Note that a free Key-M slot (no SSD) will always show ''detect.quiet'' for its controller. That is expected.
+
+===== LTE/5G modem =====
+
+Tested with Quectel RM520N-GL in an M.2 Key-B slot (USB, QMI). Install:
+
+<code>
+apk add modemmanager luci-proto-modemmanager kmod-usb-net-qmi-wwan kmod-usb-net-cdc-mbim kmod-usb-serial-option kmod-usb-wdm
+</code>
+
+In ''network.<iface>.device'' use the **sysfs path** of the modem, not the D-Bus path (''/org/freedesktop/ModemManager1/Modem/N'' changes between boots, and the interface then fails with "couldn't find modem"):
+
+<code>
+uci set network.mm.device="$(mmcli -m any -K | sed -n 's/^modem\.generic\.device *: *//p')"
+uci commit network; ifup mm
+</code>
+
+===== Hardware =====
+
+==== Ethernet switch firmware ====
+
+The MxL86252C switch runs its own firmware. The version is printed at boot:
+
+<code>
+dmesg | grep 'mxl862xx.*firmware'
+# mxl862xx mdio-bus:10: switch ready after 2600ms, firmware 1.0.85 (build 85)
+</code>
+
+It can be updated with ''fwupd'' (''apk add fwupd'', then ''fwupdmgr refresh'' and ''fwupdmgr get-updates''), see [[https://github.com/openwrt/packages/pull/30470|openwrt/packages#30470]].
+
+==== BPI-R4-NIC-BE14 ====
+
+See [[toh:sinovoip:bananapi_bpi-r4#bpi-r4-nic-be14|BPI-R4 page]]. The card uses both PCIe x2 controllers (11300000, 11310000).
+
+==== Serial ====
+
+//TODO: debug console on USB Type-C, parameters.//
+
+===== Bootlogs =====
+
+//TODO//
+
+===== Notes =====
+
+===== Tags =====

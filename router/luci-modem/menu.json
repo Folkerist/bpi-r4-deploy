@@ -1,0 +1,13 @@
+{
+	"admin/status/modem": {
+		"title": "Modem",
+		"order": 15,
+		"action": {
+			"type": "view",
+			"path": "modem-status"
+		},
+		"depends": {
+			"acl": [ "luci-app-modem-status" ]
+		}
+	}
+}

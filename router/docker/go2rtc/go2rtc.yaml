@@ -1,0 +1,11 @@
+# Standalone go2rtc for cameras HA can't reach on its own (Xiaomi C700: xiaomi source, go2rtc >= 1.9.13).
+# HA runs its own embedded go2rtc, so this one uses non-default API port 1985.
+# Streams are added from the web UI (http://<router>:1985 → Add → Xiaomi). go2rtc then writes the Xiaomi
+# session/keys into this file on the router — never copy that version back into the repo.
+api:
+  listen: ":1985"
+rtsp:
+  listen: ":8554"
+webrtc:
+  listen: ":8555"
+streams: {}

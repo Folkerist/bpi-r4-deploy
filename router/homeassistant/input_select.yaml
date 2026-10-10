@@ -1,0 +1,9 @@
+# Помощники для «Планировки». На роутере: /config/input_select.yaml,
+# в configuration.yaml — «input_select: !include input_select.yaml» (после добавления — перезапуск HA).
+
+# Кто убирает комнату по долгому нажатию на плане и по кнопкам «Уборка» (script.fp_vacuum_clean).
+# Мокрый = Qrevo, Сухой = S5. «Вместе» — сначала сухой пылесосит, потом мокрый моет (script.fp_vacuum_together).
+fp_vacuum:
+  name: Кто убирает
+  icon: mdi:robot-vacuum
+  options: [Мокрый, Сухой, Вместе]
