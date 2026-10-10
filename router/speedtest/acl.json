@@ -16,25 +16,7 @@
 		},
 		"write": {
 			"file": {
-				"/usr/bin/speedtest.sh start main 10": [
-					"exec"
-				],
-				"/usr/bin/speedtest.sh start main 100": [
-					"exec"
-				],
-				"/usr/bin/speedtest.sh start main 1000": [
-					"exec"
-				],
-				"/usr/bin/speedtest.sh start lte 10": [
-					"exec"
-				],
-				"/usr/bin/speedtest.sh start lte 100": [
-					"exec"
-				],
-				"/usr/bin/speedtest.sh start lte 1000": [
-					"exec"
-				],
-				"/usr/bin/speedtest.sh start main 10000": [
+				"/usr/bin/speedtest.sh start *": [
 					"exec"
 				]
 			}
