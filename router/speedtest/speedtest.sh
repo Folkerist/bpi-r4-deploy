@@ -14,8 +14,9 @@ DIR=/tmp/speedtest
 ST=$DIR/state.json
 HIST=/root/speedtest-history.txt
 URL_DL=http://speedtest.selectel.ru/10GB	# 10 GiB file, supports byte ranges
-URL_UP=https://speed.cloudflare.com/__up
-UPCHUNK=104857600	# Cloudflare rejects a body over ~500 MB (413): upload in 100 MB requests
+URL_UP=http://speedtest.selectel.ru/empty.php	# LibreSpeed upload sink, Moscow (Cloudflare HEL capped ~77 Mbit/s per stream)
+URL_IP=http://speedtest.selectel.ru/getIP.php	# our IP as the upload server sees it
+UPCHUNK=104857600	# upload in 100 MB requests (Selectel takes 500 MB+, Cloudflare rejected >500 MB with 413)
 PING_HOST=77.88.8.8
 
 uptime_s() { cut -d' ' -f1 /proc/uptime; }
@@ -116,10 +117,10 @@ run() {
 		RSRP=$(sig LTE_RSRP) SINR=$(sig LTE_SNR) BANDS=$(sig BANDS)
 	fi
 
-	# external IP of this path; Cloudflare's view too (the upload goes there - may differ behind a proxy)
+	# external IP of this path; the upload server's view too (may differ behind a proxy)
 	state true ip
 	IP=$(curl $CURL -s -m 6 https://ifconfig.me/ip | cleanip)
-	IP_CF=$(curl $CURL -s -m 6 https://speed.cloudflare.com/cdn-cgi/trace | sed -n 's/^ip=//p' | cleanip)
+	IP_CF=$(curl $CURL -s -m 6 $URL_IP | cleanip)
 
 	state true ping
 	out=$(ping -c 5 -W 2 $PINGI $PING_HOST 2>&1)

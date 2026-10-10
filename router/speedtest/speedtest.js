@@ -321,7 +321,7 @@ function ipCell(s) {
 	var parts = [ E('strong', {}, s.ip || s.ip_cf) ];
 	if (s.ip && s.ip_cf && s.ip != s.ip_cf)
 		parts.push(E('div', { 'style': 'margin-top:.3em;color:#f97316' },
-			'⚠️ Cloudflare (тест отдачи) видит другой адрес: ' + s.ip_cf +
+			'⚠️ Сервер отдачи (Selectel) видит другой адрес: ' + s.ip_cf +
 			'. Скорее всего, этот трафик идёт через прокси (mihomo), и отдача измеряет скорость прокси.'));
 	return E('div', {}, parts);
 }
