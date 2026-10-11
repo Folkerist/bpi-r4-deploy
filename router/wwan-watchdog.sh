@@ -1,6 +1,8 @@
 #!/bin/sh
 # cron: */2 * * * * - restores the LTE link (ModemManager, interface "mm") when the Internet is lost.
 # 1st-2nd failed check: ifup mm; 3rd: restart ModemManager; then every 3rd: reset the modem.
+# After a ModemManager restart or modem reset the modem comes back "disabled" and stays so until
+# netifd enables it, so every branch ends with ifup mm (without it the link never came back).
 F=/tmp/wwan-watchdog.fails
 read up _ < /proc/uptime
 [ "${up%.*}" -lt 300 ] && exit 0
@@ -39,7 +41,14 @@ if [ "$n" -le 2 ]; then
 elif [ "$n" -eq 3 ]; then
 	logger -t wwan-watchdog "no Internet via wwan0 (check $n): restarting ModemManager"
 	/etc/init.d/modemmanager restart
+	sleep 15
+	ifup mm
 elif [ $((n % 3)) -eq 0 ]; then
 	logger -t wwan-watchdog "no Internet via wwan0 (check $n): resetting modem"
 	mmcli -m any --reset
+	sleep 40	# USB re-enumeration + ModemManager probing
+	ifup mm
+else
+	logger -t wwan-watchdog "no Internet via wwan0 (check $n): ifup mm"
+	ifup mm
 fi
