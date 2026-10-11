@@ -242,7 +242,1121 @@ Notes for both variants:
 
 ===== Bootlogs =====
 
-Boot log of a 4E with the BE14 card (OpenWrt SNAPSHOT r36672, kernel 6.18.52, WireGuard and AmneziaWG installed):
+==== 8X ====
+
+8X with BE14, two NVMe SSDs and a Quectel RM520N-GL modem (OpenWrt SNAPSHOT r36928, kernel 6.18.55, ''clk_ignore_unused'' set). Kernel command line and ''dmesg''; the U-Boot part is not included:
+<WRAP bootlog>
+<nowiki>
+console=ttyS0,115200n1 pci=pcie_bus_perf root=/dev/fit0 rootwait clk_ignore_unused
+
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x411fd090]
+[    0.000000] Linux version 6.18.55 (builder@buildhost) (aarch64-openwrt-linux-musl-gcc (OpenWrt GCC 14.4.0 r36928-6046133027) 14.4.0, GNU ld (GNU Binutils) 2.46.1) #0 SMP Wed Oct  7 05:56:52 2026
+[    0.000000] KASLR enabled
+[    0.000000] Machine model: Bananapi BPI-R4 Pro 8X
+[    0.000000] OF: reserved mem: 0x0000000042ff0000..0x0000000042ffffff (64 KiB) map non-reusable ramoops@42ff0000
+[    0.000000] OF: reserved mem: 0x0000000043000000..0x000000004304ffff (320 KiB) nomap non-reusable secmon@43000000
+[    0.000000] OF: reserved mem: 0x0000000047cc0000..0x0000000047dbffff (1024 KiB) nomap non-reusable wmcpu-reserved@47cc0000
+[    0.000000] OF: reserved mem: 0x000000004f600000..0x000000004f63ffff (256 KiB) nomap non-reusable wo-emi@4f600000
+[    0.000000] OF: reserved mem: 0x000000004f640000..0x000000004f67ffff (256 KiB) nomap non-reusable wo-emi@4f640000
+[    0.000000] OF: reserved mem: 0x000000004f680000..0x000000004f6bffff (256 KiB) nomap non-reusable wo-emi@4f680000
+[    0.000000] OF: reserved mem: 0x000000004f700000..0x000000004fefffff (8192 KiB) nomap non-reusable wo-data@4f700000
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000000040000000-0x00000000ffffffff]
+[    0.000000]   DMA32    empty
+[    0.000000]   Normal   [mem 0x0000000100000000-0x000000023fffffff]
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000040000000-0x0000000042ffffff]
+[    0.000000]   node   0: [mem 0x0000000043000000-0x000000004304ffff]
+[    0.000000]   node   0: [mem 0x0000000043050000-0x0000000047cbffff]
+[    0.000000]   node   0: [mem 0x0000000047cc0000-0x0000000047dbffff]
+[    0.000000]   node   0: [mem 0x0000000047dc0000-0x000000004f5fffff]
+[    0.000000]   node   0: [mem 0x000000004f600000-0x000000004f6bffff]
+[    0.000000]   node   0: [mem 0x000000004f6c0000-0x000000004f6fffff]
+[    0.000000]   node   0: [mem 0x000000004f700000-0x000000004fefffff]
+[    0.000000]   node   0: [mem 0x000000004ff00000-0x000000023fffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x000000023fffffff]
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: PSCIv1.1 detected in firmware.
+[    0.000000] psci: Using standard PSCI v0.2 function IDs
+[    0.000000] psci: MIGRATE_INFO_TYPE not supported.
+[    0.000000] psci: SMC Calling Convention v1.5
+[    0.000000] percpu: Embedded 20 pages/cpu s43544 r8192 d30184 u81920
+[    0.000000] pcpu-alloc: s43544 r8192 d30184 u81920 alloc=20*4096
+[    0.000000] pcpu-alloc: [0] 0 [0] 1 [0] 2 [0] 3
+[    0.000000] Detected VIPT I-cache on CPU0
+[    0.000000] CPU features: detected: GICv3 CPU interface
+[    0.000000] CPU features: detected: Spectre-BHB
+[    0.000000] CPU features: kernel page table isolation disabled by kernel configuration
+[    0.000000] alternatives: applying boot alternatives
+[    0.000000] Kernel command line: console=ttyS0,115200n1 pci=pcie_bus_perf root=/dev/fit0 rootwait clk_ignore_unused
+[    0.000000] printk: log buffer data + meta data: 131072 + 458752 = 589824 bytes
+[    0.000000] Dentry cache hash table entries: 1048576 (order: 11, 8388608 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 524288 (order: 10, 4194304 bytes, linear)
+[    0.000000] software IO TLB: area num 4.
+[    0.000000] software IO TLB: mapped [mem 0x00000000fa7de000-0x00000000fe7de000] (64MB)
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 2097152
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=4, Nodes=1
+[    0.000000] rcu: Hierarchical RCU implementation.
+[    0.000000] 	Tracing variant of Tasks RCU enabled.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 10 jiffies.
+[    0.000000] RCU Tasks Trace: Setting shift to 2 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=4.
+[    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+[    0.000000] GICv3: GIC: Using split EOI/Deactivate mode
+[    0.000000] GICv3: 416 SPIs implemented
+[    0.000000] GICv3: 0 Extended SPIs implemented
+[    0.000000] Root IRQ handler: gic_handle_irq
+[    0.000000] GICv3: GICv3 features: 16 PPIs
+[    0.000000] GICv3: GICD_CTLR.DS=0, SCR_EL3.FIQ=0
+[    0.000000] GICv3: CPU0: found redistributor 0 region 0:0x000000000c080000
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.000000] arch_timer: cp15 timer running at 13.00MHz (phys).
+[    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x2ff89eacb, max_idle_ns: 440795202429 ns
+[    0.000000] sched_clock: 56 bits at 13MHz, resolution 76ns, wraps every 4398046511101ns
+[    0.000091] Calibrating delay loop (skipped), value calculated using timer frequency.. 26.00 BogoMIPS (lpj=130000)
+[    0.000098] pid_max: default: 32768 minimum: 301
+[    0.001848] Mount-cache hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.001870] Mountpoint-cache hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.005825] rcu: Hierarchical SRCU implementation.
+[    0.005829] rcu: 	Max phase no-delay instances is 1000.
+[    0.005924] Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[    0.006094] smp: Bringing up secondary CPUs ...
+[    0.006325] Detected VIPT I-cache on CPU1
+[    0.006364] GICv3: CPU1: found redistributor 1 region 0:0x000000000c0a0000
+[    0.006384] CPU1: Booted secondary processor 0x0000000001 [0x411fd090]
+[    0.006666] Detected VIPT I-cache on CPU2
+[    0.006687] GICv3: CPU2: found redistributor 2 region 0:0x000000000c0c0000
+[    0.006696] CPU2: Booted secondary processor 0x0000000002 [0x411fd090]
+[    0.006934] Detected VIPT I-cache on CPU3
+[    0.006957] GICv3: CPU3: found redistributor 3 region 0:0x000000000c0e0000
+[    0.006966] CPU3: Booted secondary processor 0x0000000003 [0x411fd090]
+[    0.006997] smp: Brought up 1 node, 4 CPUs
+[    0.007001] SMP: Total of 4 processors activated.
+[    0.007003] CPU: All CPU(s) started at EL2
+[    0.007005] CPU features: detected: 32-bit EL0 Support
+[    0.007007] CPU features: detected: CRC32 instructions
+[    0.007036] alternatives: applying system-wide alternatives
+[    0.007119] CPU features: emulated: Privileged Access Never (PAN) using TTBR0_EL1 switching
+[    0.007229] Memory: 8132248K/8388608K available (10048K kernel code, 954K rwdata, 3076K rodata, 960K init, 308K bss, 252644K reserved, 0K cma-reserved)
+[    0.010893] posixtimers hash table entries: 2048 (order: 3, 32768 bytes, linear)
+[    0.010929] futex hash table entries: 1024 (65536 bytes on 1 NUMA nodes, total 64 KiB, linear).
+[    0.010964] 2G module region forced by RANDOMIZE_MODULE_REGION_FULL
+[    0.010968] 0 pages in range for non-PLT usage
+[    0.010970] 520400 pages in range for PLT usage
+[    0.012165] pinctrl core: initialized pinctrl subsystem
+[    0.013751] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.014136] DMA: preallocated 1024 KiB GFP_KERNEL pool for atomic allocations
+[    0.014320] DMA: preallocated 1024 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.014497] DMA: preallocated 1024 KiB GFP_KERNEL|GFP_DMA32 pool for atomic allocations
+[    0.014820] thermal_sys: Registered thermal governor 'fair_share'
+[    0.014822] thermal_sys: Registered thermal governor 'bang_bang'
+[    0.014824] thermal_sys: Registered thermal governor 'step_wise'
+[    0.014826] thermal_sys: Registered thermal governor 'user_space'
+[    0.014877] ASID allocator initialised with 65536 entries
+[    0.015672] pstore: Using crash dump compression: deflate
+[    0.015678] printk: legacy console [ramoops-1] enabled
+[    0.015936] pstore: Registered ramoops as persistent store backend
+[    0.015941] ramoops: using 0x10000@0x42ff0000, ecc: 0
+[    0.017994] /soc/interrupt-controller@c000000: Fixed dependency cycle(s) with /soc/interrupt-controller@c000000
+[    0.022005] /soc/pcie@11280000: Fixed dependency cycle(s) with /soc/pcie@11280000/interrupt-controller
+[    0.022113] /soc/pcie@11290000: Fixed dependency cycle(s) with /soc/pcie@11290000/interrupt-controller
+[    0.022221] /soc/pcie@11300000: Fixed dependency cycle(s) with /soc/pcie@11300000/interrupt-controller
+[    0.022317] /soc/pcie@11310000: Fixed dependency cycle(s) with /soc/pcie@11310000/interrupt-controller
+[    0.033534] SCSI subsystem initialized
+[    0.033612] libata version 3.00 loaded.
+[    0.034628] clocksource: Switched to clocksource arch_sys_counter
+[    0.036499] NET: Registered PF_INET protocol family
+[    0.036711] IP idents hash table entries: 131072 (order: 8, 1048576 bytes, linear)
+[    0.041024] tcp_listen_portaddr_hash hash table entries: 4096 (order: 4, 65536 bytes, linear)
+[    0.041066] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.041082] TCP established hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.041299] TCP bind hash table entries: 65536 (order: 9, 2097152 bytes, linear)
+[    0.042140] TCP: Hash tables configured (established 65536 bind 65536)
+[    0.042399] MPTCP token hash table entries: 8192 (order: 6, 196608 bytes, linear)
+[    0.042561] UDP hash table entries: 4096 (order: 6, 262144 bytes, linear)
+[    0.042711] UDP-Lite hash table entries: 4096 (order: 6, 262144 bytes, linear)
+[    0.043047] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.043082] PCI: CLS 0 bytes, default 64
+[    0.043830] workingset: timestamp_bits=46 max_order=21 bucket_order=0
+[    0.047756] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.047764] jffs2: version 2.2 (NAND) (SUMMARY) (LZMA) (RTIME) (CMODE_PRIORITY) (c) 2001-2006 Red Hat, Inc.
+[    0.049808] cryptd: max_cpu_qlen set to 1000
+[    0.079605] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 249)
+[    0.080590] mtk-xsphy soc:xs-phy@11e10000: failed to get ref_clk(id-1)
+[    0.081350] mtk-pcie-gen3 11300000.pcie: host bridge /soc/pcie@11300000 ranges:
+[    0.081350] mtk-pcie-gen3 11290000.pcie: host bridge /soc/pcie@11290000 ranges:
+[    0.081368] mtk-pcie-gen3 11280000.pcie: host bridge /soc/pcie@11280000 ranges:
+[    0.081374] mtk-pcie-gen3 11290000.pcie: Parsing ranges property...
+[    0.081382] mtk-pcie-gen3 11300000.pcie: Parsing ranges property...
+[    0.081396] mtk-pcie-gen3 11280000.pcie: Parsing ranges property...
+[    0.081411] mtk-pcie-gen3 11290000.pcie:       IO 0x0028000000..0x00281fffff -> 0x0028000000
+[    0.081414] mtk-pcie-gen3 11300000.pcie:       IO 0x0030000000..0x00301fffff -> 0x0030000000
+[    0.081417] mtk-pcie-gen3 11280000.pcie:       IO 0x0020000000..0x00201fffff -> 0x0020000000
+[    0.081432] mtk-pcie-gen3 11300000.pcie:      MEM 0x0030200000..0x0037ffffff -> 0x0030200000
+[    0.081439] mtk-pcie-gen3 11290000.pcie:      MEM 0x0028200000..0x002fffffff -> 0x0028200000
+[    0.081440] mtk-pcie-gen3 11280000.pcie:      MEM 0x0020200000..0x0027ffffff -> 0x0020200000
+[    0.081470] /soc/pcie@11300000: Failed to get clk index: 0 ret: -517
+[    0.081480] /soc/pcie@11290000: Failed to get clk index: 0 ret: -517
+[    0.081490] mtk-pcie-gen3 11300000.pcie: failed to get clocks
+[    0.081493] mtk-pcie-gen3 11290000.pcie: failed to get clocks
+[    0.081564] mtk-pcie-gen3 11310000.pcie: host bridge /soc/pcie@11310000 ranges:
+[    0.081579] mtk-pcie-gen3 11310000.pcie: Parsing ranges property...
+[    0.081596] mtk-pcie-gen3 11310000.pcie:       IO 0x0038000000..0x00381fffff -> 0x0038000000
+[    0.081607] mtk-pcie-gen3 11310000.pcie:      MEM 0x0038200000..0x003fffffff -> 0x0038200000
+[    0.081638] /soc/pcie@11310000: Failed to get clk index: 0 ret: -517
+[    0.081652] mtk-pcie-gen3 11310000.pcie: failed to get clocks
+[    0.085024] Serial: 8250/16550 driver, 16 ports, IRQ sharing enabled
+[    0.087142] printk: legacy console [ttyS0] disabled
+[    0.107420] 11000000.serial: ttyS0 at MMIO 0x11000000 (irq = 99, base_baud = 2500000) is a ST16650V2
+[    0.107457] printk: legacy console [ttyS0] enabled
+[    1.176244] mtk_rng trng: registered RNG driver
+[    1.176296] random: crng init done
+[    1.185617] loop: module loaded
+[    1.190221] spi-nand spi0.0: Winbond SPI NAND was found.
+[    1.195563] spi-nand spi0.0: 256 MiB, block size: 128 KiB, page size: 2048, OOB size: 128
+[    1.203904] 2 fixed-partitions partitions found on MTD device spi0.0
+[    1.210405] Creating 2 MTD partitions on "spi0.0":
+[    1.215213] 0x000000000000-0x000000200000 : "bl2"
+[    1.221285] 0x000000200000-0x000010000000 : "ubi"
+[    1.359762] ubi0: default fastmap pool size: 100
+[    1.364376] ubi0: default fastmap WL pool size: 50
+[    1.369170] ubi0: attaching mtd1
+[    2.059980] ubi0: scanning is finished
+[    2.068242] ubi0: attached mtd1 (name "ubi", size 254 MiB)
+[    2.073729] ubi0: PEB size: 131072 bytes (128 KiB), LEB size: 126976 bytes
+[    2.080607] ubi0: min./max. I/O unit sizes: 2048/2048, sub-page size 2048
+[    2.087385] ubi0: VID header offset: 2048 (aligned 2048), data offset: 4096
+[    2.094334] ubi0: good PEBs: 2019, bad PEBs: 13, corrupted PEBs: 0
+[    2.100503] ubi0: user volume: 7, internal volumes: 1, max. volumes count: 128
+[    2.107714] ubi0: max/mean erase counter: 2/1, WL threshold: 4096, image sequence number: 0
+[    2.116052] ubi0: available PEBs: 0, total reserved PEBs: 2019, PEBs reserved for bad PEB handling: 27
+[    2.125350] ubi0: background thread "ubi_bgt0d" started, PID 290
+[    2.126054] block ubiblock0_4: created from ubi0:4(fit)
+[    2.265898] mtk_soc_eth 15100000.ethernet: generated random MAC address 20:08:02:00:00:00
+[    6.479063] mtk_soc_eth 15100000.ethernet eth0: mediatek frame engine at 0xffffffc0812c0000, irq 104
+[    6.488956] mtk_soc_eth 15100000.ethernet eth1: mediatek frame engine at 0xffffffc0812c0000, irq 104
+[    6.498839] mtk_soc_eth 15100000.ethernet eth2: mediatek frame engine at 0xffffffc0812c0000, irq 104
+[    6.508486] i2c_dev: i2c /dev entries driver
+[    6.513257] /soc/i2c@11003000/rt5190a@64: Fixed dependency cycle(s) with /soc/i2c@11003000/rt5190a@64/regulators/buck1
+[    6.525528] mtk-lvts-thermal 1100a000.lvts: golden temp=60
+[    6.532503] mtk-wdt 1001c000.watchdog: Watchdog enabled (timeout=31 sec, nowayout=0)
+[    6.548569] NET: Registered PF_INET6 protocol family
+[    6.554117] Segment Routing with IPv6
+[    6.557865] In-situ OAM (IOAM) with IPv6
+[    6.561808] NET: Registered PF_PACKET protocol family
+[    6.566875] bridge: filtering via arp/ip/ip6tables is no longer available by default. Update your scripts to load br_netfilter if you need this.
+[    6.579926] 8021q: 802.1Q VLAN Support v1.8
+[    6.596347] phy phy-soc:xs-phy@11e10000.3: type_sw - reg 0x194, index 0
+[    6.603950] mtk-pcie-gen3 11280000.pcie: host bridge /soc/pcie@11280000 ranges:
+[    6.603998] mtk-pcie-gen3 11300000.pcie: host bridge /soc/pcie@11300000 ranges:
+[    6.604136] mtk-pcie-gen3 11290000.pcie: host bridge /soc/pcie@11290000 ranges:
+[    6.604154] mtk-pcie-gen3 11290000.pcie: Parsing ranges property...
+[    6.604173] mtk-pcie-gen3 11290000.pcie:       IO 0x0028000000..0x00281fffff -> 0x0028000000
+[    6.604184] mtk-pcie-gen3 11290000.pcie:      MEM 0x0028200000..0x002fffffff -> 0x0028200000
+[    6.604576] mtk-pcie-gen3 11310000.pcie: host bridge /soc/pcie@11310000 ranges:
+[    6.604588] mtk-pcie-gen3 11310000.pcie: Parsing ranges property...
+[    6.604599] mtk-pcie-gen3 11310000.pcie:       IO 0x0038000000..0x00381fffff -> 0x0038000000
+[    6.604609] mtk-pcie-gen3 11310000.pcie:      MEM 0x0038200000..0x003fffffff -> 0x0038200000
+[    6.611291] mtk-pcie-gen3 11280000.pcie: Parsing ranges property...
+[    6.611307] mtk-pcie-gen3 11280000.pcie:       IO 0x0020000000..0x00201fffff -> 0x0020000000
+[    6.611322] mtk-pcie-gen3 11280000.pcie:      MEM 0x0020200000..0x0027ffffff -> 0x0020200000
+[    6.625853] mt7530-mmio 15020000.switch: configuring for fixed/internal link mode
+[    6.625930] mtk-pcie-gen3 11300000.pcie: Parsing ranges property...
+[    6.632188] mt7530-mmio 15020000.switch: Link is Up - 10Gbps/Full - flow control rx/tx
+[    6.640605] mtk-pcie-gen3 11300000.pcie:       IO 0x0030000000..0x00301fffff -> 0x0030000000
+[    6.654670] mtk-msdc 11230000.mmc: Final PAD_DS_TUNE: 0x13014
+[    6.656323] mtk-pcie-gen3 11300000.pcie:      MEM 0x0030200000..0x0037ffffff -> 0x0030200000
+[    6.658820] mt7530-mmio 15020000.switch lan5 (uninitialized): PHY [mt7530-0:00] driver [MediaTek MT7988 PHY] (irq=113)
+[    6.659806] mtk_soc_eth 15100000.ethernet eth0: entered promiscuous mode
+[    6.659825] DSA: tree 1 setup
+[    6.660231] clk: Not disabling unused clocks
+[    6.660235] PM: genpd: Disabling unused power domains
+[    6.662692] mmc0: Host Software Queue enabled
+[    6.729665] mtk-pcie-gen3 11310000.pcie: set IO trans window[0]: cpu_addr = 0x38000000, pci_addr = 0x38000000, size = 0x200000
+[    6.732592] mmc0: new HS400 MMC card at address 0001
+[    6.738320] mtk-pcie-gen3 11310000.pcie: set MEM trans window[1]: cpu_addr = 0x38200000, pci_addr = 0x38200000, size = 0x200000
+[    6.747271] mmcblk0: mmc0:0001 8GTF4R 7.28 GiB
+[    6.750316] mtk-pcie-gen3 11280000.pcie: set IO trans window[0]: cpu_addr = 0x20000000, pci_addr = 0x20000000, size = 0x200000
+[    6.750324] mtk-pcie-gen3 11280000.pcie: set MEM trans window[1]: cpu_addr = 0x20200000, pci_addr = 0x20200000, size = 0x200000
+[    6.750328] mtk-pcie-gen3 11280000.pcie: set MEM trans window[2]: cpu_addr = 0x20400000, pci_addr = 0x20400000, size = 0x400000
+[    6.750333] mtk-pcie-gen3 11280000.pcie: set MEM trans window[3]: cpu_addr = 0x20800000, pci_addr = 0x20800000, size = 0x800000
+[    6.750337] mtk-pcie-gen3 11280000.pcie: set MEM trans window[4]: cpu_addr = 0x21000000, pci_addr = 0x21000000, size = 0x1000000
+[    6.750341] mtk-pcie-gen3 11280000.pcie: set MEM trans window[5]: cpu_addr = 0x22000000, pci_addr = 0x22000000, size = 0x2000000
+[    6.750346] mtk-pcie-gen3 11280000.pcie: set MEM trans window[6]: cpu_addr = 0x24000000, pci_addr = 0x24000000, size = 0x4000000
+[    6.750649] mtk-pcie-gen3 11280000.pcie: PCI host bridge to bus 0003:00
+[    6.750656] pci_bus 0003:00: root bus resource [bus 00-ff]
+[    6.750664] pci_bus 0003:00: root bus resource [io  0x400000-0x5fffff] (bus address [0x20000000-0x201fffff])
+[    6.750668] pci_bus 0003:00: root bus resource [mem 0x20200000-0x27ffffff]
+[    6.750672] pci_bus 0003:00: scanning bus
+[    6.750703] pci 0003:00:00.0: [14c3:7988] type 01 class 0x060400 PCIe Root Port
+[    6.750725] pci 0003:00:00.0: BAR 0 [mem 0x00000000-0x00007fff 64bit]
+[    6.750731] pci 0003:00:00.0: PCI bridge to [bus 00]
+[    6.750738] pci 0003:00:00.0:   bridge window [io  0x0000-0x0fff]
+[    6.750743] pci 0003:00:00.0:   bridge window [mem 0x00000000-0x000fffff]
+[    6.750753] pci 0003:00:00.0:   bridge window [mem 0x00000000-0x000fffff 64bit pref]
+[    6.750811] pci 0003:00:00.0: PME# supported from D0 D3hot D3cold
+[    6.750816] pci 0003:00:00.0: PME# disabled
+[    6.752264] pci_bus 0003:00: fixups for bus
+[    6.752268] pci 0003:00:00.0: scanning [bus 00-00] behind bridge, pass 0
+[    6.752273] pci 0003:00:00.0: bridge configuration invalid ([bus 00-00]), reconfiguring
+[    6.752281] pci 0003:00:00.0: scanning [bus 00-00] behind bridge, pass 1
+[    6.752330] pci_bus 0003:01: scanning bus
+[    6.752359] pci 0003:01:00.0: [144d:a80a] type 00 class 0x010802 PCIe Endpoint
+[    6.752415] pci 0003:01:00.0: BAR 0 [mem 0x00000000-0x00003fff 64bit]
+[    6.752611] pci 0003:01:00.0: 7.876 Gb/s available PCIe bandwidth, limited by 8.0 GT/s PCIe x1 link at 0003:00:00.0 (capable of 63.012 Gb/s with 16.0 GT/s PCIe x4 link)
+[    6.756079] mtk-pcie-gen3 11290000.pcie: set IO trans window[0]: cpu_addr = 0x28000000, pci_addr = 0x28000000, size = 0x200000
+[    6.756086] mtk-pcie-gen3 11290000.pcie: set MEM trans window[1]: cpu_addr = 0x28200000, pci_addr = 0x28200000, size = 0x200000
+[    6.756091] mtk-pcie-gen3 11290000.pcie: set MEM trans window[2]: cpu_addr = 0x28400000, pci_addr = 0x28400000, size = 0x400000
+[    6.756095] mtk-pcie-gen3 11290000.pcie: set MEM trans window[3]: cpu_addr = 0x28800000, pci_addr = 0x28800000, size = 0x800000
+[    6.756100] mtk-pcie-gen3 11290000.pcie: set MEM trans window[4]: cpu_addr = 0x29000000, pci_addr = 0x29000000, size = 0x1000000
+[    6.756104] mtk-pcie-gen3 11290000.pcie: set MEM trans window[5]: cpu_addr = 0x2a000000, pci_addr = 0x2a000000, size = 0x2000000
+[    6.756108] mtk-pcie-gen3 11290000.pcie: set MEM trans window[6]: cpu_addr = 0x2c000000, pci_addr = 0x2c000000, size = 0x4000000
+[    6.757417] mtk-pcie-gen3 11310000.pcie: set MEM trans window[2]: cpu_addr = 0x38400000, pci_addr = 0x38400000, size = 0x400000
+[    6.757422] mtk-pcie-gen3 11310000.pcie: set MEM trans window[3]: cpu_addr = 0x38800000, pci_addr = 0x38800000, size = 0x800000
+[    6.757426] mtk-pcie-gen3 11310000.pcie: set MEM trans window[4]: cpu_addr = 0x39000000, pci_addr = 0x39000000, size = 0x1000000
+[    6.757430] mtk-pcie-gen3 11310000.pcie: set MEM trans window[5]: cpu_addr = 0x3a000000, pci_addr = 0x3a000000, size = 0x2000000
+[    6.774667] pci 0003:01:00.0: ASPM: default states L1
+[    6.776520] mtk-pcie-gen3 11310000.pcie: set MEM trans window[6]: cpu_addr = 0x3c000000, pci_addr = 0x3c000000, size = 0x4000000
+[    6.780848] pci_bus 0003:01: fixups for bus
+[    6.780852] pci_bus 0003:01: bus scan returning with max=01
+[    6.790182] mtk-pcie-gen3 11300000.pcie: set IO trans window[0]: cpu_addr = 0x30000000, pci_addr = 0x30000000, size = 0x200000
+[    6.790188] mtk-pcie-gen3 11300000.pcie: set MEM trans window[1]: cpu_addr = 0x30200000, pci_addr = 0x30200000, size = 0x200000
+[    6.790193] mtk-pcie-gen3 11300000.pcie: set MEM trans window[2]: cpu_addr = 0x30400000, pci_addr = 0x30400000, size = 0x400000
+[    6.790197] mtk-pcie-gen3 11300000.pcie: set MEM trans window[3]: cpu_addr = 0x30800000, pci_addr = 0x30800000, size = 0x800000
+[    6.790201] mtk-pcie-gen3 11300000.pcie: set MEM trans window[4]: cpu_addr = 0x31000000, pci_addr = 0x31000000, size = 0x1000000
+[    6.790206] mtk-pcie-gen3 11300000.pcie: set MEM trans window[5]: cpu_addr = 0x32000000, pci_addr = 0x32000000, size = 0x2000000
+[    6.790210] mtk-pcie-gen3 11300000.pcie: set MEM trans window[6]: cpu_addr = 0x34000000, pci_addr = 0x34000000, size = 0x4000000
+[    6.792985]  mmcblk0: p1 p2 p3 p4 p5 p6 p128
+[    6.797182] pci_bus 0003:01: busn_res: [bus 01-ff] end is updated to 01
+[    6.797193] pci_bus 0003:00: bus scan returning with max=01
+[    6.797214] pci 0003:00:00.0: bridge window [mem 0x20200000-0x202fffff]: assigned
+[    6.797278] mtk-pcie-gen3 11290000.pcie: PCI host bridge to bus 0002:00
+[    6.797290] pci_bus 0002:00: root bus resource [bus 00-ff]
+[    6.797296] pci_bus 0002:00: root bus resource [io  0x200000-0x3fffff] (bus address [0x28000000-0x281fffff])
+[    6.797300] pci_bus 0002:00: root bus resource [mem 0x28200000-0x2fffffff]
+[    6.797303] pci_bus 0002:00: scanning bus
+[    6.797334] pci 0002:00:00.0: [14c3:7988] type 01 class 0x060400 PCIe Root Port
+[    6.797355] pci 0002:00:00.0: BAR 0 [mem 0x00000000-0x00007fff 64bit]
+[    6.797361] pci 0002:00:00.0: PCI bridge to [bus 00]
+[    6.797368] pci 0002:00:00.0:   bridge window [io  0x0000-0x0fff]
+[    6.797373] pci 0002:00:00.0:   bridge window [mem 0x00000000-0x000fffff]
+[    6.797383] pci 0002:00:00.0:   bridge window [mem 0x00000000-0x000fffff 64bit pref]
+[    6.797441] pci 0002:00:00.0: PME# supported from D0 D3hot D3cold
+[    6.797447] pci 0002:00:00.0: PME# disabled
+[    6.798950] pci_bus 0002:00: fixups for bus
+[    6.798954] pci 0002:00:00.0: scanning [bus 00-00] behind bridge, pass 0
+[    6.798958] pci 0002:00:00.0: bridge configuration invalid ([bus 00-00]), reconfiguring
+[    6.798966] pci 0002:00:00.0: scanning [bus 00-00] behind bridge, pass 1
+[    6.799016] pci_bus 0002:01: scanning bus
+[    6.799047] pci 0002:01:00.0: [126f:2263] type 00 class 0x010802 PCIe Endpoint
+[    6.799109] pci 0002:01:00.0: BAR 0 [mem 0x00000000-0x00003fff 64bit]
+[    6.799276] pci 0002:01:00.0: 7.876 Gb/s available PCIe bandwidth, limited by 8.0 GT/s PCIe x1 link at 0002:00:00.0 (capable of 31.504 Gb/s with 8.0 GT/s PCIe x4 link)
+[    6.809430] mmcblk0boot0: mmc0:0001 8GTF4R 4.00 MiB
+[    6.813094] pci 0003:00:00.0: BAR 0 [mem 0x20300000-0x20307fff 64bit]: assigned
+[    6.814673] pci 0002:01:00.0: ASPM: default states L1
+[    6.814700] pci_bus 0002:01: fixups for bus
+[    6.814703] pci_bus 0002:01: bus scan returning with max=01
+[    6.814707] pci_bus 0002:01: busn_res: [bus 01-ff] end is updated to 01
+[    6.814715] pci_bus 0002:00: bus scan returning with max=01
+[    6.814737] pci 0002:00:00.0: bridge window [mem 0x28200000-0x282fffff]: assigned
+[    6.814742] pci 0002:00:00.0: BAR 0 [mem 0x28300000-0x28307fff 64bit]: assigned
+[    6.814753] pci 0002:01:00.0: BAR 0 [mem 0x28200000-0x28203fff 64bit]: assigned
+[    6.814768] pci 0002:00:00.0: PCI bridge to [bus 01]
+[    6.814774] pci 0002:00:00.0:   bridge window [mem 0x28200000-0x282fffff]
+[    6.814783] pci_bus 0002:00: resource 4 [io  0x200000-0x3fffff]
+[    6.814787] pci_bus 0002:00: resource 5 [mem 0x28200000-0x2fffffff]
+[    6.814790] pci_bus 0002:01: resource 1 [mem 0x28200000-0x282fffff]
+[    6.814802] pci 0002:00:00.0: Max Payload Size set to  256/ 256 (was  128), Max Read Rq  256
+[    6.814812] mtk-pcie-gen3 11310000.pcie: PCI host bridge to bus 0001:00
+[    6.814822] pci_bus 0001:00: root bus resource [bus 00-ff]
+[    6.814824] pci 0002:01:00.0: Max Payload Size set to  256/ 256 (was  128), Max Read Rq  256
+[    6.814827] pci_bus 0001:00: root bus resource [io  0x600000-0x7fffff] (bus address [0x38000000-0x381fffff])
+[    6.814831] pci_bus 0001:00: root bus resource [mem 0x38200000-0x3fffffff]
+[    6.814835] pci_bus 0001:00: scanning bus
+[    6.814864] pci 0001:00:00.0: [14c3:7988] type 01 class 0x060400 PCIe Root Port
+[    6.814885] pci 0001:00:00.0: BAR 0 [mem 0x00000000-0x00007fff 64bit]
+[    6.814890] pci 0001:00:00.0: PCI bridge to [bus 00]
+[    6.814897] pci 0001:00:00.0:   bridge window [io  0x0000-0x0fff]
+[    6.814902] pci 0001:00:00.0:   bridge window [mem 0x00000000-0x000fffff]
+[    6.814911] pci 0001:00:00.0:   bridge window [mem 0x00000000-0x000fffff 64bit pref]
+[    6.814969] pci 0001:00:00.0: PME# supported from D0 D3hot D3cold
+[    6.814974] pci 0001:00:00.0: PME# disabled
+[    6.816470] pci_bus 0001:00: fixups for bus
+[    6.816474] pci 0001:00:00.0: scanning [bus 00-00] behind bridge, pass 0
+[    6.816478] pci 0001:00:00.0: bridge configuration invalid ([bus 00-00]), reconfiguring
+[    6.816486] pci 0001:00:00.0: scanning [bus 00-00] behind bridge, pass 1
+[    6.816533] pci_bus 0001:01: scanning bus
+[    6.816560] pci 0001:01:00.0: [14c3:7991] type 00 class 0x028000 PCIe Endpoint
+[    6.816616] pci 0001:01:00.0: BAR 0 [mem 0x00000000-0x001fffff 64bit pref]
+[    6.816622] pci 0001:01:00.0: BAR 2 [mem 0x00000000-0x00007fff 64bit]
+[    6.816727] pci 0001:01:00.0: PME# supported from D0 D3hot D3cold
+[    6.816733] pci 0001:01:00.0: PME# disabled
+[    6.825355] mmcblk0boot1: mmc0:0001 8GTF4R 4.00 MiB
+[    6.834673] pci 0001:01:00.0: ASPM: default states L0s L1
+[    6.834696] pci_bus 0001:01: fixups for bus
+[    6.834699] pci_bus 0001:01: bus scan returning with max=01
+[    6.834703] pci_bus 0001:01: busn_res: [bus 01-ff] end is updated to 01
+[    6.834712] pci_bus 0001:00: bus scan returning with max=01
+[    6.834731] pci 0001:00:00.0: bridge window [mem 0x38200000-0x383fffff 64bit pref]: assigned
+[    6.834737] pci 0001:00:00.0: bridge window [mem 0x38400000-0x384fffff]: assigned
+[    6.834741] pci 0001:00:00.0: BAR 0 [mem 0x38500000-0x38507fff 64bit]: assigned
+[    6.834752] pci 0001:01:00.0: BAR 0 [mem 0x38200000-0x383fffff 64bit pref]: assigned
+[    6.834766] pci 0001:01:00.0: BAR 2 [mem 0x38400000-0x38407fff 64bit]: assigned
+[    6.834779] pci 0001:00:00.0: PCI bridge to [bus 01]
+[    6.834784] pci 0001:00:00.0:   bridge window [mem 0x38400000-0x384fffff]
+[    6.834789] pci 0001:00:00.0:   bridge window [mem 0x38200000-0x383fffff 64bit pref]
+[    6.834795] pci_bus 0001:00: resource 4 [io  0x600000-0x7fffff]
+[    6.834799] pci_bus 0001:00: resource 5 [mem 0x38200000-0x3fffffff]
+[    6.834802] pci_bus 0001:01: resource 1 [mem 0x38400000-0x384fffff]
+[    6.834805] pci_bus 0001:01: resource 2 [mem 0x38200000-0x383fffff 64bit pref]
+[    6.834810] mtk-pcie-gen3 11300000.pcie: PCI host bridge to bus 0000:00
+[    6.834816] pci 0001:00:00.0: Max Payload Size set to  256/ 256 (was  128), Max Read Rq  256
+[    6.834820] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    6.834825] pci_bus 0000:00: root bus resource [io  0x0000-0x1fffff] (bus address [0x30000000-0x301fffff])
+[    6.834829] pci_bus 0000:00: root bus resource [mem 0x30200000-0x37ffffff]
+[    6.834836] pci 0001:01:00.0: Max Payload Size set to  256/ 256 (was  128), Max Read Rq  256
+[    6.834839] pci_bus 0000:00: scanning bus
+[    6.834866] pci 0000:00:00.0: [14c3:7988] type 01 class 0x060400 PCIe Root Port
+[    6.834886] pci 0000:00:00.0: BAR 0 [mem 0x00000000-0x00007fff 64bit]
+[    6.834891] pci 0000:00:00.0: PCI bridge to [bus 00]
+[    6.834898] pci 0000:00:00.0:   bridge window [io  0x0000-0x0fff]
+[    6.834903] pci 0000:00:00.0:   bridge window [mem 0x00000000-0x000fffff]
+[    6.834913] pci 0000:00:00.0:   bridge window [mem 0x00000000-0x000fffff 64bit pref]
+[    6.834970] pci 0000:00:00.0: PME# supported from D0 D3hot D3cold
+[    6.834975] pci 0000:00:00.0: PME# disabled
+[    6.835932] pci 0003:01:00.0: BAR 0 [mem 0x20200000-0x20203fff 64bit]: assigned
+[    6.835946] pci 0003:00:00.0: PCI bridge to [bus 01]
+[    6.836460] pci_bus 0000:00: fixups for bus
+[    6.836464] pci 0000:00:00.0: scanning [bus 00-00] behind bridge, pass 0
+[    6.836468] pci 0000:00:00.0: bridge configuration invalid ([bus 00-00]), reconfiguring
+[    6.836475] pci 0000:00:00.0: scanning [bus 00-00] behind bridge, pass 1
+[    6.836526] pci_bus 0000:01: scanning bus
+[    6.836552] pci 0000:01:00.0: [14c3:7990] type 00 class 0x028000 PCIe Endpoint
+[    6.836608] pci 0000:01:00.0: BAR 0 [mem 0x00000000-0x001fffff 64bit pref]
+[    6.836615] pci 0000:01:00.0: BAR 2 [mem 0x00000000-0x00007fff 64bit]
+[    6.836719] pci 0000:01:00.0: PME# supported from D0 D3hot D3cold
+[    6.836725] pci 0000:01:00.0: PME# disabled
+[    6.847917] mmcblk0rpmb: mmc0:0001 8GTF4R 512 KiB, chardev (247:0)
+[    6.854652] pci 0000:01:00.0: ASPM: default states L0s L1
+[    6.854670] pci_bus 0000:01: fixups for bus
+[    6.854673] pci_bus 0000:01: bus scan returning with max=01
+[    6.854677] pci_bus 0000:01: busn_res: [bus 01-ff] end is updated to 01
+[    6.854684] pci_bus 0000:00: bus scan returning with max=01
+[    6.854701] pci 0000:00:00.0: bridge window [mem 0x30200000-0x303fffff 64bit pref]: assigned
+[    6.854706] pci 0000:00:00.0: bridge window [mem 0x30400000-0x304fffff]: assigned
+[    6.854710] pci 0000:00:00.0: BAR 0 [mem 0x30500000-0x30507fff 64bit]: assigned
+[    6.854718] pci 0002:00:00.0: save config 0x00: 0x798814c3
+[    6.854721] pci 0000:01:00.0: BAR 0 [mem 0x30200000-0x303fffff 64bit pref]: assigned
+[    6.854724] pci 0002:00:00.0: save config 0x04: 0x00100000
+[    6.854729] pci 0002:00:00.0: save config 0x08: 0x06040001
+[    6.854734] pci 0002:00:00.0: save config 0x0c: 0x00010000
+[    6.854737] pci 0000:01:00.0: BAR 2 [mem 0x30400000-0x30407fff 64bit]: assigned
+[    6.854737] pci 0002:00:00.0: save config 0x10: 0x28300004
+[    6.854743] pci 0002:00:00.0: save config 0x14: 0x00000000
+[    6.854746] pci 0002:00:00.0: save config 0x18: 0x00010100
+[    6.854750] pci 0002:00:00.0: save config 0x1c: 0x000001f1
+[    6.854753] pci 0000:00:00.0: PCI bridge to [bus 01]
+[    6.854754] pci 0002:00:00.0: save config 0x20: 0x28202820
+[    6.854757] pci 0002:00:00.0: save config 0x24: 0x0001fff1
+[    6.854760] pci 0000:00:00.0:   bridge window [mem 0x30400000-0x304fffff]
+[    6.854761] pci 0002:00:00.0: save config 0x28: 0x00000000
+[    6.854764] pci 0002:00:00.0: save config 0x2c: 0x00000000
+[    6.854765] pci 0000:00:00.0:   bridge window [mem 0x30200000-0x303fffff 64bit pref]
+[    6.854768] pci 0002:00:00.0: save config 0x30: 0x00000000
+[    6.854772] pci_bus 0000:00: resource 4 [io  0x0000-0x1fffff]
+[    6.854772] pci 0002:00:00.0: save config 0x34: 0x00000080
+[    6.854776] pci 0002:00:00.0: save config 0x38: 0x00000000
+[    6.854776] pci_bus 0000:00: resource 5 [mem 0x30200000-0x37ffffff]
+[    6.854780] pci_bus 0000:01: resource 1 [mem 0x30400000-0x304fffff]
+[    6.854780] pci 0002:00:00.0: save config 0x3c: 0x00020100
+[    6.854784] pci_bus 0000:01: resource 2 [mem 0x30200000-0x303fffff 64bit pref]
+[    6.854802] pci 0000:00:00.0: Max Payload Size set to  256/ 256 (was  128), Max Read Rq  256
+[    6.854829] pci 0000:01:00.0: Max Payload Size set to  256/ 256 (was  128), Max Read Rq  256
+[    6.854948] pcieport 0002:00:00.0: assign IRQ: got 118
+[    6.854957] pcieport 0002:00:00.0: enabling device (0000 -> 0002)
+[    6.854970] pcieport 0002:00:00.0: enabling bus mastering
+[    6.855353] mtk-pcie-gen3 11290000.pcie: msi#0x0 address_hi 0x0 address_lo 0x11290c00 data 0
+[    6.855363] mtk-pcie-gen3 11290000.pcie: msi#0x1 address_hi 0x0 address_lo 0x11290c00 data 1
+[    6.855368] mtk-pcie-gen3 11290000.pcie: msi#0x2 address_hi 0x0 address_lo 0x11290c00 data 2
+[    6.855372] mtk-pcie-gen3 11290000.pcie: msi#0x3 address_hi 0x0 address_lo 0x11290c00 data 3
+[    6.855375] mtk-pcie-gen3 11290000.pcie: msi#0x4 address_hi 0x0 address_lo 0x11290c00 data 4
+[    6.855379] mtk-pcie-gen3 11290000.pcie: msi#0x5 address_hi 0x0 address_lo 0x11290c00 data 5
+[    6.855382] mtk-pcie-gen3 11290000.pcie: msi#0x6 address_hi 0x0 address_lo 0x11290c00 data 6
+[    6.855385] mtk-pcie-gen3 11290000.pcie: msi#0x7 address_hi 0x0 address_lo 0x11290c00 data 7
+[    6.855389] mtk-pcie-gen3 11290000.pcie: msi#0x8 address_hi 0x0 address_lo 0x11290c00 data 8
+[    6.855392] mtk-pcie-gen3 11290000.pcie: msi#0x9 address_hi 0x0 address_lo 0x11290c00 data 9
+[    6.855396] mtk-pcie-gen3 11290000.pcie: msi#0xa address_hi 0x0 address_lo 0x11290c00 data 10
+[    6.855399] mtk-pcie-gen3 11290000.pcie: msi#0xb address_hi 0x0 address_lo 0x11290c00 data 11
+[    6.855403] mtk-pcie-gen3 11290000.pcie: msi#0xc address_hi 0x0 address_lo 0x11290c00 data 12
+[    6.855406] mtk-pcie-gen3 11290000.pcie: msi#0xd address_hi 0x0 address_lo 0x11290c00 data 13
+[    6.855409] mtk-pcie-gen3 11290000.pcie: msi#0xe address_hi 0x0 address_lo 0x11290c00 data 14
+[    6.855413] mtk-pcie-gen3 11290000.pcie: msi#0xf address_hi 0x0 address_lo 0x11290c00 data 15
+[    6.855416] mtk-pcie-gen3 11290000.pcie: msi#0x10 address_hi 0x0 address_lo 0x11290c00 data 16
+[    6.855420] mtk-pcie-gen3 11290000.pcie: msi#0x11 address_hi 0x0 address_lo 0x11290c00 data 17
+[    6.855423] mtk-pcie-gen3 11290000.pcie: msi#0x12 address_hi 0x0 address_lo 0x11290c00 data 18
+[    6.855426] mtk-pcie-gen3 11290000.pcie: msi#0x13 address_hi 0x0 address_lo 0x11290c00 data 19
+[    6.855430] mtk-pcie-gen3 11290000.pcie: msi#0x14 address_hi 0x0 address_lo 0x11290c00 data 20
+[    6.855433] mtk-pcie-gen3 11290000.pcie: msi#0x15 address_hi 0x0 address_lo 0x11290c00 data 21
+[    6.855437] mtk-pcie-gen3 11290000.pcie: msi#0x16 address_hi 0x0 address_lo 0x11290c00 data 22
+[    6.855440] mtk-pcie-gen3 11290000.pcie: msi#0x17 address_hi 0x0 address_lo 0x11290c00 data 23
+[    6.855444] mtk-pcie-gen3 11290000.pcie: msi#0x18 address_hi 0x0 address_lo 0x11290c00 data 24
+[    6.855447] mtk-pcie-gen3 11290000.pcie: msi#0x19 address_hi 0x0 address_lo 0x11290c00 data 25
+[    6.855450] mtk-pcie-gen3 11290000.pcie: msi#0x1a address_hi 0x0 address_lo 0x11290c00 data 26
+[    6.855454] mtk-pcie-gen3 11290000.pcie: msi#0x1b address_hi 0x0 address_lo 0x11290c00 data 27
+[    6.855457] mtk-pcie-gen3 11290000.pcie: msi#0x1c address_hi 0x0 address_lo 0x11290c00 data 28
+[    6.855461] mtk-pcie-gen3 11290000.pcie: msi#0x1d address_hi 0x0 address_lo 0x11290c00 data 29
+[    6.855464] mtk-pcie-gen3 11290000.pcie: msi#0x1e address_hi 0x0 address_lo 0x11290c00 data 30
+[    6.855467] mtk-pcie-gen3 11290000.pcie: msi#0x1f address_hi 0x0 address_lo 0x11290c00 data 31
+[    6.855846] mtk-pcie-gen3 11290000.pcie: msi#0x0 address_hi 0x0 address_lo 0x11290c00 data 0
+[    6.855926] pcieport 0002:00:00.0: PME: Signaling with IRQ 119
+[    6.856149] pcieport 0002:00:00.0: AER: enabled with IRQ 119
+[    6.856224] pcieport 0002:00:00.0: bwctrl: enabled with IRQ 119
+[    6.856238] pcieport 0002:00:00.0: save config 0x00: 0x798814c3
+[    6.856243] pcieport 0002:00:00.0: save config 0x04: 0x00100406
+[    6.856247] pcieport 0002:00:00.0: save config 0x08: 0x06040001
+[    6.856250] pcieport 0002:00:00.0: save config 0x0c: 0x00010000
+[    6.856254] pcieport 0002:00:00.0: save config 0x10: 0x28300004
+[    6.856257] pcieport 0002:00:00.0: save config 0x14: 0x00000000
+[    6.856261] pcieport 0002:00:00.0: save config 0x18: 0x00010100
+[    6.856264] pcieport 0002:00:00.0: save config 0x1c: 0x000001f1
+[    6.856268] pcieport 0002:00:00.0: save config 0x20: 0x28202820
+[    6.856271] pcieport 0002:00:00.0: save config 0x24: 0x0001fff1
+[    6.856275] pcieport 0002:00:00.0: save config 0x28: 0x00000000
+[    6.856279] pcieport 0002:00:00.0: save config 0x2c: 0x00000000
+[    6.856283] pcieport 0002:00:00.0: save config 0x30: 0x00000000
+[    6.856286] pcieport 0002:00:00.0: save config 0x34: 0x00000080
+[    6.856289] pcieport 0002:00:00.0: save config 0x38: 0x00000000
+[    6.856293] pcieport 0002:00:00.0: save config 0x3c: 0x00020176
+[    6.856365] pci 0002:01:00.0: save config 0x00: 0x2263126f
+[    6.856370] pci 0002:01:00.0: save config 0x04: 0x00100000
+[    6.856374] pci 0002:01:00.0: save config 0x08: 0x01080203
+[    6.856379] pci 0002:01:00.0: save config 0x0c: 0x00000000
+[    6.856391] pci 0002:01:00.0: save config 0x10: 0x28200004
+[    6.856396] pci 0002:01:00.0: save config 0x14: 0x00000000
+[    6.856400] pci 0002:01:00.0: save config 0x18: 0x00000000
+[    6.856404] pci 0002:01:00.0: save config 0x1c: 0x00000000
+[    6.856408] pci 0002:01:00.0: save config 0x20: 0x00000000
+[    6.856412] pci 0002:01:00.0: save config 0x24: 0x00000000
+[    6.856417] pci 0002:01:00.0: save config 0x28: 0x00000000
+[    6.856421] pci 0002:01:00.0: save config 0x2c: 0x2263126f
+[    6.856425] pci 0002:01:00.0: save config 0x30: 0x00000000
+[    6.856429] pci 0002:01:00.0: save config 0x34: 0x00000040
+[    6.856433] pci 0002:01:00.0: save config 0x38: 0x00000000
+[    6.856437] pci 0002:01:00.0: save config 0x3c: 0x000001ff
+[    6.856503] FIT: Detected U-Boot 2026.07-OpenWrt-r35937-6c12b87ffc
+[    6.856509] FIT: Selected configuration: "config-mt7988a-bananapi-bpi-r4-pro-8x" (OpenWrt bananapi_bpi-r4-pro-8x)
+[    6.856519] FIT:           kernel sub-image 0x00002000..0x00654f77 "kernel-1" (ARM64 OpenWrt Linux-6.18.55)
+[    6.856531] FIT:          flat_dt sub-image 0x00655000..0x006603b6 "fdt-1" (ARM64 OpenWrt bananapi_bpi-r4-pro-8x device tree blob)
+[    6.856544] FIT:          flat_dt sub-image 0x00661000..0x00661601 "fdt-mt7988a-bananapi-bpi-r4-pro-emmc" (ARM64 OpenWrt bananapi_bpi-r4-pro-8x device tree overlay mt7988a-bananapi-bpi-r4-pro-emmc)
+[    6.856556] FIT:          flat_dt sub-image 0x00662000..0x006625b9 "fdt-mt7988a-bananapi-bpi-r4-pro-sd" (ARM64 OpenWrt bananapi_bpi-r4-pro-8x device tree overlay mt7988a-bananapi-bpi-r4-pro-sd)
+[    6.856569] FIT:          flat_dt sub-image 0x00663000..0x00663102 "fdt-mt7988a-bananapi-bpi-r4-pro-cn13" (ARM64 OpenWrt bananapi_bpi-r4-pro-8x device tree overlay mt7988a-bananapi-bpi-r4-pro-cn13)
+[    6.856581] FIT:          flat_dt sub-image 0x00664000..0x00664102 "fdt-mt7988a-bananapi-bpi-r4-pro-cn14" (ARM64 OpenWrt bananapi_bpi-r4-pro-8x device tree overlay mt7988a-bananapi-bpi-r4-pro-cn14)
+[    6.856592] FIT:          flat_dt sub-image 0x00665000..0x00665101 "fdt-mt7988a-bananapi-bpi-r4-pro-cn15" (ARM64 OpenWrt bananapi_bpi-r4-pro-8x device tree overlay mt7988a-bananapi-bpi-r4-pro-cn15)
+[    6.856604] FIT:          flat_dt sub-image 0x00666000..0x00666101 "fdt-mt7988a-bananapi-bpi-r4-pro-cn18" (ARM64 OpenWrt bananapi_bpi-r4-pro-8x device tree overlay mt7988a-bananapi-bpi-r4-pro-cn18)
+[    6.856617] FIT:          flat_dt sub-image 0x00667000..0x006672c9 "fdt-mt7988a-bananapi-bpi-r4-pro-8x-lan-phy" (ARM64 OpenWrt bananapi_bpi-r4-pro-8x device tree overlay mt7988a-bananapi-bpi-r4-pro-8x-lan-phy)
+[    6.856629] FIT:          flat_dt sub-image 0x00668000..0x006682b8 "fdt-mt7988a-bananapi-bpi-r4-pro-8x-lan-sfp" (ARM64 OpenWrt bananapi_bpi-r4-pro-8x device tree overlay mt7988a-bananapi-bpi-r4-pro-8x-lan-sfp)
+[    6.856642] FIT:          flat_dt sub-image 0x00669000..0x00669251 "fdt-mt7988a-bananapi-bpi-r4-pro-8x-wan-phy" (ARM64 OpenWrt bananapi_bpi-r4-pro-8x device tree overlay mt7988a-bananapi-bpi-r4-pro-8x-wan-phy)
+[    6.856655] FIT:          flat_dt sub-image 0x0066a000..0x0066a242 "fdt-mt7988a-bananapi-bpi-r4-pro-8x-wan-sfp" (ARM64 OpenWrt bananapi_bpi-r4-pro-8x device tree overlay mt7988a-bananapi-bpi-r4-pro-8x-wan-sfp)
+[    6.856664] FIT:       filesystem sub-image 0x0066b000..0x057ddfff "rootfs-1" (ARM64 OpenWrt bananapi_bpi-r4-pro-8x rootfs)
+[    6.856881] pci 0001:00:00.0: save config 0x00: 0x798814c3
+[    6.856887] pci 0001:00:00.0: save config 0x04: 0x00100000
+[    6.856891] pci 0001:00:00.0: save config 0x08: 0x06040001
+[    6.856895] pci 0001:00:00.0: save config 0x0c: 0x00010000
+[    6.856898] pci 0001:00:00.0: save config 0x10: 0x38500004
+[    6.856901] pci 0001:00:00.0: save config 0x14: 0x00000000
+[    6.856905] pci 0001:00:00.0: save config 0x18: 0x00010100
+[    6.856908] pci 0001:00:00.0: save config 0x1c: 0x000001f1
+[    6.856912] pci 0001:00:00.0: save config 0x20: 0x38403840
+[    6.856916] pci 0001:00:00.0: save config 0x24: 0x38313821
+[    6.856920] pci 0001:00:00.0: save config 0x28: 0x00000000
+[    6.856923] pci 0001:00:00.0: save config 0x2c: 0x00000000
+[    6.856926] pci 0001:00:00.0: save config 0x30: 0x00000000
+[    6.856930] pci 0001:00:00.0: save config 0x34: 0x00000080
+[    6.856933] pci 0001:00:00.0: save config 0x38: 0x00000000
+[    6.856936] pci 0001:00:00.0: save config 0x3c: 0x00020100
+[    6.856985] block mmcblk0p5: mapped 1 uImage.FIT filesystem sub-image as /dev/fit0
+[    6.857057] pcieport 0001:00:00.0: assign IRQ: got 120
+[    6.857066] pcieport 0001:00:00.0: enabling device (0000 -> 0002)
+[    6.857080] pcieport 0001:00:00.0: enabling bus mastering
+[    6.857277] block mmcblk0p5: mapped remaining space as /dev/fitrw
+[    6.857487] mtk-pcie-gen3 11310000.pcie: msi#0x0 address_hi 0x0 address_lo 0x11310c00 data 0
+[    6.857497] mtk-pcie-gen3 11310000.pcie: msi#0x1 address_hi 0x0 address_lo 0x11310c00 data 1
+[    6.857501] mtk-pcie-gen3 11310000.pcie: msi#0x2 address_hi 0x0 address_lo 0x11310c00 data 2
+[    6.857505] mtk-pcie-gen3 11310000.pcie: msi#0x3 address_hi 0x0 address_lo 0x11310c00 data 3
+[    6.857509] mtk-pcie-gen3 11310000.pcie: msi#0x4 address_hi 0x0 address_lo 0x11310c00 data 4
+[    6.857512] mtk-pcie-gen3 11310000.pcie: msi#0x5 address_hi 0x0 address_lo 0x11310c00 data 5
+[    6.857516] mtk-pcie-gen3 11310000.pcie: msi#0x6 address_hi 0x0 address_lo 0x11310c00 data 6
+[    6.857519] mtk-pcie-gen3 11310000.pcie: msi#0x7 address_hi 0x0 address_lo 0x11310c00 data 7
+[    6.857523] mtk-pcie-gen3 11310000.pcie: msi#0x8 address_hi 0x0 address_lo 0x11310c00 data 8
+[    6.857527] mtk-pcie-gen3 11310000.pcie: msi#0x9 address_hi 0x0 address_lo 0x11310c00 data 9
+[    6.857530] mtk-pcie-gen3 11310000.pcie: msi#0xa address_hi 0x0 address_lo 0x11310c00 data 10
+[    6.857534] mtk-pcie-gen3 11310000.pcie: msi#0xb address_hi 0x0 address_lo 0x11310c00 data 11
+[    6.857538] mtk-pcie-gen3 11310000.pcie: msi#0xc address_hi 0x0 address_lo 0x11310c00 data 12
+[    6.857542] mtk-pcie-gen3 11310000.pcie: msi#0xd address_hi 0x0 address_lo 0x11310c00 data 13
+[    6.857546] mtk-pcie-gen3 11310000.pcie: msi#0xe address_hi 0x0 address_lo 0x11310c00 data 14
+[    6.857549] mtk-pcie-gen3 11310000.pcie: msi#0xf address_hi 0x0 address_lo 0x11310c00 data 15
+[    6.857553] mtk-pcie-gen3 11310000.pcie: msi#0x10 address_hi 0x0 address_lo 0x11310c00 data 16
+[    6.857557] mtk-pcie-gen3 11310000.pcie: msi#0x11 address_hi 0x0 address_lo 0x11310c00 data 17
+[    6.857561] mtk-pcie-gen3 11310000.pcie: msi#0x12 address_hi 0x0 address_lo 0x11310c00 data 18
+[    6.857565] mtk-pcie-gen3 11310000.pcie: msi#0x13 address_hi 0x0 address_lo 0x11310c00 data 19
+[    6.857569] mtk-pcie-gen3 11310000.pcie: msi#0x14 address_hi 0x0 address_lo 0x11310c00 data 20
+[    6.857573] mtk-pcie-gen3 11310000.pcie: msi#0x15 address_hi 0x0 address_lo 0x11310c00 data 21
+[    6.857577] mtk-pcie-gen3 11310000.pcie: msi#0x16 address_hi 0x0 address_lo 0x11310c00 data 22
+[    6.857581] mtk-pcie-gen3 11310000.pcie: msi#0x17 address_hi 0x0 address_lo 0x11310c00 data 23
+[    6.857585] mtk-pcie-gen3 11310000.pcie: msi#0x18 address_hi 0x0 address_lo 0x11310c00 data 24
+[    6.857588] mtk-pcie-gen3 11310000.pcie: msi#0x19 address_hi 0x0 address_lo 0x11310c00 data 25
+[    6.857592] mtk-pcie-gen3 11310000.pcie: msi#0x1a address_hi 0x0 address_lo 0x11310c00 data 26
+[    6.857596] mtk-pcie-gen3 11310000.pcie: msi#0x1b address_hi 0x0 address_lo 0x11310c00 data 27
+[    6.857600] mtk-pcie-gen3 11310000.pcie: msi#0x1c address_hi 0x0 address_lo 0x11310c00 data 28
+[    6.857604] mtk-pcie-gen3 11310000.pcie: msi#0x1d address_hi 0x0 address_lo 0x11310c00 data 29
+[    6.857608] mtk-pcie-gen3 11310000.pcie: msi#0x1e address_hi 0x0 address_lo 0x11310c00 data 30
+[    6.857612] mtk-pcie-gen3 11310000.pcie: msi#0x1f address_hi 0x0 address_lo 0x11310c00 data 31
+[    6.857980] mtk-pcie-gen3 11310000.pcie: msi#0x0 address_hi 0x0 address_lo 0x11310c00 data 0
+[    6.858054] pcieport 0001:00:00.0: PME: Signaling with IRQ 121
+[    6.858167] pcieport 0001:00:00.0: AER: enabled with IRQ 121
+[    6.858218] pcieport 0001:00:00.0: bwctrl: enabled with IRQ 121
+[    6.858235] pcieport 0001:00:00.0: save config 0x00: 0x798814c3
+[    6.858239] pcieport 0001:00:00.0: save config 0x04: 0x00100406
+[    6.858243] pcieport 0001:00:00.0: save config 0x08: 0x06040001
+[    6.858247] pcieport 0001:00:00.0: save config 0x0c: 0x00010000
+[    6.858250] pcieport 0001:00:00.0: save config 0x10: 0x38500004
+[    6.858255] pcieport 0001:00:00.0: save config 0x14: 0x00000000
+[    6.858258] pcieport 0001:00:00.0: save config 0x18: 0x00010100
+[    6.858261] pcieport 0001:00:00.0: save config 0x1c: 0x000001f1
+[    6.858265] pcieport 0001:00:00.0: save config 0x20: 0x38403840
+[    6.858268] pcieport 0001:00:00.0: save config 0x24: 0x38313821
+[    6.858272] pcieport 0001:00:00.0: save config 0x28: 0x00000000
+[    6.858276] pcieport 0001:00:00.0: save config 0x2c: 0x00000000
+[    6.858280] pcieport 0001:00:00.0: save config 0x30: 0x00000000
+[    6.858284] pcieport 0001:00:00.0: save config 0x34: 0x00000080
+[    6.858288] pcieport 0001:00:00.0: save config 0x38: 0x00000000
+[    6.858291] pcieport 0001:00:00.0: save config 0x3c: 0x00020178
+[    6.858346] pci 0001:01:00.0: save config 0x00: 0x799114c3
+[    6.858351] pci 0001:01:00.0: save config 0x04: 0x00100000
+[    6.858355] pci 0001:01:00.0: save config 0x08: 0x02800000
+[    6.858359] pci 0001:01:00.0: save config 0x0c: 0x00000000
+[    6.858363] pci 0001:01:00.0: save config 0x10: 0x3820000c
+[    6.858368] pci 0001:01:00.0: save config 0x14: 0x00000000
+[    6.858372] pci 0001:01:00.0: save config 0x18: 0x38400004
+[    6.858376] pci 0001:01:00.0: save config 0x1c: 0x00000000
+[    6.858380] pci 0001:01:00.0: save config 0x20: 0x00000000
+[    6.858384] pci 0001:01:00.0: save config 0x24: 0x00000000
+[    6.858388] pci 0001:01:00.0: save config 0x28: 0x00000000
+[    6.858392] pci 0001:01:00.0: save config 0x2c: 0x663914c3
+[    6.858396] pci 0001:01:00.0: save config 0x30: 0x00000000
+[    6.858400] pci 0001:01:00.0: save config 0x34: 0x00000080
+[    6.858404] pci 0001:01:00.0: save config 0x38: 0x00000000
+[    6.858408] pci 0001:01:00.0: save config 0x3c: 0x00000100
+[    6.858495] pci 0000:00:00.0: save config 0x00: 0x798814c3
+[    6.858501] pci 0000:00:00.0: save config 0x04: 0x00100000
+[    6.858506] pci 0000:00:00.0: save config 0x08: 0x06040001
+[    6.858509] pci 0000:00:00.0: save config 0x0c: 0x00010000
+[    6.858513] pci 0000:00:00.0: save config 0x10: 0x30500004
+[    6.858517] pci 0000:00:00.0: save config 0x14: 0x00000000
+[    6.858521] pci 0000:00:00.0: save config 0x18: 0x00010100
+[    6.858524] pci 0000:00:00.0: save config 0x1c: 0x000001f1
+[    6.858528] pci 0000:00:00.0: save config 0x20: 0x30403040
+[    6.858532] pci 0000:00:00.0: save config 0x24: 0x30313021
+[    6.858536] pci 0000:00:00.0: save config 0x28: 0x00000000
+[    6.858539] pci 0000:00:00.0: save config 0x2c: 0x00000000
+[    6.858542] pci 0000:00:00.0: save config 0x30: 0x00000000
+[    6.858546] pci 0000:00:00.0: save config 0x34: 0x00000080
+[    6.858549] pci 0000:00:00.0: save config 0x38: 0x00000000
+[    6.858552] pci 0000:00:00.0: save config 0x3c: 0x00020100
+[    6.858651] pcieport 0000:00:00.0: assign IRQ: got 122
+[    6.858659] pcieport 0000:00:00.0: enabling device (0000 -> 0002)
+[    6.858672] pcieport 0000:00:00.0: enabling bus mastering
+[    6.858856] pci 0003:00:00.0:   bridge window [mem 0x20200000-0x202fffff]
+[    6.858865] pci_bus 0003:00: resource 4 [io  0x400000-0x5fffff]
+[    6.858869] pci_bus 0003:00: resource 5 [mem 0x20200000-0x27ffffff]
+[    6.859029] mtk-pcie-gen3 11300000.pcie: msi#0x0 address_hi 0x0 address_lo 0x11300c00 data 0
+[    6.859039] mtk-pcie-gen3 11300000.pcie: msi#0x1 address_hi 0x0 address_lo 0x11300c00 data 1
+[    6.859044] mtk-pcie-gen3 11300000.pcie: msi#0x2 address_hi 0x0 address_lo 0x11300c00 data 2
+[    6.859048] mtk-pcie-gen3 11300000.pcie: msi#0x3 address_hi 0x0 address_lo 0x11300c00 data 3
+[    6.859052] mtk-pcie-gen3 11300000.pcie: msi#0x4 address_hi 0x0 address_lo 0x11300c00 data 4
+[    6.859055] mtk-pcie-gen3 11300000.pcie: msi#0x5 address_hi 0x0 address_lo 0x11300c00 data 5
+[    6.859058] mtk-pcie-gen3 11300000.pcie: msi#0x6 address_hi 0x0 address_lo 0x11300c00 data 6
+[    6.859062] mtk-pcie-gen3 11300000.pcie: msi#0x7 address_hi 0x0 address_lo 0x11300c00 data 7
+[    6.859065] mtk-pcie-gen3 11300000.pcie: msi#0x8 address_hi 0x0 address_lo 0x11300c00 data 8
+[    6.859069] mtk-pcie-gen3 11300000.pcie: msi#0x9 address_hi 0x0 address_lo 0x11300c00 data 9
+[    6.859072] mtk-pcie-gen3 11300000.pcie: msi#0xa address_hi 0x0 address_lo 0x11300c00 data 10
+[    6.859076] mtk-pcie-gen3 11300000.pcie: msi#0xb address_hi 0x0 address_lo 0x11300c00 data 11
+[    6.859079] mtk-pcie-gen3 11300000.pcie: msi#0xc address_hi 0x0 address_lo 0x11300c00 data 12
+[    6.859083] mtk-pcie-gen3 11300000.pcie: msi#0xd address_hi 0x0 address_lo 0x11300c00 data 13
+[    6.859086] mtk-pcie-gen3 11300000.pcie: msi#0xe address_hi 0x0 address_lo 0x11300c00 data 14
+[    6.859090] mtk-pcie-gen3 11300000.pcie: msi#0xf address_hi 0x0 address_lo 0x11300c00 data 15
+[    6.859093] mtk-pcie-gen3 11300000.pcie: msi#0x10 address_hi 0x0 address_lo 0x11300c00 data 16
+[    6.859097] mtk-pcie-gen3 11300000.pcie: msi#0x11 address_hi 0x0 address_lo 0x11300c00 data 17
+[    6.859100] mtk-pcie-gen3 11300000.pcie: msi#0x12 address_hi 0x0 address_lo 0x11300c00 data 18
+[    6.859104] mtk-pcie-gen3 11300000.pcie: msi#0x13 address_hi 0x0 address_lo 0x11300c00 data 19
+[    6.859107] mtk-pcie-gen3 11300000.pcie: msi#0x14 address_hi 0x0 address_lo 0x11300c00 data 20
+[    6.859110] mtk-pcie-gen3 11300000.pcie: msi#0x15 address_hi 0x0 address_lo 0x11300c00 data 21
+[    6.859114] mtk-pcie-gen3 11300000.pcie: msi#0x16 address_hi 0x0 address_lo 0x11300c00 data 22
+[    6.859117] mtk-pcie-gen3 11300000.pcie: msi#0x17 address_hi 0x0 address_lo 0x11300c00 data 23
+[    6.859121] mtk-pcie-gen3 11300000.pcie: msi#0x18 address_hi 0x0 address_lo 0x11300c00 data 24
+[    6.859124] mtk-pcie-gen3 11300000.pcie: msi#0x19 address_hi 0x0 address_lo 0x11300c00 data 25
+[    6.859128] mtk-pcie-gen3 11300000.pcie: msi#0x1a address_hi 0x0 address_lo 0x11300c00 data 26
+[    6.859131] mtk-pcie-gen3 11300000.pcie: msi#0x1b address_hi 0x0 address_lo 0x11300c00 data 27
+[    6.859134] mtk-pcie-gen3 11300000.pcie: msi#0x1c address_hi 0x0 address_lo 0x11300c00 data 28
+[    6.859138] mtk-pcie-gen3 11300000.pcie: msi#0x1d address_hi 0x0 address_lo 0x11300c00 data 29
+[    6.859141] mtk-pcie-gen3 11300000.pcie: msi#0x1e address_hi 0x0 address_lo 0x11300c00 data 30
+[    6.859145] mtk-pcie-gen3 11300000.pcie: msi#0x1f address_hi 0x0 address_lo 0x11300c00 data 31
+[    6.859500] mtk-pcie-gen3 11300000.pcie: msi#0x0 address_hi 0x0 address_lo 0x11300c00 data 0
+[    6.859566] pcieport 0000:00:00.0: PME: Signaling with IRQ 123
+[    6.859693] pcieport 0000:00:00.0: AER: enabled with IRQ 123
+[    6.859747] pcieport 0000:00:00.0: bwctrl: enabled with IRQ 123
+[    6.859765] pcieport 0000:00:00.0: save config 0x00: 0x798814c3
+[    6.859770] pcieport 0000:00:00.0: save config 0x04: 0x00100406
+[    6.859774] pcieport 0000:00:00.0: save config 0x08: 0x06040001
+[    6.859777] pcieport 0000:00:00.0: save config 0x0c: 0x00010000
+[    6.859781] pcieport 0000:00:00.0: save config 0x10: 0x30500004
+[    6.859784] pcieport 0000:00:00.0: save config 0x14: 0x00000000
+[    6.859788] pcieport 0000:00:00.0: save config 0x18: 0x00010100
+[    6.859791] pcieport 0000:00:00.0: save config 0x1c: 0x000001f1
+[    6.859795] pcieport 0000:00:00.0: save config 0x20: 0x30403040
+[    6.859799] pcieport 0000:00:00.0: save config 0x24: 0x30313021
+[    6.859802] pcieport 0000:00:00.0: save config 0x28: 0x00000000
+[    6.859805] pcieport 0000:00:00.0: save config 0x2c: 0x00000000
+[    6.859809] pcieport 0000:00:00.0: save config 0x30: 0x00000000
+[    6.859812] pcieport 0000:00:00.0: save config 0x34: 0x00000080
+[    6.859815] pcieport 0000:00:00.0: save config 0x38: 0x00000000
+[    6.859819] pcieport 0000:00:00.0: save config 0x3c: 0x0002017a
+[    6.859871] pci 0000:01:00.0: save config 0x00: 0x799014c3
+[    6.859876] pci 0000:01:00.0: save config 0x04: 0x00100000
+[    6.859880] pci 0000:01:00.0: save config 0x08: 0x02800000
+[    6.859885] pci 0000:01:00.0: save config 0x0c: 0x00000000
+[    6.859889] pci 0000:01:00.0: save config 0x10: 0x3020000c
+[    6.859893] pci 0000:01:00.0: save config 0x14: 0x00000000
+[    6.859897] pci 0000:01:00.0: save config 0x18: 0x30400004
+[    6.859901] pci 0000:01:00.0: save config 0x1c: 0x00000000
+[    6.859905] pci 0000:01:00.0: save config 0x20: 0x00000000
+[    6.859909] pci 0000:01:00.0: save config 0x24: 0x00000000
+[    6.859913] pci 0000:01:00.0: save config 0x28: 0x00000000
+[    6.859917] pci 0000:01:00.0: save config 0x2c: 0x663914c3
+[    6.859921] pci 0000:01:00.0: save config 0x30: 0x00000000
+[    6.859925] pci 0000:01:00.0: save config 0x34: 0x00000080
+[    6.859929] pci 0000:01:00.0: save config 0x38: 0x00000000
+[    6.859933] pci 0000:01:00.0: save config 0x3c: 0x00000100
+[   10.117902] pci_bus 0003:01: resource 1 [mem 0x20200000-0x202fffff]
+[   10.124171] pci 0003:00:00.0: Max Payload Size set to  256/ 256 (was  128), Max Read Rq  256
+[   10.132614] pci 0003:01:00.0: Max Payload Size set to  256/ 256 (was  128), Max Read Rq  256
+[   10.141057] check access for rdinit=/init failed: -2, ignoring
+[   10.141058] pci 0003:00:00.0: save config 0x00: 0x798814c3
+[   10.141063] pci 0003:00:00.0: save config 0x04: 0x00100000
+[   10.157826] pci 0003:00:00.0: save config 0x08: 0x06040001
+[   10.163300] pci 0003:00:00.0: save config 0x0c: 0x00010000
+[   10.168776] pci 0003:00:00.0: save config 0x10: 0x20300004
+[   10.174251] pci 0003:00:00.0: save config 0x14: 0x00000000
+[   10.179727] pci 0003:00:00.0: save config 0x18: 0x00010100
+[   10.185203] pci 0003:00:00.0: save config 0x1c: 0x000001f1
+[   10.190677] pci 0003:00:00.0: save config 0x20: 0x20202020
+[   10.196153] pci 0003:00:00.0: save config 0x24: 0x0001fff1
+[   10.201626] pci 0003:00:00.0: save config 0x28: 0x00000000
+[   10.207102] pci 0003:00:00.0: save config 0x2c: 0x00000000
+[   10.212575] pci 0003:00:00.0: save config 0x30: 0x00000000
+[   10.218051] pci 0003:00:00.0: save config 0x34: 0x00000080
+[   10.223525] pci 0003:00:00.0: save config 0x38: 0x00000000
+[   10.229000] pci 0003:00:00.0: save config 0x3c: 0x00020100
+[   10.234606] pcieport 0003:00:00.0: assign IRQ: got 124
+[   10.239744] pcieport 0003:00:00.0: enabling device (0000 -> 0002)
+[   10.245838] pcieport 0003:00:00.0: enabling bus mastering
+[   10.251585] mtk-pcie-gen3 11280000.pcie: msi#0x0 address_hi 0x0 address_lo 0x11280c00 data 0
+[   10.260022] mtk-pcie-gen3 11280000.pcie: msi#0x1 address_hi 0x0 address_lo 0x11280c00 data 1
+[   10.268449] mtk-pcie-gen3 11280000.pcie: msi#0x2 address_hi 0x0 address_lo 0x11280c00 data 2
+[   10.276878] mtk-pcie-gen3 11280000.pcie: msi#0x3 address_hi 0x0 address_lo 0x11280c00 data 3
+[   10.285305] mtk-pcie-gen3 11280000.pcie: msi#0x4 address_hi 0x0 address_lo 0x11280c00 data 4
+[   10.293728] mtk-pcie-gen3 11280000.pcie: msi#0x5 address_hi 0x0 address_lo 0x11280c00 data 5
+[   10.302155] mtk-pcie-gen3 11280000.pcie: msi#0x6 address_hi 0x0 address_lo 0x11280c00 data 6
+[   10.310581] mtk-pcie-gen3 11280000.pcie: msi#0x7 address_hi 0x0 address_lo 0x11280c00 data 7
+[   10.319006] mtk-pcie-gen3 11280000.pcie: msi#0x8 address_hi 0x0 address_lo 0x11280c00 data 8
+[   10.327431] mtk-pcie-gen3 11280000.pcie: msi#0x9 address_hi 0x0 address_lo 0x11280c00 data 9
+[   10.335858] mtk-pcie-gen3 11280000.pcie: msi#0xa address_hi 0x0 address_lo 0x11280c00 data 10
+[   10.344369] mtk-pcie-gen3 11280000.pcie: msi#0xb address_hi 0x0 address_lo 0x11280c00 data 11
+[   10.352882] mtk-pcie-gen3 11280000.pcie: msi#0xc address_hi 0x0 address_lo 0x11280c00 data 12
+[   10.361393] mtk-pcie-gen3 11280000.pcie: msi#0xd address_hi 0x0 address_lo 0x11280c00 data 13
+[   10.369906] mtk-pcie-gen3 11280000.pcie: msi#0xe address_hi 0x0 address_lo 0x11280c00 data 14
+[   10.378419] mtk-pcie-gen3 11280000.pcie: msi#0xf address_hi 0x0 address_lo 0x11280c00 data 15
+[   10.386931] mtk-pcie-gen3 11280000.pcie: msi#0x10 address_hi 0x0 address_lo 0x11280c00 data 16
+[   10.395530] mtk-pcie-gen3 11280000.pcie: msi#0x11 address_hi 0x0 address_lo 0x11280c00 data 17
+[   10.404128] mtk-pcie-gen3 11280000.pcie: msi#0x12 address_hi 0x0 address_lo 0x11280c00 data 18
+[   10.412726] mtk-pcie-gen3 11280000.pcie: msi#0x13 address_hi 0x0 address_lo 0x11280c00 data 19
+[   10.421325] mtk-pcie-gen3 11280000.pcie: msi#0x14 address_hi 0x0 address_lo 0x11280c00 data 20
+[   10.429924] mtk-pcie-gen3 11280000.pcie: msi#0x15 address_hi 0x0 address_lo 0x11280c00 data 21
+[   10.438523] mtk-pcie-gen3 11280000.pcie: msi#0x16 address_hi 0x0 address_lo 0x11280c00 data 22
+[   10.447122] mtk-pcie-gen3 11280000.pcie: msi#0x17 address_hi 0x0 address_lo 0x11280c00 data 23
+[   10.455721] mtk-pcie-gen3 11280000.pcie: msi#0x18 address_hi 0x0 address_lo 0x11280c00 data 24
+[   10.464318] mtk-pcie-gen3 11280000.pcie: msi#0x19 address_hi 0x0 address_lo 0x11280c00 data 25
+[   10.472917] mtk-pcie-gen3 11280000.pcie: msi#0x1a address_hi 0x0 address_lo 0x11280c00 data 26
+[   10.481517] mtk-pcie-gen3 11280000.pcie: msi#0x1b address_hi 0x0 address_lo 0x11280c00 data 27
+[   10.490115] mtk-pcie-gen3 11280000.pcie: msi#0x1c address_hi 0x0 address_lo 0x11280c00 data 28
+[   10.498715] mtk-pcie-gen3 11280000.pcie: msi#0x1d address_hi 0x0 address_lo 0x11280c00 data 29
+[   10.507314] mtk-pcie-gen3 11280000.pcie: msi#0x1e address_hi 0x0 address_lo 0x11280c00 data 30
+[   10.515914] mtk-pcie-gen3 11280000.pcie: msi#0x1f address_hi 0x0 address_lo 0x11280c00 data 31
+[   10.524889] mtk-pcie-gen3 11280000.pcie: msi#0x0 address_hi 0x0 address_lo 0x11280c00 data 0
+[   10.533387] pcieport 0003:00:00.0: PME: Signaling with IRQ 125
+[   10.539321] pcieport 0003:00:00.0: AER: enabled with IRQ 125
+[   10.545172] pcieport 0003:00:00.0: bwctrl: enabled with IRQ 125
+[   10.551094] pcieport 0003:00:00.0: save config 0x00: 0x798814c3
+[   10.557013] pcieport 0003:00:00.0: save config 0x04: 0x00100406
+[   10.562921] pcieport 0003:00:00.0: save config 0x08: 0x06040001
+[   10.568832] pcieport 0003:00:00.0: save config 0x0c: 0x00010000
+[   10.574741] pcieport 0003:00:00.0: save config 0x10: 0x20300004
+[   10.580648] pcieport 0003:00:00.0: save config 0x14: 0x00000000
+[   10.586559] pcieport 0003:00:00.0: save config 0x18: 0x00010100
+[   10.592467] pcieport 0003:00:00.0: save config 0x1c: 0x000001f1
+[   10.598381] pcieport 0003:00:00.0: save config 0x20: 0x20202020
+[   10.604288] pcieport 0003:00:00.0: save config 0x24: 0x0001fff1
+[   10.610199] pcieport 0003:00:00.0: save config 0x28: 0x00000000
+[   10.616108] pcieport 0003:00:00.0: save config 0x2c: 0x00000000
+[   10.622015] pcieport 0003:00:00.0: save config 0x30: 0x00000000
+[   10.627926] pcieport 0003:00:00.0: save config 0x34: 0x00000080
+[   10.633835] pcieport 0003:00:00.0: save config 0x38: 0x00000000
+[   10.639744] pcieport 0003:00:00.0: save config 0x3c: 0x0002017c
+[   10.645712] pci 0003:01:00.0: save config 0x00: 0xa80a144d
+[   10.651188] pci 0003:01:00.0: save config 0x04: 0x00100000
+[   10.656666] pci 0003:01:00.0: save config 0x08: 0x01080200
+[   10.662141] pci 0003:01:00.0: save config 0x0c: 0x00000000
+[   10.667618] pci 0003:01:00.0: save config 0x10: 0x20200004
+[   10.673093] pci 0003:01:00.0: save config 0x14: 0x00000000
+[   10.678571] pci 0003:01:00.0: save config 0x18: 0x00000000
+[   10.684045] pci 0003:01:00.0: save config 0x1c: 0x00000000
+[   10.689521] pci 0003:01:00.0: save config 0x20: 0x00000000
+[   10.694997] pci 0003:01:00.0: save config 0x24: 0x00000000
+[   10.700471] pci 0003:01:00.0: save config 0x28: 0x00000000
+[   10.705948] pci 0003:01:00.0: save config 0x2c: 0xa801144d
+[   10.711423] pci 0003:01:00.0: save config 0x30: 0x00000000
+[   10.716902] pci 0003:01:00.0: save config 0x34: 0x00000040
+[   10.722377] pci 0003:01:00.0: save config 0x38: 0x00000000
+[   10.727853] pci 0003:01:00.0: save config 0x3c: 0x000001ff
+[   10.735529] VFS: Mounted root (squashfs filesystem) readonly on device 259:1.
+[   10.742894] Freeing unused kernel memory: 960K
+[   10.747482] Run /sbin/init as init process
+[   10.751571]   with arguments:
+[   10.754526]     /sbin/init
+[   10.757233]   with environment:
+[   10.760362]     HOME=/
+[   10.762710]     TERM=linux
+[   10.957324] init: Console is alive
+[   10.960819] init: - watchdog -
+[   11.363034] kmodloader: loading kernel modules from /etc/modules-boot.d/*
+[   11.400718] usbcore: registered new interface driver usbfs
+[   11.406251] usbcore: registered new interface driver hub
+[   11.411576] usbcore: registered new device driver usb
+[   11.417948] raid6: skipped pq benchmark and selected neonx8
+[   11.423527] raid6: using neon recovery algorithm
+[   11.429240] xor: measuring software checksum speed
+[   11.434575]    8regs           :  6023 MB/sec
+[   11.439479]    32regs          :  6069 MB/sec
+[   11.444553]    arm64_neon      :  4503 MB/sec
+[   11.448902] xor: using function: 32regs (6069 MB/sec)
+[   11.509231] Btrfs loaded, zoned=no, fsverity=no
+[   11.516764] gpio_button_hotplug: loading out-of-tree module taints kernel.
+[   11.528316] nvme 0002:01:00.0: assign IRQ: got 118
+[   11.528316] nvme 0003:01:00.0: assign IRQ: got 124
+[   11.528455] nvme nvme0: pci function 0002:01:00.0
+[   11.533189] nvme nvme1: pci function 0003:01:00.0
+[   11.537905] nvme 0002:01:00.0: enabling device (0000 -> 0002)
+[   11.542598] nvme 0003:01:00.0: enabling device (0000 -> 0002)
+[   11.547291] nvme 0002:01:00.0: enabling bus mastering
+[   11.547374] mtk-pcie-gen3 11290000.pcie: msi#0x1 address_hi 0x0 address_lo 0x11290c00 data 1
+[   11.553034] nvme 0003:01:00.0: enabling bus mastering
+[   11.558801] nvme 0002:01:00.0: save config 0x00: 0x2263126f
+[   11.563857] mtk-pcie-gen3 11280000.pcie: msi#0x1 address_hi 0x0 address_lo 0x11280c00 data 1
+[   11.572219] nvme 0002:01:00.0: save config 0x04: 0x00100406
+[   11.577303] nvme 0003:01:00.0: save config 0x00: 0xa80a144d
+[   11.582812] nvme 0002:01:00.0: save config 0x08: 0x01080203
+[   11.591237] nvme 0003:01:00.0: save config 0x04: 0x00100406
+[   11.596798] nvme 0002:01:00.0: save config 0x0c: 0x00000000
+[   11.602349] nvme 0003:01:00.0: save config 0x08: 0x01080200
+[   11.607906] nvme 0002:01:00.0: save config 0x10: 0x28200004
+[   11.613462] nvme 0003:01:00.0: save config 0x0c: 0x00000000
+[   11.619019] nvme 0002:01:00.0: save config 0x14: 0x00000000
+[   11.624574] nvme 0003:01:00.0: save config 0x10: 0x20200004
+[   11.630131] nvme 0002:01:00.0: save config 0x18: 0x00000000
+[   11.635689] nvme 0003:01:00.0: save config 0x14: 0x00000000
+[   11.641244] nvme 0002:01:00.0: save config 0x1c: 0x00000000
+[   11.646801] nvme 0003:01:00.0: save config 0x18: 0x00000000
+[   11.652357] nvme 0002:01:00.0: save config 0x20: 0x00000000
+[   11.657913] nvme 0003:01:00.0: save config 0x1c: 0x00000000
+[   11.663468] nvme 0002:01:00.0: save config 0x24: 0x00000000
+[   11.669025] nvme 0003:01:00.0: save config 0x20: 0x00000000
+[   11.674580] nvme 0002:01:00.0: save config 0x28: 0x00000000
+[   11.680137] nvme 0003:01:00.0: save config 0x24: 0x00000000
+[   11.685694] nvme 0002:01:00.0: save config 0x2c: 0x2263126f
+[   11.691249] nvme 0003:01:00.0: save config 0x28: 0x00000000
+[   11.696806] nvme 0002:01:00.0: save config 0x30: 0x00000000
+[   11.702361] nvme 0003:01:00.0: save config 0x2c: 0xa801144d
+[   11.707921] nvme 0002:01:00.0: save config 0x34: 0x00000040
+[   11.713477] nvme 0003:01:00.0: save config 0x30: 0x00000000
+[   11.719035] nvme 0002:01:00.0: save config 0x38: 0x00000000
+[   11.724589] nvme 0003:01:00.0: save config 0x34: 0x00000040
+[   11.730146] nvme 0002:01:00.0: save config 0x3c: 0x00000176
+[   11.735703] nvme 0003:01:00.0: save config 0x38: 0x00000000
+[   11.743901] nvme nvme0: missing or invalid SUBNQN field.
+[   11.746830] nvme 0003:01:00.0: save config 0x3c: 0x0000017c
+[   11.754635] hwmon hwmon1: temp1_input not attached to any thermal zone
+[   11.768822] nvme nvme1: D3 entry latency set to 10 seconds
+[   11.782087] hwmon hwmon2: temp1_input not attached to any thermal zone
+[   11.785863] nvme nvme0: allocated 64 MiB host memory buffer (16 segments).
+[   11.788632] hwmon hwmon2: temp2_input not attached to any thermal zone
+[   11.797397] mtk-pcie-gen3 11290000.pcie: msi#0x1 address_hi 0x0 address_lo 0x11290c00 data 1
+[   11.801994] hwmon hwmon2: temp3_input not attached to any thermal zone
+[   11.810431] mtk-pcie-gen3 11290000.pcie: msi#0x2 address_hi 0x0 address_lo 0x11290c00 data 2
+[   11.825374] mtk-pcie-gen3 11290000.pcie: msi#0x3 address_hi 0x0 address_lo 0x11290c00 data 3
+[   11.825433] mtk-pcie-gen3 11280000.pcie: msi#0x1 address_hi 0x0 address_lo 0x11280c00 data 1
+[   11.833815] mtk-pcie-gen3 11290000.pcie: msi#0x4 address_hi 0x0 address_lo 0x11290c00 data 4
+[   11.842252] mtk-pcie-gen3 11280000.pcie: msi#0x2 address_hi 0x0 address_lo 0x11280c00 data 2
+[   11.850655] mtk-pcie-gen3 11290000.pcie: msi#0x5 address_hi 0x0 address_lo 0x11290c00 data 5
+[   11.859082] mtk-pcie-gen3 11280000.pcie: msi#0x3 address_hi 0x0 address_lo 0x11280c00 data 3
+[   11.873619] nvme nvme0: 4/0/0 default/read/poll queues
+[   11.875927] mtk-pcie-gen3 11280000.pcie: msi#0x4 address_hi 0x0 address_lo 0x11280c00 data 4
+[   11.885011] nvme nvme0: Ignoring bogus Namespace Identifiers
+[   11.889485] mtk-pcie-gen3 11280000.pcie: msi#0x5 address_hi 0x0 address_lo 0x11280c00 data 5
+[   11.904716] nvme nvme1: 4/0/0 default/read/poll queues
+[   11.913354]  nvme1n1: p1
+[   11.919978] xhci-mtk 11190000.usb: supply vbus not found, using dummy regulator
+[   11.927390] xhci-mtk 11190000.usb: supply vusb33 not found, using dummy regulator
+[   11.935149] xhci-mtk 11190000.usb: xHCI Host Controller
+[   11.940374] xhci-mtk 11190000.usb: new USB bus registered, assigned bus number 1
+[   11.947829] xhci-mtk 11190000.usb: hcc params 0x01403f99 hci version 0x110 quirks 0x0000000000200010
+[   11.956980] xhci-mtk 11190000.usb: irq 136, io mem 0x11190000
+[   11.962801] xhci-mtk 11190000.usb: xHCI Host Controller
+[   11.968020] xhci-mtk 11190000.usb: new USB bus registered, assigned bus number 2
+[   11.975409] xhci-mtk 11190000.usb: Host supports USB 3.2 Enhanced SuperSpeed
+[   11.982697] hub 1-0:1.0: USB hub found
+[   11.986531] hub 1-0:1.0: 1 port detected
+[   11.990614] usb usb2: We don't know the algorithms for LPM for this host, disabling LPM.
+[   11.998906] hub 2-0:1.0: USB hub found
+[   12.002656] hub 2-0:1.0: 1 port detected
+[   12.006824] xhci-mtk 11200000.usb: supply vbus not found, using dummy regulator
+[   12.014175] xhci-mtk 11200000.usb: supply vusb33 not found, using dummy regulator
+[   12.022084] xhci-mtk 11200000.usb: xHCI Host Controller
+[   12.027318] xhci-mtk 11200000.usb: new USB bus registered, assigned bus number 3
+[   12.037763] xhci-mtk 11200000.usb: hcc params 0x01403f99 hci version 0x110 quirks 0x0000000000200010
+[   12.046918] xhci-mtk 11200000.usb: irq 137, io mem 0x11200000
+[   12.052725] xhci-mtk 11200000.usb: xHCI Host Controller
+[   12.057965] xhci-mtk 11200000.usb: new USB bus registered, assigned bus number 4
+[   12.065353] xhci-mtk 11200000.usb: Host supports USB 3.2 Enhanced SuperSpeed
+[   12.072603] hub 3-0:1.0: USB hub found
+[   12.076361] hub 3-0:1.0: 1 port detected
+[   12.080427] usb usb4: We don't know the algorithms for LPM for this host, disabling LPM.
+[   12.088681] hub 4-0:1.0: USB hub found
+[   12.092430] hub 4-0:1.0: 1 port detected
+[   12.102297] usbcore: registered new interface driver usb-storage
+[   12.108823] kmodloader: done loading kernel modules from /etc/modules-boot.d/*
+[   12.121261] init: - preinit -
+[   12.291343] mtk_soc_eth 15100000.ethernet wan: renamed from eth1
+[   12.308136] mtk_soc_eth 15100000.ethernet eth0: configuring for fixed/internal link mode
+[   12.316303] mtk_soc_eth 15100000.ethernet eth0: Link is Up - 10Gbps/Full - flow control rx/tx
+[   12.414660] usb 1-1: new high-speed USB device number 2 using xhci-mtk
+[   12.464950] usb 4-1: new SuperSpeed USB device number 2 using xhci-mtk
+[   12.514762] hub 4-1:1.0: USB hub found
+[   12.518798] hub 4-1:1.0: 4 ports detected
+[   12.565187] hub 1-1:1.0: USB hub found
+[   12.569017] hub 1-1:1.0: 4 ports detected
+[   12.644636] usb 3-1: new high-speed USB device number 2 using xhci-mtk
+[   12.798209] hub 3-1:1.0: USB hub found
+[   12.802215] hub 3-1:1.0: 4 ports detected
+[   12.894630] usb 1-1.4: new full-speed USB device number 3 using xhci-mtk
+[   13.195488] usb 4-1.4: new SuperSpeed USB device number 3 using xhci-mtk
+[   13.216511] usb 4-1.4: LPM exit latency is zeroed, disabling LPM.
+[   16.806827] Scanning for Btrfs filesystems
+[   16.884973] mtdblock: MTD device 'bl2' is NAND, please consider using UBI block devices instead.
+[   16.958444] mtdblock: MTD device 'ubi' is NAND, please consider using UBI block devices instead.
+[   17.028678] mount_root: loading kmods from internal overlay
+[   17.049892] kmodloader: loading kernel modules from //etc/modules-boot.d/*
+[   17.059344] kmodloader: done loading kernel modules from //etc/modules-boot.d/*
+[   17.276435] block: attempting to load /tmp/overlay/upper/etc/config/fstab
+[   17.284741] block: unable to load configuration (fstab: Entry not found)
+[   17.291468] block: attempting to load /tmp/overlay/etc/config/fstab
+[   17.297893] block: unable to load configuration (fstab: Entry not found)
+[   17.304625] block: attempting to load /etc/config/fstab
+[   17.312373] block: unable to load configuration (fstab: Entry not found)
+[   17.319111] block: no usable configuration
+[   17.325967] UBIFS (ubi0:6): Mounting in unauthenticated mode
+[   17.331677] UBIFS (ubi0:6): background thread "ubifs_bgt0_6" started, PID 1132
+[   17.367965] UBIFS (ubi0:6): UBIFS: mounted UBI device 0, volume 6, name "rootfs_data"
+[   17.375793] UBIFS (ubi0:6): LEB size: 126976 bytes (124 KiB), min./max. I/O unit sizes: 2048 bytes/2048 bytes
+[   17.385697] UBIFS (ubi0:6): FS size: 203796480 bytes (194 MiB, 1605 LEBs), max 1617 LEBs, journal size 10158080 bytes (9 MiB, 80 LEBs)
+[   17.397770] UBIFS (ubi0:6): reserved for root: 4952683 bytes (4836 KiB)
+[   17.404373] UBIFS (ubi0:6): media format: w5/r0 (latest is w5/r0), UUID 154DD111-A844-4A78-86BE-FDC00ADBAF07, small LPT model
+[   17.416411] block: attempting to load /tmp/ubifs_cfg/upper/etc/config/fstab
+[   17.425111] block: unable to load configuration (fstab: Entry not found)
+[   17.431839] block: attempting to load /tmp/ubifs_cfg/etc/config/fstab
+[   17.438356] block: unable to load configuration (fstab: Entry not found)
+[   17.445095] block: attempting to load /etc/config/fstab
+[   17.450362] block: unable to load configuration (fstab: Entry not found)
+[   17.457112] block: no usable configuration
+[   17.542618] UBIFS (ubi0:6): un-mount UBI device 0
+[   17.547334] UBIFS (ubi0:6): background thread "ubifs_bgt0_6" stops
+[   17.561285] F2FS-fs (fitrw): f2fs_recover_fsync_data: recovery fsync data, check_only: 0
+[   17.569603] F2FS-fs (fitrw): Mounted with checkpoint version = 428fa18d
+[   17.576827] mount_root: loading kmods from internal overlay
+[   17.598305] kmodloader: loading kernel modules from /tmp/overlay/upper/etc/modules-boot.d/*
+[   17.607271] kmodloader: done loading kernel modules from /tmp/overlay/upper/etc/modules-boot.d/*
+[   17.804670] block: attempting to load /tmp/overlay/upper/etc/config/fstab
+[   17.908644] EXT4-fs (mmcblk0p6): recovery complete
+[   17.913871] EXT4-fs (mmcblk0p6): mounted filesystem d52d95ff-5ac8-4710-b5e8-d842d7ab2ef2 r/w with ordered data mode. Quota mode: disabled.
+[   17.928835] overlayfs: null uuid detected in lower fs '/', falling back to xino=off,index=off,nfs_export=off.
+[   17.942261] mount_root: switched to extroot
+[   17.947208] urandom-seed: Seeding with /etc/urandom.seed
+[   17.978568] procd: - early -
+[   17.981500] procd: - watchdog -
+[   18.513105] procd: - watchdog -
+[   18.516439] procd: - ubus -
+[   18.670730] procd: - init -
+[   19.009090] urngd: v1.0.2 started.
+[   19.107509] kmodloader: loading kernel modules from /etc/modules.d/*
+[   19.152283] mdio_bus mdio-bus:18: Aeonsemi recovery: stale cached PCS ID refreshed to 75009410
+[   19.753107] EXT4-fs (nvme0n1): recovery complete
+[   19.758095] EXT4-fs (nvme0n1): mounted filesystem b4e94bff-33eb-44f6-955e-5eb8fcd30f9c r/w with ordered data mode. Quota mode: disabled.
+[   21.429778] mdio_bus mdio-bus:1c: Aeonsemi recovery: stale cached PCS ID refreshed to 75009410
+[   22.244892] platform gpio-leds: deferred probe pending: leds-gpio: Failed to get GPIO '/gpio-leds/sys-led-red'
+[   22.279972] EXT4-fs (nvme1n1p1): mounted filesystem 7fd66b08-6876-42f1-960b-8bab22dea944 r/w with ordered data mode. Quota mode: disabled.
+[   23.734815] Aeonsemi AS21010JB1 mdio-bus:18: Firmware Version: 1.9.1
+[   23.969910] Aeonsemi AS21010JB1 mdio-bus:1c: Firmware Version: 1.9.1
+[   24.147565] pca954x 2-0070: supply vdd not found, using dummy regulator
+[   24.154888] i2c i2c-2: Added multiplexed i2c bus 3
+[   24.159768] i2c i2c-2: Added multiplexed i2c bus 4
+[   24.164711] i2c i2c-2: Added multiplexed i2c bus 5
+[   24.169587] i2c i2c-2: Added multiplexed i2c bus 6
+[   24.174375] pca954x 2-0070: registered 4 multiplexed busses for I2C switch pca9545
+[   24.183890] pca953x 3-0020: supply vcc not found, using dummy regulator
+[   24.190632] pca953x 3-0020: using no AI
+[   24.201025] crypto-safexcel 15600000.crypto: EIP197:331(7,1,8,4)-HIA:272(2,5,5),PE:151/450(alg:7fe1fc00)/240/240/450
+[   24.212327] crypto-safexcel 15600000.crypto: TRC init: 8704d,48a (32r,128h)
+[   24.535079] at24 3-0057: supply vcc not found, using dummy regulator
+[   24.542106] at24 3-0057: 256 byte 24c02 EEPROM, writable, 8 bytes/write
+[   24.549478] Bridge firewalling registered
+[   24.554797] cdc_acm 1-1.4:1.0: ttyACM0: USB ACM device
+[   24.560050] usbcore: registered new interface driver cdc_acm
+[   24.565752] cdc_acm: USB Abstract Control Model driver for USB modems and ISDN adapters
+[   24.574698] usbcore: registered new interface driver cdc_wdm
+[   24.580854] Loading modules backported from Linux version v7.2-0-g8d3ae59288f1
+[   24.588111] Backport generated by backports.git v5.15.58-1-198-g2580fa90cb79
+[   27.242642] mxl862xx mdio-bus:10: switch ready after 2600ms, firmware 1.0.85 (build 85)
+[   28.018531] MaxLinear Ethernet MxL86252 mdio-bus:10-mii:00: Firmware Version: 0.105 (0x0069 test version)
+[   28.083670] MaxLinear Ethernet MxL86252 mdio-bus:10-mii:01: Firmware Version: 0.105 (0x0069 test version)
+[   28.148833] MaxLinear Ethernet MxL86252 mdio-bus:10-mii:02: Firmware Version: 0.105 (0x0069 test version)
+[   28.214129] MaxLinear Ethernet MxL86252 mdio-bus:10-mii:03: Firmware Version: 0.105 (0x0069 test version)
+[   28.504249] mxl862xx mdio-bus:10: configuring for fixed/10gbase-r link mode
+[   28.511521] mxl862xx mdio-bus:10: Link is Up - 10Gbps/Full - flow control off
+[   28.535357] mxl862xx mdio-bus:10 lan1 (uninitialized): PHY [mdio-bus:10-mii:00] driver [MaxLinear Ethernet MxL86252] (irq=POLL)
+[   28.571745] mxl862xx mdio-bus:10 lan2 (uninitialized): PHY [mdio-bus:10-mii:01] driver [MaxLinear Ethernet MxL86252] (irq=POLL)
+[   28.605414] mxl862xx mdio-bus:10 lan3 (uninitialized): PHY [mdio-bus:10-mii:02] driver [MaxLinear Ethernet MxL86252] (irq=POLL)
+[   28.638833] mxl862xx mdio-bus:10 lan4 (uninitialized): PHY [mdio-bus:10-mii:03] driver [MaxLinear Ethernet MxL86252] (irq=POLL)
+[   28.691683] mtk_soc_eth 15100000.ethernet eth2: entered promiscuous mode
+[   28.698618] DSA: tree 0 setup
+[   28.708132] rtc-pcf8563 3-0051: registered as rtc0
+[   28.714229] rtc-pcf8563 3-0051: setting system clock to 2026-10-11T12:38:10 UTC (1791722290)
+[   28.725160] sfp sfp1: Host maximum power 3.0W
+[   28.730030] sfp sfp2: Host maximum power 3.0W
+[   28.737864] usbcore: registered new interface driver usbserial_generic
+[   28.744412] usbserial: USB Serial support registered for generic
+[   28.757036] xt_time: kernel timezone is -0000
+[   28.762082] usbcore: registered new interface driver cdc_ether
+[   28.768859] usbcore: registered new interface driver cdc_ncm
+[   28.819114] mt7996e_hif 0001:01:00.0: assign IRQ: got 120
+[   28.824533] mt7996e_hif 0001:01:00.0: enabling device (0000 -> 0002)
+[   28.830925] mt7996e_hif 0001:01:00.0: enabling bus mastering
+[   28.836703] mt7996e 0000:01:00.0: assign IRQ: got 122
+[   28.841752] mt7996e 0000:01:00.0: enabling device (0000 -> 0002)
+[   28.847772] mt7996e 0000:01:00.0: enabling bus mastering
+[   28.924718] mtk-pcie-gen3 11300000.pcie: msi#0x1 address_hi 0x0 address_lo 0x11300c00 data 1
+[   28.933234] mtk-pcie-gen3 11310000.pcie: msi#0x1 address_hi 0x0 address_lo 0x11310c00 data 1
+[   28.984942] mt7996e 0000:01:00.0: HW/SW Version: 0x8a108a10, Build Time: 20260311120705a
+[   28.984942]
+[   29.090083] mt7996e 0000:01:00.0: WM Firmware Version: ____000000, Build Time: 20260311120702
+[   29.138147] mt7996e 0000:01:00.0: DSP Firmware Version: ____000000, Build Time: 20260311120415
+[   29.158684] mt7996e 0000:01:00.0: WA Firmware Version: ____000000, Build Time: 20260311120618
+[   29.618967] mt7996e 0000:01:00.0: registering led 'mt76-phy0'
+[   29.660591] PPP generic driver version 2.4.2
+[   29.665769] NET: Registered PF_PPPOX protocol family
+[   29.674008] qmi_wwan 4-1.4:1.4: cdc-wdm0: USB WDM device
+[   29.680211] qmi_wwan 4-1.4:1.4 wwan0: register 'qmi_wwan' at usb-11200000.usb-1.4, WWAN/QMI device, 7a:9c:7d:cb:2b:4f
+[   29.690992] usbcore: registered new interface driver qmi_wwan
+[   29.699804] wireguard: WireGuard 1.0.0 loaded. See www.wireguard.com for information.
+[   29.707663] wireguard: Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
+[   29.718352] usbcore: registered new interface driver cdc_mbim
+[   29.730136] usbcore: registered new interface driver option
+[   29.735793] usbserial: USB Serial support registered for GSM modem (1-port)
+[   29.742952] option 4-1.4:1.0: GSM modem (1-port) converter detected
+[   29.749442] usb 4-1.4: GSM modem (1-port) converter now attached to ttyUSB0
+[   29.756537] option 4-1.4:1.1: GSM modem (1-port) converter detected
+[   29.762988] usb 4-1.4: GSM modem (1-port) converter now attached to ttyUSB1
+[   29.770125] option 4-1.4:1.2: GSM modem (1-port) converter detected
+[   29.776577] usb 4-1.4: GSM modem (1-port) converter now attached to ttyUSB2
+[   29.783656] option 4-1.4:1.3: GSM modem (1-port) converter detected
+[   29.790099] usb 4-1.4: GSM modem (1-port) converter now attached to ttyUSB3
+[   29.799964] kmodloader: done loading kernel modules from /etc/modules.d/*
+[   31.734474] mtk_soc_eth 15100000.ethernet eth2: configuring for fixed/10gbase-r link mode
+[   31.767885] mxl862xx mdio-bus:10 lan1: configuring for phy/internal link mode
+[   31.775759] br-lan: port 1(lan1) entered blocking state
+[   31.780995] br-lan: port 1(lan1) entered disabled state
+[   31.786278] mxl862xx mdio-bus:10 lan1: entered allmulticast mode
+[   31.792294] mtk_soc_eth 15100000.ethernet eth2: entered allmulticast mode
+[   31.793900] mtk_soc_eth 15100000.ethernet eth2: Link is Up - 10Gbps/Full - flow control rx/tx
+[   31.808614] mxl862xx mdio-bus:10 lan1: entered promiscuous mode
+[   31.861948] mxl862xx mdio-bus:10 lan1: Link is Up - 2.5Gbps/Full - flow control off
+[   31.875304] mxl862xx mdio-bus:10 lan2: configuring for phy/internal link mode
+[   31.930217] br-lan: port 2(lan2) entered blocking state
+[   31.935483] br-lan: port 2(lan2) entered disabled state
+[   31.940812] mxl862xx mdio-bus:10 lan2: entered allmulticast mode
+[   31.981598] mxl862xx mdio-bus:10 lan2: entered promiscuous mode
+[   31.996729] br-lan: port 1(lan1) entered blocking state
+[   32.002001] br-lan: port 1(lan1) entered forwarding state
+[   32.058843] mxl862xx mdio-bus:10 lan3: configuring for phy/internal link mode
+[   32.087449] br-lan: port 3(lan3) entered blocking state
+[   32.092691] br-lan: port 3(lan3) entered disabled state
+[   32.098029] mxl862xx mdio-bus:10 lan3: entered allmulticast mode
+[   32.115380] mxl862xx mdio-bus:10 lan3: entered promiscuous mode
+[   32.142997] mxl862xx mdio-bus:10 lan4: configuring for phy/internal link mode
+[   32.171831] br-lan: port 4(lan4) entered blocking state
+[   32.177104] br-lan: port 4(lan4) entered disabled state
+[   32.182364] mxl862xx mdio-bus:10 lan4: entered allmulticast mode
+[   32.200453] mxl862xx mdio-bus:10 lan4: entered promiscuous mode
+[   32.233932] mtk_soc_eth 15100000.ethernet eth0: Link is Down
+[   32.241175] mtk_soc_eth 15100000.ethernet eth0: configuring for fixed/internal link mode
+[   32.249639] mtk_soc_eth 15100000.ethernet eth0: Link is Up - 10Gbps/Full - flow control rx/tx
+[   32.250184] mt7530-mmio 15020000.switch lan5: configuring for phy/internal link mode
+[   32.266959] br-lan: port 5(lan5) entered blocking state
+[   32.272219] br-lan: port 5(lan5) entered disabled state
+[   32.277536] mt7530-mmio 15020000.switch lan5: entered allmulticast mode
+[   32.284153] mtk_soc_eth 15100000.ethernet eth0: entered allmulticast mode
+[   32.291232] mt7530-mmio 15020000.switch lan5: entered promiscuous mode
+[   32.305569] mxl862xx mdio-bus:10 lan6: configuring for inband/usxgmii link mode
+[   32.316618] br-lan: port 6(lan6) entered blocking state
+[   32.321859] br-lan: port 6(lan6) entered disabled state
+[   32.327182] mxl862xx mdio-bus:10 lan6: entered allmulticast mode
+[   32.381452] mxl862xx mdio-bus:10 lan6: entered promiscuous mode
+[   32.464744] mtk_soc_eth 15100000.ethernet wan: PHY [mdio-bus:1c] driver [Aeonsemi AS21010JB1] (irq=POLL)
+[   32.474434] mtk_soc_eth 15100000.ethernet wan: configuring for inband/usxgmii link mode
+[   45.270933] br-lan: port 7(phy0.2-ap0) entered blocking state
+[   45.276741] br-lan: port 7(phy0.2-ap0) entered disabled state
+[   45.282552] mt7996e 0000:01:00.0 phy0.2-ap0: entered allmulticast mode
+[   45.290462] mt7996e 0000:01:00.0 phy0.2-ap0: entered promiscuous mode
+[   45.297075] br-lan: port 7(phy0.2-ap0) entered blocking state
+[   45.302849] br-lan: port 7(phy0.2-ap0) entered forwarding state
+[   45.309680] br-lan: port 7(phy0.2-ap0) entered disabled state
+[   46.144235] br-lan: port 7(phy0.2-ap0) entered blocking state
+[   46.150022] br-lan: port 7(phy0.2-ap0) entered forwarding state
+
+  _______                     ________        __
+ |       |.-----.-----.-----.|  |  |  |.----.|  |_
+ |   -   ||  _  |  -__|     ||  |  |  ||   _||   _|
+ |_______||   __|_____|__|__||________||__|  |____|
+          |__| W I R E L E S S   F R E E D O M
+ -----------------------------------------------------
+ OpenWrt SNAPSHOT, r36928-6046133027
+ -----------------------------------------------------
+</nowiki>
+</WRAP>
+
+==== 4E ====
+
+4E with the BE14 card (OpenWrt SNAPSHOT r36672, kernel 6.18.52, WireGuard and AmneziaWG installed):
 <WRAP bootlog>
 <nowiki>
 F0: 102B 0000

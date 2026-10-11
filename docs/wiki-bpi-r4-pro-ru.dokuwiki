@@ -192,7 +192,7 @@ dmesg | grep 'mxl862xx.*firmware'
 
 ===== Логи загрузки =====
 
-Лог загрузки 4E с платой BE14 (OpenWrt SNAPSHOT r36672, ядро 6.18.52, установлены WireGuard и AmneziaWG) — см. [[toh:sinovoip:bananapi_bpi-r4_pro#bootlogs|английскую страницу]].
+Логи загрузки 8X (BE14, два NVMe, модем RM520N-GL; r36928, ядро 6.18.55) и 4E (BE14; r36672, ядро 6.18.52) — см. [[toh:sinovoip:bananapi_bpi-r4_pro#bootlogs|английскую страницу]].
 
 ===== Примечания =====
 
