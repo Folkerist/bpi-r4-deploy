@@ -73,6 +73,13 @@ bootconf_emmc=mt7988a-bananapi-bpi-r4-pro-emmc
 bootconf_extra=mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14#mt7988a-bananapi-bpi-r4-pro-8x-wan-phy#mt7988a-bananapi-bpi-r4-pro-8x-lan-sfp
 </code>
 
+Пример (4E, оба слота NVMe):
+
+<code>
+bootconf=config-mt7988a-bananapi-bpi-r4-pro-4e
+bootconf_extra=mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14
+</code>
+
 ^ Оверлей ^ Что включает ^
 | ''mt7988a-bananapi-bpi-r4-pro-cn13'' | слот Key-M CN13 (NVMe) на PCIe 11280000 |
 | ''mt7988a-bananapi-bpi-r4-pro-cn15'' | слот Key-B CN15 на PCIe 11280000 вместо CN13 |
@@ -80,6 +87,7 @@ bootconf_extra=mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14
 | ''mt7988a-bananapi-bpi-r4-pro-cn18'' | слот Key-B CN18 на PCIe 11290000 вместо CN14 |
 | ''mt7988a-bananapi-bpi-r4-pro-8x-wan-phy'' / ''-wan-sfp'' | 10G WAN как RJ45 / как SFP+ (только один из двух) |
 | ''mt7988a-bananapi-bpi-r4-pro-8x-lan-phy'' / ''-lan-sfp'' | 10G LAN как RJ45 / как SFP+ (только один из двух) |
+| ''mt7988a-bananapi-bpi-r4-pro-4e-wan-phy'' / ''-wan-sfp'' | только 4E: WAN как RJ45 / как SFP (только один из двух) |
 | ''mt7988a-bananapi-bpi-r4-pro-emmc'' / ''-sd'' | eMMC или microSD (общий контроллер) |
 
 Из каждой пары указывайте только один оверлей. Пример: переключить 10G WAN с RJ45 на SFP+:
@@ -88,6 +96,18 @@ bootconf_extra=mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14
 fw_printenv -n bootconf_extra > /root/bootconf_extra.orig
 fw_setenv bootconf_extra "mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14#mt7988a-bananapi-bpi-r4-pro-8x-wan-sfp#mt7988a-bananapi-bpi-r4-pro-8x-lan-sfp"
 reboot
+</code>
+
+На 4E добавьте к текущему списку один оверлей WAN. RJ45:
+
+<code>
+fw_setenv bootconf_extra "mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14#mt7988a-bananapi-bpi-r4-pro-4e-wan-phy"
+</code>
+
+SFP:
+
+<code>
+fw_setenv bootconf_extra "mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14#mt7988a-bananapi-bpi-r4-pro-4e-wan-sfp"
 </code>
 
 <WRAP important>
@@ -157,13 +177,73 @@ dmesg | grep 'mxl862xx.*firmware'
 
 См. [[toh:sinovoip:bananapi_bpi-r4#bpi-r4-nic-be14|страницу BPI-R4]] (на английском). Плата занимает оба контроллера PCIe x2 (11300000, 11310000).
 
+На 8X конфиг ''/etc/config/wireless'' по умолчанию рабочий: OpenWrt создаёт три радио на одном пути PCIe, они различаются строкой ''option radio '0'/'1'/'2'''. На 4E конфиг по умолчанию не работает. Замените ''/etc/config/wireless'' на следующий, затем укажите страну, шифрование и имена сетей и включите радио:
+
+<code>
+config wifi-device 'radio0'
+	option type 'mac80211'
+	option path 'soc/11300000.pcie/pci0000:00/0000:00:00.0/0000:01:00.0'
+	option radio '0'
+	option band '2g'
+	option channel '1'
+	option htmode 'EHT20'
+	option country '00'
+	option disabled '1'
+
+config wifi-iface 'default_radio0'
+	option device 'radio0'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'OpenWrt'
+	option encryption 'none'
+	option disabled '1'
+
+config wifi-device 'radio1'
+	option type 'mac80211'
+	option path 'soc/11300000.pcie/pci0000:00/0000:00:00.0/0000:01:00.0'
+	option radio '1'
+	option band '5g'
+	option channel '36'
+	option htmode 'EHT80'
+	option country '00'
+	option disabled '1'
+
+config wifi-iface 'default_radio1'
+	option device 'radio1'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'OpenWrt'
+	option encryption 'none'
+	option disabled '1'
+
+config wifi-device 'radio2'
+	option type 'mac80211'
+	option path 'soc/11300000.pcie/pci0000:00/0000:00:00.0/0000:01:00.0'
+	option radio '2'
+	option band '6g'
+	option channel '37'
+	option htmode 'EHT80'
+	option country '00'
+	option disabled '1'
+
+config wifi-iface 'default_radio2'
+	option device 'radio2'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'OpenWrt_6g'
+	option encryption 'owe'
+	option disabled '1'
+</code>
+
+Для Wi-Fi 7 (EHT) нужен WPA3: укажите в интерфейсах ''option encryption 'sae''' и ''option key''. С WPA2 (''psk2'') клиенты откатываются на Wi-Fi 6 или 5. В ''option country'' укажите код своей страны: с ''00'' урезаются каналы и ширина. Применить: ''wifi reload''.
+
 ==== Последовательная консоль ====
 
 //TODO: отладочная консоль через USB Type-C, параметры.//
 
 ===== Логи загрузки =====
 
-//TODO//
+Лог загрузки 4E с платой BE14 (OpenWrt SNAPSHOT r36672, ядро 6.18.52, установлены WireGuard и AmneziaWG) — см. [[toh:sinovoip:bananapi_bpi-r4_pro#bootlogs|английскую страницу]].
 
 ===== Примечания =====
 

@@ -71,6 +71,13 @@ bootconf_emmc=mt7988a-bananapi-bpi-r4-pro-emmc
 bootconf_extra=mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14#mt7988a-bananapi-bpi-r4-pro-8x-wan-phy#mt7988a-bananapi-bpi-r4-pro-8x-lan-sfp
 </code>
 
+Example (4E, both NVMe slots):
+
+<code>
+bootconf=config-mt7988a-bananapi-bpi-r4-pro-4e
+bootconf_extra=mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14
+</code>
+
 ^ Overlay ^ Selects ^
 | ''mt7988a-bananapi-bpi-r4-pro-cn13'' | Key-M slot CN13 (NVMe) on PCIe 11280000 |
 | ''mt7988a-bananapi-bpi-r4-pro-cn15'' | Key-B slot CN15 on PCIe 11280000 instead of CN13 |
@@ -78,6 +85,7 @@ bootconf_extra=mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14
 | ''mt7988a-bananapi-bpi-r4-pro-cn18'' | Key-B slot CN18 on PCIe 11290000 instead of CN14 |
 | ''mt7988a-bananapi-bpi-r4-pro-8x-wan-phy'' / ''-wan-sfp'' | 10G WAN as RJ45 / as SFP+ (only one of the two) |
 | ''mt7988a-bananapi-bpi-r4-pro-8x-lan-phy'' / ''-lan-sfp'' | 10G LAN as RJ45 / as SFP+ (only one of the two) |
+| ''mt7988a-bananapi-bpi-r4-pro-4e-wan-phy'' / ''-wan-sfp'' | 4E only: WAN as RJ45 / as SFP (only one of the two) |
 | ''mt7988a-bananapi-bpi-r4-pro-emmc'' / ''-sd'' | eMMC or microSD (shared controller) |
 
 Use only one overlay per pair. Example: switch the 10G WAN from RJ45 to SFP+:
@@ -86,6 +94,18 @@ Use only one overlay per pair. Example: switch the 10G WAN from RJ45 to SFP+:
 fw_printenv -n bootconf_extra > /root/bootconf_extra.orig
 fw_setenv bootconf_extra "mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14#mt7988a-bananapi-bpi-r4-pro-8x-wan-sfp#mt7988a-bananapi-bpi-r4-pro-8x-lan-sfp"
 reboot
+</code>
+
+On the 4E, add one WAN overlay to the existing list. RJ45:
+
+<code>
+fw_setenv bootconf_extra "mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14#mt7988a-bananapi-bpi-r4-pro-4e-wan-phy"
+</code>
+
+SFP:
+
+<code>
+fw_setenv bootconf_extra "mt7988a-bananapi-bpi-r4-pro-cn13#mt7988a-bananapi-bpi-r4-pro-cn14#mt7988a-bananapi-bpi-r4-pro-4e-wan-sfp"
 </code>
 
 <WRAP important>
@@ -155,13 +175,75 @@ It can be updated with ''fwupd'' (''apk add fwupd'', then ''fwupdmgr refresh'' a
 
 See [[toh:sinovoip:bananapi_bpi-r4#bpi-r4-nic-be14|BPI-R4 page]]. The card uses both PCIe x2 controllers (11300000, 11310000).
 
+On the 8X the default ''/etc/config/wireless'' works: OpenWrt creates three radios on the same PCIe path, told apart by ''option radio '0'/'1'/'2'''. On the 4E the default config does not work; replace ''/etc/config/wireless'' with the following, then set the country, encryption and SSIDs and enable the radios:
+
+<code>
+config wifi-device 'radio0'
+	option type 'mac80211'
+	option path 'soc/11300000.pcie/pci0000:00/0000:00:00.0/0000:01:00.0'
+	option radio '0'
+	option band '2g'
+	option channel '1'
+	option htmode 'EHT20'
+	option country '00'
+	option disabled '1'
+
+config wifi-iface 'default_radio0'
+	option device 'radio0'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'OpenWrt'
+	option encryption 'none'
+	option disabled '1'
+
+config wifi-device 'radio1'
+	option type 'mac80211'
+	option path 'soc/11300000.pcie/pci0000:00/0000:00:00.0/0000:01:00.0'
+	option radio '1'
+	option band '5g'
+	option channel '36'
+	option htmode 'EHT80'
+	option country '00'
+	option disabled '1'
+
+config wifi-iface 'default_radio1'
+	option device 'radio1'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'OpenWrt'
+	option encryption 'none'
+	option disabled '1'
+
+config wifi-device 'radio2'
+	option type 'mac80211'
+	option path 'soc/11300000.pcie/pci0000:00/0000:00:00.0/0000:01:00.0'
+	option radio '2'
+	option band '6g'
+	option channel '37'
+	option htmode 'EHT80'
+	option country '00'
+	option disabled '1'
+
+config wifi-iface 'default_radio2'
+	option device 'radio2'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'OpenWrt_6g'
+	option encryption 'owe'
+	option disabled '1'
+</code>
+
+Wi-Fi 7 (EHT) needs WPA3: set ''option encryption 'sae''' and ''option key'' on the interfaces. With WPA2 (''psk2'') clients fall back to Wi-Fi 6 or 5. Set ''option country'' to your country code: with ''00'' channels and widths are limited. Apply with ''wifi reload''.
+
 ==== Serial ====
 
 //TODO: debug console on USB Type-C, parameters.//
 
 ===== Bootlogs =====
 
-//TODO//
+Boot log of a 4E with the BE14 card (OpenWrt SNAPSHOT r36672, kernel 6.18.52, WireGuard and AmneziaWG installed):
+
+//(paste the existing log block here unchanged)//
 
 ===== Notes =====
 
