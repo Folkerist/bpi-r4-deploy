@@ -1,0 +1,17 @@
+#!/bin/sh /etc/rc.common
+# Permanent iperf3 servers (procd respawns them if they die or hang up).
+# Two ports so two clients can test at the same time: iperf3 -c 192.168.88.2 [-p 5202]
+START=99
+USE_PROCD=1
+PORTS="5201 5202"
+
+start_service() {
+	local p
+	for p in $PORTS; do
+		procd_open_instance "p$p"
+		procd_set_param command /usr/bin/iperf3 -s -p "$p"
+		procd_set_param respawn 3600 5 0
+		procd_set_param stderr 1
+		procd_close_instance
+	done
+}
