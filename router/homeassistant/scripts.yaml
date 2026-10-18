@@ -1,0 +1,161 @@
+# Скрипты для «Планировки». На роутере: /config/scripts.yaml (в configuration.yaml — «script: !include scripts.yaml»).
+# После правки: Инструменты разработчика → YAML → «Скрипты».
+#
+# Комнаты плана (как у sensor.fp_vacuum_room): zal, kukhnia, spalnia, detskaia, prikhozhaia, koridor,
+# koridor2 (малый коридор у ванной; у S5 вместе с ванной), prokhod (проход от прихожей к кухне).
+# Сегменты Qrevo — из приложения Roborock; S5 (Mi Home, комнаты без имён) — по координатам Xiaomi Cloud Map Extractor.
+
+# Убрать комнату (или список) пылесосом с переключателя input_select.fp_vacuum (или из поля who).
+fp_vacuum_clean:
+  alias: Пылесос — убрать комнаты
+  icon: mdi:robot-vacuum
+  mode: parallel
+  fields:
+    rooms:
+      name: Комнаты
+      description: "Комната плана или список: zal, kukhnia, spalnia, detskaia, prikhozhaia, koridor, koridor2, prokhod."
+      example: zal
+      required: true
+    who:
+      name: Пылесос
+      description: "Мокрый (Qrevo), Сухой (S5) или Вместе; по умолчанию — переключатель «Кто убирает»."
+      example: Сухой
+  variables:
+    qrevo: {zal: [5], kukhnia: [1], spalnia: [4], detskaia: [8], prikhozhaia: [7], koridor: [6], koridor2: [2], prokhod: [3]}
+    s5: {zal: [16], kukhnia: [17], spalnia: [22], detskaia: [23], prikhozhaia: [21, 1], koridor: [20], koridor2: [18], prokhod: [19]}
+    ids: "{{ [rooms] if rooms is string else rooms | list }}"
+    by: "{{ who if who is defined and who else states('input_select.fp_vacuum') }}"
+  sequence:
+    - choose:
+        - conditions: "{{ by == 'Вместе' }}"
+          sequence:
+            - action: script.turn_on
+              target: {entity_id: script.fp_vacuum_together}
+              data: {variables: {rooms: "{{ ids }}"}}
+        # S5 (прошивка 3.5.x): параметры — просто список сегментов.
+        - conditions: "{{ by == 'Сухой' }}"
+          sequence:
+            - action: vacuum.send_command
+              target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+              data:
+                command: app_segment_clean
+                params: "{% set ns = namespace(v=[]) %}{% for r in ids if r in s5 %}{% set ns.v = ns.v + s5[r] %}{% endfor %}{{ ns.v }}"
+      default:
+        - action: vacuum.send_command
+          target: {entity_id: vacuum.koridor_roborock_qrevo}
+          data:
+            command: app_segment_clean
+            params: "{% set ns = namespace(v=[]) %}{% for r in ids if r in qrevo %}{% set ns.v = ns.v + qrevo[r] %}{% endfor %}{{ [{'segments': ns.v, 'repeat': 1}] }}"
+
+# Вместе: сначала S5 пылесосит, после его возвращения на базу Qrevo моет те же комнаты (режим «только швабра»),
+# потом режим Qrevo возвращается прежний. Если S5 не поехал или ушёл в ошибку — Qrevo не запускается.
+fp_vacuum_together:
+  alias: Пылесосы — сухая (S5), потом влажная (Qrevo)
+  icon: mdi:robot-vacuum-variant
+  mode: single
+  fields:
+    rooms:
+      name: Комнаты
+      description: "Как у fp_vacuum_clean; не задано — вся квартира."
+      example: "[zal, kukhnia]"
+  variables:
+    ids: >
+      {{ ([rooms] if rooms is string else rooms | list) if rooms is defined and rooms
+         else ['zal', 'kukhnia', 'spalnia', 'detskaia', 'prikhozhaia', 'koridor', 'koridor2', 'prokhod'] }}
+    s5: vacuum.roborock_s5_8159_robot_cleaner
+    qrevo: vacuum.koridor_roborock_qrevo
+    mode_sel: select.koridor_roborock_qrevo_cleaning_mode
+    mode_before: "{{ states('select.koridor_roborock_qrevo_cleaning_mode') }}"
+  sequence:
+    - action: script.fp_vacuum_clean
+      data: {rooms: "{{ ids }}", who: Сухой}
+    - wait_template: "{{ is_state(s5, 'cleaning') }}"
+      timeout: "00:02:00"
+    - if: "{{ not wait.completed }}"
+      then:
+        - action: persistent_notification.create
+          data: {title: Уборка вместе, message: "S5 не начал уборку за 2 минуты — Qrevo не запускаю."}
+        - stop: S5 не начал уборку
+    - wait_template: "{{ states(s5) in ['docked', 'idle', 'error'] }}"
+      timeout: "03:00:00"
+    - if: "{{ not wait.completed or is_state(s5, 'error') }}"
+      then:
+        - action: persistent_notification.create
+          data: {title: Уборка вместе, message: "S5 не закончил уборку (ошибка или больше 3 ч) — Qrevo не запускаю."}
+        - stop: S5 не закончил уборку
+    - action: select.select_option
+      target: {entity_id: "{{ mode_sel }}"}
+      data: {option: mop}
+    - delay: "00:00:03"
+    - action: script.fp_vacuum_clean
+      data: {rooms: "{{ ids }}", who: Мокрый}
+    - wait_template: "{{ is_state(qrevo, 'cleaning') }}"
+      timeout: "00:02:00"
+    - if: "{{ wait.completed }}"
+      then:
+        - wait_template: "{{ states(qrevo) in ['docked', 'idle', 'error'] }}"
+          timeout: "03:00:00"
+      else:
+        - action: persistent_notification.create
+          data: {title: Уборка вместе, message: "Qrevo не начал мойку за 2 минуты."}
+    - action: select.select_option
+      target: {entity_id: "{{ mode_sel }}"}
+      data:
+        option: "{{ mode_before if mode_before in ['vacuum', 'vac_and_mop', 'mop', 'custom', 'smart_mode'] else 'vac_and_mop' }}"
+
+# ─── Сценарии для кнопок на панели «Дом» ───────────────────────────────────────────────────────────────────────
+# Основа — свои сценарии в «Доме с Алисой»: колонке отправляется фраза сценария (play_media, тип command), и Алиса
+# выполняет его так же, как сказанный голосом. Свет из HA выключается и отдельно — на случай, если колонка не ответит.
+
+# «Я ухожу» — сценарий Яндекса «Я ухожу»: весь свет в доме выключить, все колонки остановить.
+home_leave:
+  alias: Я ухожу
+  icon: mdi:exit-run
+  mode: single
+  sequence:
+    - action: media_player.play_media
+      target: {entity_id: media_player.yandex_station_lp00000000000047571100008ab064b1}  # Лайт в прихожей
+      data: {media_content_type: command, media_content_id: Я ухожу}
+    - action: homeassistant.turn_off
+      target: &all_lights
+        entity_id: [light.zal_yeelight_hall, light.zal_yeelight_hall_ambilight, switch.light_kitchen_main,
+                    switch.light_kitchen_perimeter, light.spalnia_yeelight_bed, light.spalnia_yeelight_bed_ambilight,
+                    switch.light_entry_main, switch.light_entry_perimeter, switch.light_hall_main,
+                    switch.light_hall_perimeter, switch.light_corridor, switch.light_bath, switch.light_wc,
+                    switch.light_storage]
+
+# «Спокойной ночи» — сценарий Яндекса «Ночной режим» (его фраза «Выключи все»: свет, ТВ, колонки, фитолампа,
+# динамики, гирлянда) + то, чего нет в Яндексе: пылесосы, которые убирают, — на базу.
+home_night:
+  alias: Спокойной ночи
+  icon: mdi:weather-night
+  mode: single
+  sequence:
+    - action: media_player.play_media
+      target: {entity_id: media_player.yandex_station_x11bmg2000x29z}  # Макс в спальне
+      data: {media_content_type: command, media_content_id: Выключи все}
+    - action: homeassistant.turn_off
+      target: *all_lights
+    - action: script.turn_off
+      target: {entity_id: script.fp_vacuum_together}
+    - repeat:
+        for_each: [vacuum.koridor_roborock_qrevo, vacuum.roborock_s5_8159_robot_cleaner]
+        sequence:
+          - if: "{{ states(repeat.item) in ['cleaning', 'paused'] }}"
+            then:
+              - action: vacuum.return_to_base
+                target: {entity_id: "{{ repeat.item }}"}
+
+# «Утро» — если ещё темно, свет над столом на кухне; утреннее шоу Алисы (погода, новости, музыка) на кухонной Станции.
+home_morning:
+  alias: Доброе утро
+  icon: mdi:weather-sunset-up
+  mode: single
+  sequence:
+    - if: "{{ is_state('sun.sun', 'below_horizon') }}"
+      then:
+        - action: switch.turn_on
+          target: {entity_id: switch.light_kitchen_main}
+    - action: media_player.play_media
+      target: {entity_id: media_player.yandex_tv_t60jcw202w4z1k}  # ТВ Станция на кухне
+      data: {media_content_type: command, media_content_id: Включи утреннее шоу}

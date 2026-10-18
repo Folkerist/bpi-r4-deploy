@@ -1,0 +1,25 @@
+{
+	"luci-app-speedtest": {
+		"description": "Run the router speed test (main uplink / LTE)",
+		"read": {
+			"file": {
+				"/usr/bin/speedtest.sh status": [
+					"exec"
+				],
+				"/usr/bin/speedtest.sh history": [
+					"exec"
+				],
+				"/usr/bin/speedtest.sh history 50": [
+					"exec"
+				]
+			}
+		},
+		"write": {
+			"file": {
+				"/usr/bin/speedtest.sh start *": [
+					"exec"
+				]
+			}
+		}
+	}
+}
