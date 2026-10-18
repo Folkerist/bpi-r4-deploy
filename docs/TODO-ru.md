@@ -42,3 +42,8 @@ PPE (flow_offloading_hw) ускоряет только кабель, до Wi-Fi 
 - docker-graceful: перезапуск контейнеров после загрузки (unless-stopped + docker stop = не стартуют).
 - Вернули вручную: тема proton2025 (install.sh), luci-app-temp-status 0.8.1 (+ru, тянет luci-lua-runtime). forkop/sing-box/byedpi НЕ ставили (не используются, конфиги сохранены).
 - as21xxx.ko из PR 24990 лежит в overlay (taint O) — только для 6.18.55.
+
+## Обновление r36928 → r37395+ (отложено 18.10.2026)
+- Зачем: ~130 коммитов по MLO/hostapd/wifi-scripts (стабильность AP MLD, station dump по линкам, PMF на EHT/6 ГГц), mt76 2026-10-08 (фиксы mt7996), фикс WED WDMA TX hang. Ядро то же 6.18.55.
+- Перед: `sysupgrade-prepare.sh` (уже не сохраняет board-base.json), копия `/etc/config/wireless`.
+- После: `lsmod | grep as21xxx` (модуль из PR 24990 может не загрузиться при другом vermagic); BSSID Wi-Fi может смениться (MAC теперь раздаёт netifd); `iw dev ap-mld0 station dump` с Pixel.
