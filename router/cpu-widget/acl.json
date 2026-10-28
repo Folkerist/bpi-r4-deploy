@@ -1,0 +1,11 @@
+{
+	"luci-mod-status-cpu-widget": {
+		"description": "Read /proc/stat and cpufreq for the Overview CPU widget",
+		"read": {
+			"file": {
+				"/proc/stat": [ "read" ],
+				"/sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq": [ "read" ]
+			}
+		}
+	}
+}
