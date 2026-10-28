@@ -297,6 +297,11 @@
   Симптом: на Android «!» у Wi-Fi и трафик через мобильную сеть. Исправлено сменой DoH на зеркало usa.eof.onl;
   проверка `:put [:resolve connectivitycheck.gstatic.com]` (обычный адрес) и `:resolve youtube.com` (198.18.x.x — mihomo).
   Идея: проверка по расписанию, отключающая DoH при отказе. Порт ether2 (AX3600) снова 3 раза падал 28.10 05:17.
+- 28.10.2026: Gemini не открывался. Его домены (category-ai-!cn, 16 правил) шли FWD на DoH «DNS-AI» (dns-ai.ru,
+  smart-DNS: отдаёт IP своего посредника, напр. 109.120.131.200). Посредник пингуется, но TCP 443 с МГТС — таймаут
+  (вероятно, режет ТСПУ). По решению пользователя DNS-AI убран полностью: правила снова forward-to=MihomoProxyRoS,
+  static dns-ai.ru и форвардер DNS-AI удалены (бэкапы на RB5009: dns-static-before-remove-dnsai, dns-fwd-before-remove-dnsai).
+  Gemini идёт через mihomo, группа AI; выход USA CH Google не принимает («недоступно в стране») — нужна другая точка.
 - Доступ к HA снаружи нужен: через Back To Home или пир WireGuard на RB5009 (не проброс порта).
 
 ## Как работаем
