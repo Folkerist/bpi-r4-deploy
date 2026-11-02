@@ -1,0 +1,35 @@
+#!/bin/sh /etc/rc.common
+# AmneziaWG (userspace amneziawg-go) server awg0 for mobile clients.
+# Config: /etc/amneziawg/awg0.conf ([Interface] + [Peer] blocks, awg setconf format).
+# Firewall zone 'awg' (device awg0) is configured in /etc/config/firewall.
+START=95
+STOP=10
+USE_PROCD=1
+IFACE=awg0
+ADDR=10.20.20.1/24
+MTU=1420
+CONF=/etc/amneziawg/$IFACE.conf
+
+start_service() {
+	[ -r "$CONF" ] || { logger -t amneziawg "$CONF missing"; return 1; }
+	[ -c /dev/net/tun ] || modprobe tun
+	ip link del "$IFACE" 2>/dev/null
+	procd_open_instance
+	procd_set_param command /usr/bin/amneziawg-go -f "$IFACE"
+	procd_set_param respawn 3600 5 0
+	procd_set_param stdout 1
+	procd_set_param stderr 1
+	procd_close_instance
+	# configure once the daemon has created the interface
+	( i=0; while [ $i -lt 20 ] && ! ip link show "$IFACE" >/dev/null 2>&1; do sleep 1; i=$((i+1)); done
+	  awg setconf "$IFACE" "$CONF" && ip addr replace "$ADDR" dev "$IFACE" && ip link set "$IFACE" mtu $MTU up &&
+	  logger -t amneziawg "$IFACE up" ) &
+}
+
+stop_service() {
+	ip link del "$IFACE" 2>/dev/null
+}
+
+reload_service() {
+	awg syncconf "$IFACE" "$CONF"
+}
