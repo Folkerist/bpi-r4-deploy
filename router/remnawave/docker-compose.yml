@@ -85,6 +85,17 @@ services:
       timeout: 3s
       retries: 3
 
+  caddy:
+    image: caddy:2.9
+    container_name: remnawave-caddy
+    restart: always
+    network_mode: host
+    <<: [*logging]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy-data:/data
+      - ./caddy-config:/config
+
 networks:
   remnawave-network:
     name: remnawave-network
