@@ -1,5 +1,6 @@
 # Remnawave panel on the BPI-R4 Pro: upstream docker-compose-prod.yml (remnawave/backend main),
-# with the pre-created network and without the published Postgres port.
+# with the pre-created network, without the published Postgres port, and valkey started with
+# --ignore-warnings ARM64-COW-BUG (its self-test fails on this kernel; persistence is off anyway).
 x-common: &common
   ulimits:
     nofile:
@@ -77,6 +78,7 @@ services:
       --unixsocket /var/run/valkey/valkey.sock
       --unixsocketperm 777
       --port 0
+      --ignore-warnings ARM64-COW-BUG
     healthcheck:
       test: ['CMD', 'valkey-cli', '-s', '/var/run/valkey/valkey.sock', 'ping']
       interval: 3s
