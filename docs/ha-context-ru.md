@@ -302,6 +302,14 @@
   (вероятно, режет ТСПУ). По решению пользователя DNS-AI убран полностью: правила снова forward-to=MihomoProxyRoS,
   static dns-ai.ru и форвардер DNS-AI удалены (бэкапы на RB5009: dns-static-before-remove-dnsai, dns-fwd-before-remove-dnsai).
   Gemini идёт через mihomo, группа AI; выход USA CH Google не принимает («недоступно в стране») — нужна другая точка.
+- AmneziaWG-сервер на BPI (02.11.2026) для мобильных клиентов (операторы душат обычный WG): userspace
+  amneziawg-go + awg (статические aarch64, собраны из исходников, `router/awg/bin/`), нужен kmod-tun.
+  `awg0` 10.20.20.1/24, UDP 51820, конфиг `/etc/amneziawg/awg0.conf` (сервер + [Peer]), сервис
+  `/etc/init.d/amneziawg` (`router/awg/amneziawg`), клиенты — `router/awg/awg-add-peer.sh ИМЯ` (QR через qrencode).
+  Firewall BPI: зона `awg` (device awg0) → forwarding в lan, masq в lan только для 10.20.20.0/24 — клиенты выходят
+  через RB5009 как LAN (mihomo/DNS работают), DNS клиентов 192.168.88.1. RB5009: dst-nat UDP 51820 → 192.168.88.2
+  (comment AWG-to-BPI), Endpoint `hgg09v8e2f8.sn.mynetname.net:51820`. Клиенты: phone-my = .2. Проверено дома и с LTE.
+  Ключи Back To Home попали в чат 02.11 (вывод /ip cloud print) — перевыпустить.
 - Доступ к HA снаружи нужен: через Back To Home или пир WireGuard на RB5009 (не проброс порта).
 
 ## Как работаем
