@@ -325,7 +325,7 @@
   - Нода `/mnt/nvme/compose/remnanode` (network host, NODE_PORT 2222), Xray 26.7.28, профиль `home-reality`:
     VLESS+Reality TCP :4443, target/SNI ya.ru, DNS 192.168.88.1, outbound freedom UseIPv4. Хост `Home` 128.0.136.224:443.
     RB5009: dst-nat TCP 443 WAN → 192.168.88.2:4443 (comment Reality-to-BPI). Сквад `family`, пользователь phone-my.
-  - Клиенты (Happ): Mux ВЫКЛЮЧИТЬ (с flow xtls-rprx-vision Mux для TCP отклоняется: "common/mux: unexpected network TCP").
+  - Клиенты: v2rayNG (Android) работает сразу, Mux там выключен по умолчанию. В Happ Mux ВЫКЛЮЧИТЬ (с flow xtls-rprx-vision Mux для TCP отклоняется: "common/mux: unexpected network TCP").
     DNS клиентов к 1.1.1.1 RB5009 перехватывает и отдаёт FakeIP — обход через mihomo работает.
   - Логи Xray: `docker exec remnanode tail /var/log/xray/current`.
 - Доступ к HA снаружи нужен: через Back To Home или пир WireGuard на RB5009 (не проброс порта).
