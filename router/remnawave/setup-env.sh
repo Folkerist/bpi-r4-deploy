@@ -1,6 +1,6 @@
 #!/bin/sh
 # setup-env.sh - create /mnt/nvme/compose/remnawave/.env from env.sample with fresh secrets.
-# Panel: https://panel.home.arpa:8443 (Caddy, LAN/VPN only); subscriptions: http://sub.home.arpa:8080/api/sub/<id>
+# Panel: https://panel.home.arpa:8443 (Caddy, LAN/VPN only); subscriptions: https://128.0.136.224:8444/api/sub/<id> (public, Lets Encrypt IP cert)
 set -e
 D=/mnt/nvme/compose/remnawave
 cd "$D"
@@ -19,7 +19,7 @@ sed -e "s|^APP_SECRET=.*|APP_SECRET=$(hex 64)|" \
     -e "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=$PGPASS|" \
     -e "s|^DATABASE_URL=.*|DATABASE_URL=\"postgresql://postgres:$PGPASS@remnawave-db:5432/postgres\"|" \
     -e "s|^PANEL_DOMAIN=.*|PANEL_DOMAIN=panel.home.arpa:8443|" \
-    -e "s|^SUB_PUBLIC_DOMAIN=.*|SUB_PUBLIC_DOMAIN=sub.home.arpa:8080/api/sub|" \
+    -e "s|^SUB_PUBLIC_DOMAIN=.*|SUB_PUBLIC_DOMAIN=128.0.136.224:8444/api/sub|" \
     env.sample > .env
 grep -cE '^(APP_SECRET|METRICS_PASS|WEBHOOK_SECRET_HEADER|POSTGRES_PASSWORD)=..' .env
 grep -E '^(PANEL_DOMAIN|SUB_PUBLIC_DOMAIN|FRONT_END_DOMAIN)=' .env

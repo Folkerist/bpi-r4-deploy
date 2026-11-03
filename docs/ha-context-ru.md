@@ -319,8 +319,12 @@
   - панель `/mnt/nvme/compose/remnawave` (`router/remnawave/`: compose = upstream prod + внешняя сеть
     `remnawave-network` с мостом `br-remna` 172.30.0.0/24 в зоне firewall `docker`, forwarding docker→lan;
     valkey с `--ignore-warnings ARM64-COW-BUG`; `.env` из `setup-env.sh`). Backend 3.4.7.
-  - Caddy (host network): `https://panel.home.arpa:8443` (tls internal), подписки `http://sub.home.arpa:8080/api/sub/<id>`
-    (панель показывает ссылку с https — клиентам давать http). Имена — static DNS на RB5009 (comment Remnawave).
+  - Caddy 2.10 (host network): панель `https://panel.home.arpa:8443` (tls internal, только LAN/VPN).
+    Подписки ПУБЛИЧНО: `https://128.0.136.224:8444/api/sub/<id>` — сертификат Let's Encrypt на IP (профиль shortlived,
+    6 дней, Caddy продлевает сам через HTTP-01). SUB_PUBLIC_DOMAIN=128.0.136.224:8444/api/sub — ссылки и QR из панели
+    работают как есть в любом клиенте. Снаружи открыт только путь /api/sub/*, остальное 404.
+    RB5009: dst-nat TCP 80 → .2:8080 и TCP 8444 → .2:8444 (comment Sub-to-BPI), hairpin из LAN (comment Sub-hairpin).
+    Старый http://sub.home.arpa:8080 остался (Android-приложения вроде v2rayNG http не пускают — cleartext). Имена — static DNS на RB5009 (comment Remnawave).
     На самом BPI dnsmasq режет ответы с частными IP (rebind) — проверять curl --resolve.
   - Нода `/mnt/nvme/compose/remnanode` (network host, NODE_PORT 2222), Xray 26.7.28, профиль `home-reality`:
     VLESS+Reality TCP :4443, target/SNI ya.ru, DNS 192.168.88.1, outbound freedom UseIPv4. Хост `Home` 128.0.136.224:443.
