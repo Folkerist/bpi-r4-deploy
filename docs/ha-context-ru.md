@@ -332,6 +332,12 @@
   - Клиенты: v2rayNG (Android) работает сразу, Mux там выключен по умолчанию. В Happ Mux ВЫКЛЮЧИТЬ (с flow xtls-rprx-vision Mux для TCP отклоняется: "common/mux: unexpected network TCP").
     DNS клиентов к 1.1.1.1 RB5009 перехватывает и отдаёт FakeIP — обход через mihomo работает.
   - Логи Xray: `docker exec remnanode tail /var/log/xray/current`.
+  - ВАЖНО (03.11): Xray 26.x в freedom по умолчанию блокирует частные и зарезервированные IP для трафика из VLESS и т.п.
+    (лог: `proxy/freedom: blocked target: tcp:198.18.x.x:443, blackholing connection`). Из-за этого всё, что получает FakeIP
+    (YouTube → mihomo → BYEDPI_3), не работало, а Telegram (реальные IP из address-list) работал. Исправлено в профиле:
+    `"finalRules": [{"action":"allow","network":"tcp,udp","ip":["198.18.0.0/15"]}]` в settings outbound DIRECT.
+    Остальные частные сети (LAN) остаются закрыты для клиентов. YouTube на RB5009 идёт двумя путями: FakeIP и
+    address-list `MihomoProxyRoS` (mangle MarkConnAddressList, в т.ч. динамические IP www.youtube.com) — оба в mihomo.
 - Доступ к HA снаружи нужен: через Back To Home или пир WireGuard на RB5009 (не проброс порта).
 
 ## Как работаем
