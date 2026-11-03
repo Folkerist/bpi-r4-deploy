@@ -1,11 +1,15 @@
-# Caddy for Remnawave on the BPI-R4 Pro: LAN/VPN only (names on the RB5009 DNS -> 192.168.88.2).
-# LuCI keeps ports 80/443, so Caddy uses 8443 (panel, HTTPS with Caddy's internal CA)
-# and 8080 (plain HTTP, subscriptions only).
+# Caddy for Remnawave on the BPI-R4 Pro. LuCI keeps ports 80/443 on the BPI.
+# - 8443: panel, LAN/VPN only (names on the RB5009 DNS -> 192.168.88.2), Caddy's internal CA
+# - 8080: plain HTTP: subscriptions for sub.home.arpa (LAN/VPN) and the ACME HTTP-01 challenge
+#         (RB5009 forwards public TCP 80 here)
+# - 8444: public HTTPS subscriptions on the white IP, Let's Encrypt IP certificate
+#         (6-day 'shortlived' profile, renewed by Caddy); RB5009 forwards public TCP 8444 here
 {
 	http_port 8080
 	https_port 8443
 	auto_https disable_redirects
 	skip_install_trust
+	default_sni 128.0.136.224
 }
 
 panel.home.arpa:8443 {
@@ -20,6 +24,19 @@ http://sub.home.arpa:8080 {
 		reverse_proxy 127.0.0.1:3000 {
 			header_up X-Forwarded-Proto https
 		}
+	}
+	respond 404
+}
+
+https://128.0.136.224:8444 {
+	tls {
+		issuer acme {
+			profile shortlived
+		}
+	}
+	@sub path /api/sub/*
+	handle @sub {
+		reverse_proxy 127.0.0.1:3000
 	}
 	respond 404
 }

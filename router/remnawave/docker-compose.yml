@@ -86,7 +86,7 @@ services:
       retries: 3
 
   caddy:
-    image: caddy:2.9
+    image: caddy:2.10
     container_name: remnawave-caddy
     restart: always
     network_mode: host
