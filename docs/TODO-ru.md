@@ -47,3 +47,12 @@ PPE (flow_offloading_hw) ускоряет только кабель, до Wi-Fi 
 - Зачем: ~130 коммитов по MLO/hostapd/wifi-scripts (стабильность AP MLD, station dump по линкам, PMF на EHT/6 ГГц), mt76 2026-10-08 (фиксы mt7996), фикс WED WDMA TX hang. Ядро то же 6.18.55.
 - Перед: `sysupgrade-prepare.sh` (уже не сохраняет board-base.json), копия `/etc/config/wireless`.
 - После: `lsmod | grep as21xxx` (модуль из PR 24990 может не загрузиться при другом vermagic); BSSID Wi-Fi может смениться (MAC теперь раздаёт netifd); `iw dev ap-mld0 station dump` с Pixel.
+
+## Фоновые запросы к случайным доменам с телефона (отложено 03.11.2026)
+- В логе Xray (пользователь 2, phone-my) пачки раз в 10–30 мин: выдуманные составные домены (`synergylibertybase.net`,
+  `pizzabacklandoo.org`…), порты udp 53/22/546/553/554, tcp 80/443, все NXDOMAIN. Похоже на фоновую проверку сети
+  «бесплатным VPN» (движок Psiphon) или DGA. Ноде не вредит.
+- Кандидаты: Shadowrocket (на Android — подделка), Nova, Geminify. План: остановить их, через час проверить
+  (loglevel info нужен для строк accepted):
+  `docker exec remnanode sh -c 'tail -n 30000 /var/log/xray/current' | grep accepted | grep "email: 2" | grep -E "accepted (tcp|udp):(www\.)?[a-z]{12,}\.(org|net|com):" | awk '{print $1, substr($2,1,5)}' | uniq -c | tail -n 5`
+- Иначе — PCAPdroid 40 мин с выключенным v2rayNG (на vivo приложения показывались как «Неизвестное»).
