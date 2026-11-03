@@ -302,6 +302,8 @@
   (вероятно, режет ТСПУ). По решению пользователя DNS-AI убран полностью: правила снова forward-to=MihomoProxyRoS,
   static dns-ai.ru и форвардер DNS-AI удалены (бэкапы на RB5009: dns-static-before-remove-dnsai, dns-fwd-before-remove-dnsai).
   Gemini идёт через mihomo, группа AI; выход USA CH Google не принимает («недоступно в стране») — нужна другая точка.
+  Тест «весь Google через mihomo» (static FWD, comment test-google-vpn) не помог (Gemini app: «недоступен», код 1060),
+  правила удалены 03.11.2026. Через Geminify (Comss) Gemini на телефоне работает.
 - AmneziaWG-сервер на BPI (02.11.2026) для мобильных клиентов (операторы душат обычный WG): userspace
   amneziawg-go + awg (статические aarch64, собраны из исходников, `router/awg/bin/`), нужен kmod-tun.
   `awg0` 10.20.20.1/24, UDP 51820, конфиг `/etc/amneziawg/awg0.conf` (сервер + [Peer]), сервис
