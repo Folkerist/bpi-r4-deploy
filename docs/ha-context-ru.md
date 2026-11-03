@@ -313,6 +313,19 @@
 - Внешний IP дома — 128.0.136.224, белый и постоянный (со слов пользователя 03.11.2026; выдаётся по DHCP МГТС,
   но не меняется). В хостах Remnawave и в конфигах клиентов можно указывать его напрямую; DDNS RB5009
   `hgg09v8e2f8.sn.mynetname.net` — запасной вариант.
+- Remnawave на BPI (03.11.2026), всё в Docker на NVMe, вход в панель только из дома/по VPN:
+  - панель `/mnt/nvme/compose/remnawave` (`router/remnawave/`: compose = upstream prod + внешняя сеть
+    `remnawave-network` с мостом `br-remna` 172.30.0.0/24 в зоне firewall `docker`, forwarding docker→lan;
+    valkey с `--ignore-warnings ARM64-COW-BUG`; `.env` из `setup-env.sh`). Backend 3.4.7.
+  - Caddy (host network): `https://panel.home.arpa:8443` (tls internal), подписки `http://sub.home.arpa:8080/api/sub/<id>`
+    (панель показывает ссылку с https — клиентам давать http). Имена — static DNS на RB5009 (comment Remnawave).
+    На самом BPI dnsmasq режет ответы с частными IP (rebind) — проверять curl --resolve.
+  - Нода `/mnt/nvme/compose/remnanode` (network host, NODE_PORT 2222), Xray 26.7.28, профиль `home-reality`:
+    VLESS+Reality TCP :4443, target/SNI ya.ru, DNS 192.168.88.1, outbound freedom UseIPv4. Хост `Home` 128.0.136.224:443.
+    RB5009: dst-nat TCP 443 WAN → 192.168.88.2:4443 (comment Reality-to-BPI). Сквад `family`, пользователь phone-my.
+  - Клиенты (Happ): Mux ВЫКЛЮЧИТЬ (с flow xtls-rprx-vision Mux для TCP отклоняется: "common/mux: unexpected network TCP").
+    DNS клиентов к 1.1.1.1 RB5009 перехватывает и отдаёт FakeIP — обход через mihomo работает.
+  - Логи Xray: `docker exec remnanode tail /var/log/xray/current`.
 - Доступ к HA снаружи нужен: через Back To Home или пир WireGuard на RB5009 (не проброс порта).
 
 ## Как работаем
