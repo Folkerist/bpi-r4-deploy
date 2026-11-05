@@ -1,0 +1,6 @@
+#!/bin/sh
+# /etc/hotplug.d/iface/40-uplink-mode - switch direct/tunnel mode when the WAN cable goes up/down
+[ "$INTERFACE" = wan ] || exit 0
+case "$ACTION" in
+	ifup|ifdown) (sleep 5; /usr/bin/uplink-mode.sh) >/dev/null 2>&1 & ;;
+esac

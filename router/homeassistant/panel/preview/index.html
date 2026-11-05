@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Панель дома — превью</title>
+<style>html,body{margin:0;background:#070b12}#err{position:fixed;left:0;right:0;bottom:0;z-index:999;background:#b91c1c;color:#fff;font:13px monospace;white-space:pre-wrap;padding:8px;display:none}</style>
+</head><body><div id="err"></div>
+<script>
+  // Ошибки — на экран (видно на скриншоте) и в заголовок.
+  const E = document.getElementById("err");
+  const shout = (m) => { E.style.display = "block"; E.textContent += m + "\n"; document.title = "ERROR"; };
+  window.addEventListener("error", (e) => shout(`${e.message} @ ${e.filename}:${e.lineno}:${e.colno}`));
+  window.addEventListener("unhandledrejection", (e) => shout("promise: " + (e.reason && (e.reason.stack || e.reason))));
+  const _ce = console.error; console.error = (...a) => { shout(a.map((x) => x && x.stack || x).join(" ")); _ce(...a); };
+  const q = new URLSearchParams(location.search);
+  // ?frame=390 — показать панель в iframe такой ширины (Chrome не даёт окно уже ~500 px).
+  if (q.get("frame")) { const w = q.get("frame"); q.delete("frame");
+    document.write(`<iframe src="?${q}" style="border:0;width:${w}px;height:100vh;display:block"></iframe>`); document.close(); throw 0; }
+  try { localStorage.setItem("hp-theme", q.get("theme") || "dark"); localStorage.setItem("hp-page", q.get("page") || "0"); } catch (e) {}
+</script>
+<script type="module">
+  import * as mdi from "./vendor/mdi.js";
+  // Заменитель ha-icon из HA: те же значки MDI.
+  class HaIcon extends HTMLElement {
+    static get observedAttributes() { return ["icon"]; }
+    connectedCallback() { this.render(); } attributeChangedCallback() { this.render(); }
+    render() {
+      const n = (this.getAttribute("icon") || "").replace("mdi:", "");
+      const key = "mdi" + n.split("-").map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join("");
+      const d = mdi[key]; if (!d) console.warn("нет значка", n);
+      this.innerHTML = `<svg viewBox="0 0 24 24" style="width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px);display:block"><path fill="currentColor" d="${d || mdi.mdiHelpCircleOutline}"/></svg>`;
+    }
+  }
+  customElements.define("ha-icon", HaIcon);
+  await import("./mock.js");
+</script>
+</body></html>

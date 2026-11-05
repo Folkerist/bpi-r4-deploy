@@ -1,0 +1,30 @@
+#!/bin/sh /etc/rc.common
+# /etc/init.d/docker-graceful - stops running containers cleanly before reboot/shutdown,
+# so Home Assistant can flush its .storage files (a hard stop left them zero-length).
+# "docker stop" counts as a manual stop, so restart=unless-stopped would keep them down
+# after boot: remember which containers were running and start them again at boot.
+# Install: cp to /etc/init.d/, chmod +x, /etc/init.d/docker-graceful enable
+START=99
+STOP=01
+
+LIST=/etc/docker-graceful.running
+
+start() {
+	[ -s "$LIST" ] || return 0
+	(
+		i=0
+		until docker info >/dev/null 2>&1; do
+			i=$((i + 1)); [ $i -gt 120 ] && exit 1; sleep 1
+		done
+		docker start $(cat "$LIST") >/dev/null 2>&1
+		logger -t docker-graceful "started: $(tr '\n' ' ' < "$LIST")"
+	) &
+}
+
+stop() {
+	command -v docker >/dev/null || return 0
+	docker ps --format '{{.Names}}' > "$LIST.tmp" 2>/dev/null
+	[ -s "$LIST.tmp" ] && mv "$LIST.tmp" "$LIST" || rm -f "$LIST.tmp"
+	docker ps -q | xargs -r docker stop -t 30 >/dev/null 2>&1
+	sync
+}
