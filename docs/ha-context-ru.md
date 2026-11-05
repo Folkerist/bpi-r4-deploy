@@ -339,8 +339,9 @@
     Остальные частные сети (LAN) остаются закрыты для клиентов. YouTube на RB5009 идёт двумя путями: FakeIP и
     address-list `MihomoProxyRoS` (mangle MarkConnAddressList, в т.ч. динамические IP www.youtube.com) — оба в mihomo.
   - Доступ в домашнюю сеть только для phone-my (03.11): outbound `LAN` (freedom, finalRules allow 192.168.88.0/24 и
-    198.18.0.0/15) и routing rules `user: ["2"]` + `ip: 192.168.88.0/24` / `domain:home.arpa` → LAN. "2" — email пользователя
-    в Xray (= id в Remnawave; пересоздашь пользователя — поправить). Остальные пользователи LAN не видят.
+    198.18.0.0/15) и routing rules `user: ["2","3"]` + `ip: 192.168.88.0/24, 192.168.255.2/32` / `domain:home.arpa` → LAN. "2" (phone-my) и
+    "3" (компьютер, 05.11) — email пользователей в Xray (= id в Remnawave; пересоздашь пользователя — поправить).
+    192.168.255.2 — mihomo (MetaCubeXD :9090/ui), разрешён и в finalRules выхода LAN. Остальные пользователи LAN не видят.
     v2rayNG: «VPN обходит LAN» = Не обходит и выключить правила «绕过局域网IP» (geoip:private → direct) в Маршрутизации.
     Chrome: выключить «Безопасный DNS», иначе home.arpa не резолвится. Имена rb.home.arpa (.1) и openwrt.home.arpa (.2) —
     static DNS на RB5009 (comment Remnawave). WebFig RB5009 включён: `/ip service www` available-from 192.168.88.0/24,10.10.10.0/24.
