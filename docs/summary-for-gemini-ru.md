@@ -7,7 +7,7 @@ https://github.com/folkerist/bpi-r4-deploy (ветка `claude/bpi-r4-pcie-link-
 
 ## 1. Железо
 - **Banana Pi BPI-R4 Pro 8X**: MT7988A (4× Cortex-A73), 8 ГБ ОЗУ, eMMC, 2× NVMe
-  (1 ТБ `/mnt/nvme` — Docker/HA; Samsung 2 ТБ `/mnt/ssd2` — графики collectd).
+  (1 ТБ `/mnt/nvme` — Docker/HA и графики collectd; второй 1 ТБ `/mnt/ssd2` — под данные, с 09.11.2026 вместо Samsung 2 ТБ).
 - Wi-Fi: модуль **BE14** (MT7996, Wi-Fi 7, 2.4/5/6 ГГц), одно PCIe-устройство, в OpenWrt — radio0/1/2.
 - Модем **Quectel RM520N-GL** (LTE, Yota), ModemManager; SMS пересылаются на почту.
 - 10G PHY AS21010 (WAN), коммутатор MxL862xx (LAN).

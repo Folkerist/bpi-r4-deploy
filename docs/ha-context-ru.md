@@ -10,7 +10,9 @@
 - Overlay (extroot) на eMMC `mmcblk0p6`; eMMC почти не нагружен.
 - NVMe 1 ТБ `/mnt/nvme` (ext4): данные Docker `/mnt/nvme/docker`, HA `/mnt/nvme/homeassistant/config`,
   Matter `/mnt/nvme/matter-server/data`.
-- Samsung 2 ТБ `/mnt/ssd2`: графики collectd `/mnt/ssd2/collectd-rrd`.
+- Графики collectd: `/mnt/nvme/collectd-rrd` (перенесены 09.11.2026 с `/mnt/ssd2`).
+- Второй NVMe 1 ТБ (DGSM3001TS33T, ext4 на весь диск, метка ssd2, UUID fc2ebdf7-…) `/mnt/ssd2`: пустой, под данные.
+  Заменил Samsung 2 ТБ 09.11.2026 (fstab @mount[3]).
 - Модем Quectel RM520N-GL (LTE Yota), ModemManager; SMS → почта.
 
 ## Docker / Home Assistant

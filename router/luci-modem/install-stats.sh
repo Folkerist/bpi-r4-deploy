@@ -2,7 +2,7 @@
 # Installs modem signal graphs into LuCI -> Statistics -> Graphs -> Modem.
 set -e
 R=https://raw.githubusercontent.com/Folkerist/bpi-r4-deploy/claude/bpi-r4-pcie-link-down-x51z5y/router/luci-modem
-RRD=/mnt/ssd2/collectd-rrd
+RRD=$(uci -q get luci_statistics.collectd_rrdtool.DataDir || echo /mnt/nvme/collectd-rrd)
 
 apk update >/dev/null
 apk add luci-app-statistics collectd-mod-exec

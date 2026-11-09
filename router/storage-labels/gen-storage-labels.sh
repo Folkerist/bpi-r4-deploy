@@ -11,13 +11,13 @@ purpose() {
 	p=$(grep -m1 "^$1|" "$CONF" 2>/dev/null | cut -d'|' -f2-)
 	[ -n "$p" ] && { echo "$p"; return; }
 	case "$1" in
-		/mnt/nvme) echo "Docker, Home Assistant" ;;
-		/mnt/ssd2) echo "данные, статистика" ;;
+		/mnt/nvme) echo "Docker, Home Assistant, статистика" ;;
+		/mnt/ssd2) echo "данные" ;;
 		*) echo "${1#/mnt/}" ;;
 	esac
 }
 
-model() { # /dev/nvme1n1p1 -> "Samsung SSD 980 PRO 2TB"
+model() { # /dev/nvme1n1p1 -> "SSD DGSM3001TS33T"
 	b=${1#/dev/}
 	[ -e /sys/class/block/$b/partition ] && b=$(basename "$(readlink -f /sys/class/block/$b/..)")
 	m=$(sed 's/ *$//' /sys/class/block/$b/device/model 2>/dev/null)
