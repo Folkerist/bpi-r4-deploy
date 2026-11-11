@@ -1,0 +1,243 @@
+rooms = [
+ ("balcony","Балкон","5,2","130,545 175,515 175,605 130,605",(152,585),True),
+ ("kids","Детская","18,5","175,512 300,512 300,615 175,615",(237,563),False),
+ ("bath","Ванная","4,1","300,512 318,492 336,480 354,492 372,512 372,568 300,568",(336,522),False),
+ ("corridor2","","","300,568 372,568 372,615 300,615",(0,0),False),
+ ("corridor","Коридор","18,2","300,615 372,615 372,720 300,720",(336,665),False),
+ ("bedroom","Спальня","22,0","372,512 505,512 505,615 372,615",(438,563),False),
+ ("hall","Зал","28,2","125,615 300,615 300,720 125,720",(212,667),False),
+ ("kitchen","Кухня","21,3","125,720 230,720 230,825 95,825 95,750",(145,764),False),
+ ("storage","Кладовка","3,6","230,775 285,775 285,825 230,825",(257,810),False),
+ ("wc","WC","1,4","285,775 320,775 320,825 285,825",(302,810),False),
+ ("entry","Прихожая","15,4","230,720 370,720 370,825 320,825 320,775 230,775",(345,803),False),
+]
+SIDE_ROOMS = [("Зал", 5, "mdi:sofa"), ("Кухня", 1, "mdi:stove"), ("Спальня", 4, "mdi:bed-king"),
+              ("Детская", 8, "mdi:teddy-bear"), ("Прихожая", 7, "mdi:door"), ("Коридор", 6, "mdi:walk"),
+              ("Малый коридор", 2, "mdi:walk"), ("Проход к кухне", 3, "mdi:walk")]
+themes = {
+ "dark": dict(bg="#1c1c1c", room="#262a31", balcony="#1a1d22", wall="#4a505c", text="#e6e6e6", sub="#8b919c", win="#5aa9e6"),
+ "light":dict(bg="#ffffff", room="#f1f3f6", balcony="#e6e9ee", wall="#b8bdc6", text="#1f2328", sub="#6b7280", win="#3b8fd9"),
+}
+windows = [(130,560,130,595),(175,548,175,600),(505,535,505,590),(125,640,125,695),(95,760,95,815),(100,745,122,724)]
+# Doors and passages checked against the Qrevo lidar map (where two cleaning segments touch = a real passage,
+# fitted to the plan at ~39.5 mm per unit) and the realtor floor plan.
+openings=[
+ ("door","v",300,574,598,1,"a"),   # детская: наружу в коридор, к ванной
+ ("door","v",372,574,598,-1,"a"),  # спальня: наружу в коридор, к ванной
+ ("door","h",568,324,348,-1,"b"),  # ванная
+ ("slide","v",300,643,687,0,""),   # зал-коридор: купе-перегородка шириной в две двери (~1,7 м)
+ ("door","v",230,748,772,-1,"a"),  # кухня: внутрь кухни, петли сверху
+ ("door","h",775,260,282,-1,"a"),  # кладовка: наружу, к кухне
+ ("door","h",775,293,313,-1,"a"),  # WC: наружу, к кухне
+ ("door","h",825,336,364,1,"b"),   # входная: наружу, петли справа
+ ("door","v",175,518,540,1,"a"),   # балкон: внутрь детской, к верху
+ ("arch","h",615,324,372,0,""),    # малый коридор -> коридор (слева встроенная полка)
+ ("arch","h",720,327,367,0,""),    # коридор -> прихожая
+ ("arch","h",720,192,215,0,""),    # зал -> кухня: проём без двери
+]
+# Built-in furniture and plumbing (thin outlines): shelf left of the small-corridor arch, wardrobe along the top wall
+# of the passage to the kitchen, bath tub along the bathroom's left wall, toilet in the bathroom (the WC has its icon).
+fixtures = [
+ ("rect", 301, 603, 22, 11),       # полка в малом коридоре
+ ("rect", 236, 722, 24, 13), ("rect", 260, 722, 24, 13),   # шкаф в проходе к кухне (две секции)
+ ("rect", 304, 518, 17, 44, 7),    # ванна
+ ("ellipse", 358, 558, 5, 4),      # унитаз в ванной
+]
+for name,c in themes.items():
+    o=[f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 465 620 395" font-family="Roboto, Segoe UI, sans-serif">',
+       f'<rect x="-10" y="465" width="620" height="395" fill="{c["bg"]}"/>']
+    for rid,label,area,pts,(x,y),balc in rooms:
+        o.append(f'<polygon id="{rid}" points="{pts}" fill="{c["balcony"] if balc else c["room"]}" stroke="{c["wall"]}" stroke-width="4" stroke-linejoin="round"/>')
+    for x1,y1,x2,y2 in windows:
+        o.append(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{c["win"]}" stroke-width="3" stroke-linecap="round"/>')
+    for kind,orient,c0,a,b,d,hg in openings:
+        P=(lambda t:(c0,t)) if orient=="v" else (lambda t:(t,c0))
+        (x1,y1),(x2,y2)=P(a),P(b)
+        o.append(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{c["room"]}" stroke-width="5"/>')
+        w=b-a
+        if kind=="door":
+            H,E=(P(a),P(b)) if hg=="a" else (P(b),P(a))
+            O=(H[0]+d*w,H[1]) if orient=="v" else (H[0],H[1]+d*w)
+            cr=(O[0]-H[0])*(E[1]-H[1])-(O[1]-H[1])*(E[0]-H[0])
+            o.append(f'<path d="M{H[0]} {H[1]} L{O[0]} {O[1]} A{w} {w} 0 0 {1 if cr>0 else 0} {E[0]} {E[1]}" fill="none" stroke="{c["sub"]}" stroke-width="1"/>')
+        elif kind=="slide":
+            m=(a+b)/2
+            o.append(f'<line x1="{c0-2}" y1="{a}" x2="{c0-2}" y2="{m+3}" stroke="{c["sub"]}" stroke-width="2"/>')
+            o.append(f'<line x1="{c0+2}" y1="{m-3}" x2="{c0+2}" y2="{b}" stroke="{c["sub"]}" stroke-width="2"/>')
+        else:
+            o.append(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{c["sub"]}" stroke-width="1" stroke-dasharray="3 3"/>')
+    for f in fixtures:
+        if f[0] == "rect":
+            rx = f'rx="{f[5]}" ' if len(f) > 5 else 'rx="1.5" '
+            o.append(f'<rect x="{f[1]}" y="{f[2]}" width="{f[3]}" height="{f[4]}" {rx}fill="none" stroke="{c["sub"]}" stroke-width="1"/>')
+        else:
+            o.append(f'<ellipse cx="{f[1]}" cy="{f[2]}" rx="{f[3]}" ry="{f[4]}" fill="none" stroke="{c["sub"]}" stroke-width="1"/>')
+    for rid,label,area,pts,(x,y),balc in rooms:
+        if not label: continue
+        small = rid in ("wc","storage","bath","balcony")
+        fs = 7 if small else 9 if rid=="entry" else 11  # entry label sits in the narrow leg of the L
+        if rid=="balcony":
+            o.append(f'<text x="{x}" y="{y}" font-size="7" fill="{c["sub"]}" text-anchor="middle" transform="rotate(-90 {x} {y})">{label}</text>')
+            continue
+        o.append(f'<text x="{x}" y="{y+fs*0.35:.0f}" font-size="{fs}" font-weight="500" fill="{c["text"]}" text-anchor="middle">{label}</text>')
+    # Side panels (plan is x 80..520; panels -10..80 and 520..610): captions and button plates.
+    # Clickable areas and icons are picture-elements on top (card.yaml), positions from SIDE_* below.
+    def cap(x, y, t):
+        o.append(f'<text x="{x}" y="{y}" font-size="8" font-weight="600" fill="{c["sub"]}" text-anchor="middle" letter-spacing=".6">{t}</text>')
+    def btn(x0, yc, t):
+        o.append(f'<rect x="{x0}" y="{yc-14}" width="74" height="28" rx="6" fill="{c["room"]}" stroke="{c["wall"]}" stroke-width="1"/>')
+        fs = 8.5 if len(t) <= 9 else 7  # long captions ("Малый коридор") must fit next to the icon
+        o.append(f'<text x="{x0+45}" y="{yc+3}" font-size="{fs}" fill="{c["text"]}" text-anchor="middle">{t}</text>')
+    def hbtn(x0, yc, t):  # half-width plate, two per row
+        o.append(f'<rect x="{x0}" y="{yc-14}" width="36" height="28" rx="6" fill="{c["room"]}" stroke="{c["wall"]}" stroke-width="1"/>')
+        o.append(f'<text x="{x0+25}" y="{yc+3}" font-size="8" fill="{c["text"]}" text-anchor="middle">{t}</text>')
+    def ibtn(x0, yc):  # small icon-only plate (Старт / Пауза / На базу), three per row
+        o.append(f'<rect x="{x0}" y="{yc-12}" width="24" height="24" rx="6" fill="{c["room"]}" stroke="{c["wall"]}" stroke-width="1"/>')
+    cap(35, 492, "УБОРКА")
+    for i, (t, _seg, _icon) in enumerate(SIDE_ROOMS):
+        btn(-2, 514 + 33*i, t)
+    # Who cleans (input_select.fp_vacuum: the name is a state-label on the plate) and «all together».
+    cap(35, 780, "КТО УБИРАЕТ")
+    o.append(f'<rect x="-2" y="788" width="74" height="28" rx="6" fill="{c["room"]}" stroke="{c["wall"]}" stroke-width="1"/>')
+    btn(-2, 836, "Всё вместе")
+    cap(565, 492, "ПОГОДА")
+    cap(565, 548, "КАМЕРА")
+    cap(565, 628, "СВЕТ")
+    hbtn(528, 660, "Вкл")
+    hbtn(566, 660, "Выкл")
+    # Two vacuums: caption, status + battery (state-labels), row of icon plates Старт / Пауза / На базу.
+    for y0, t in ((692, "МОКРЫЙ"), (770, "СУХОЙ")):
+        cap(565, y0, t)
+        for x0 in (526, 553, 580):
+            ibtn(x0, y0 + 46)
+    o.append('</svg>')
+    open(f"floorplan-{name}.svg","w").write("\n".join(o))
+    # Phone version: the apartment only (side panels are cut off; on the phone they are regular cards below the map).
+    open(f"floorplan-m-{name}.svg","w").write("\n".join(o).replace('viewBox="-10 465 620 395"','viewBox="80 465 440 395"',1))
+
+# Room light overlays for picture-elements (same viewBox as the plan, shown on top when a light is on).
+HEAD = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 465 440 395">'
+glow = {"bath": "vannaia", "corridor2": "koridor"}
+open("fp-empty.svg", "w").write(HEAD + '</svg>')
+for rid, name in glow.items():
+    pts = next(r[3] for r in rooms if r[0] == rid)
+    open(f"fp-light-{name}.svg", "w").write(
+        HEAD + f'<polygon points="{pts}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+
+# Main corridor (11,2): chandelier = room fill, perimeter lights = glowing inset outline.
+cor = next(r[3] for r in rooms if r[0] == "corridor")
+open("fp-light-koridor-main.svg", "w").write(
+    HEAD + f'<polygon points="{cor}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+open("fp-light-koridor-perim.svg", "w").write(
+    HEAD + '<rect x="307" y="622" width="58" height="91" rx="4" fill="none" stroke="#ffc107" stroke-opacity=".25" stroke-width="7"/>'
+    '<rect x="307" y="622" width="58" height="91" rx="4" fill="none" stroke="#ffd54f" stroke-width="2"/></svg>')
+
+# Entry hall (L-shaped): perimeter lights = glowing inset outline; WC = room fill.
+ent_in = "237,727 363,727 363,818 327,818 327,768 237,768"
+open("fp-light-prikhozhaia-perim.svg", "w").write(
+    HEAD + f'<polygon points="{ent_in}" fill="none" stroke="#ffc107" stroke-opacity=".25" stroke-width="7" stroke-linejoin="round"/>'
+    f'<polygon points="{ent_in}" fill="none" stroke="#ffd54f" stroke-width="2" stroke-linejoin="round"/></svg>')
+wc = next(r[3] for r in rooms if r[0] == "wc")
+open("fp-light-tualet.svg", "w").write(
+    HEAD + f'<polygon points="{wc}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+
+# Entry hall chandelier = fill of the whole hall.
+ent = next(r[3] for r in rooms if r[0] == "entry")
+open("fp-light-prikhozhaia-main.svg", "w").write(
+    HEAD + f'<polygon points="{ent}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+
+# Storage room light = room fill.
+st = next(r[3] for r in rooms if r[0] == "storage")
+open("fp-light-kladovka.svg", "w").write(
+    HEAD + f'<polygon points="{st}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+
+# Kitchen: chandelier over the table = small glow at the table (TABLE), perimeter lights light the whole
+# kitchen = room fill + glowing inset outline.
+kit = next(r[3] for r in rooms if r[0] == "kitchen")
+TABLE = (195, 795)
+tx, ty = TABLE
+open("fp-light-kukhnia-main.svg", "w").write(
+    HEAD + f'<circle cx="{tx}" cy="{ty}" r="26" fill="#ffc107" fill-opacity=".18"/>'
+    f'<circle cx="{tx}" cy="{ty}" r="17" fill="#ffc107" fill-opacity=".3"/>'
+    f'<circle cx="{tx}" cy="{ty}" r="9" fill="#ffd54f" fill-opacity=".45"/></svg>')
+kit_in = "130,727 223,727 223,818 102,818 102,754"
+open("fp-light-kukhnia-perim.svg", "w").write(
+    HEAD + f'<polygon points="{kit}" fill="#ffc107" fill-opacity=".3"/>'
+    f'<polygon points="{kit_in}" fill="none" stroke="#ffc107" stroke-opacity=".25" stroke-width="7" stroke-linejoin="round"/>'
+    f'<polygon points="{kit_in}" fill="none" stroke="#ffd54f" stroke-width="2" stroke-linejoin="round"/></svg>')
+
+# Camera C700: small corridor next to the bath, looking at the entrance door. Faint field-of-view cone,
+# always shown (static overlay, not tied to a state).
+CAM = (336, 609)
+cx, cy = CAM
+open("fp-camera-fov.svg", "w").write(
+    HEAD + f'<polygon points="{cx},{cy} 330,825 370,825" fill="#4fc3f7" fill-opacity=".10" stroke="#4fc3f7" '
+    f'stroke-opacity=".35" stroke-width="1" stroke-dasharray="3 3"/></svg>')
+
+# Living room (Зал) main light = room fill.
+zal = next(r[3] for r in rooms if r[0] == "hall")
+open("fp-light-zal.svg", "w").write(
+    HEAD + f'<polygon points="{zal}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+
+# Bedroom main light (Yeelight) = room fill.
+bed = next(r[3] for r in rooms if r[0] == "bedroom")
+open("fp-light-spalnia.svg", "w").write(
+    HEAD + f'<polygon points="{bed}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+
+# Camera motion frame: drawn around the camera snapshot on the right panel (conditional element in card.yaml).
+open("fp-camera-motion.svg", "w").write(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 48"><rect x="1.5" y="1.5" width="77" height="45" rx="6" '
+    'fill="none" stroke="#ff5252" stroke-width="3"/></svg>')
+
+# Motion (Xiaomi BLE sensors): pulsing cyan outline of the room (SMIL, runs inside <img>), so it doesn't mix with
+# the yellow light fill. Kitchen has two sensors: room outline and a ring at the table.
+PULSE = '<animate attributeName="opacity" values="1;.25;1" dur="1.6s" repeatCount="indefinite"/>'
+def motion_room(fname, pts):
+    open(fname, "w").write(HEAD + f'<g>{PULSE}<polygon points="{pts}" fill="#29b6f6" fill-opacity=".12" '
+        f'stroke="#29b6f6" stroke-width="3" stroke-linejoin="round" stroke-dasharray="8 4"/></g></svg>')
+def motion_spot(fname, x, y, r):
+    open(fname, "w").write(HEAD + f'<g>{PULSE}<circle cx="{x}" cy="{y}" r="{r}" fill="#29b6f6" fill-opacity=".18" '
+        f'stroke="#29b6f6" stroke-width="2.5" stroke-dasharray="5 3"/></g></svg>')
+room_pts = {r[0]: r[3] for r in rooms}
+motion_room("fp-motion-kukhnia.svg", room_pts["kitchen"])
+motion_room("fp-motion-koridor.svg", room_pts["corridor"])
+motion_room("fp-motion-tualet.svg", room_pts["wc"])
+motion_room("fp-motion-prikhozhaia.svg", room_pts["entry"])
+motion_spot("fp-motion-kukhnia-stol.svg", tx, ty, 22)
+motion_room("fp-motion-vannaia.svg", room_pts["bath"])
+
+# Entrance door open (binary_sensor.e4aaec6dff8c_contact): red leaf + swing on top of the plan's door symbol
+# (door "h" 825, 336..364, hinge at 364, opens outwards), red line across the opening.
+open("fp-door-open.svg", "w").write(HEAD + f'<g>{PULSE}<path d="M364 825 L364 853 A28 28 0 0 1 336 825 Z" fill="#ff5252" '
+    'fill-opacity=".18"/><line x1="364" y1="825" x2="364" y2="853" stroke="#ff5252" stroke-width="3" stroke-linecap="round"/>'
+    '<line x1="336" y1="825" x2="364" y2="825" stroke="#ff5252" stroke-width="2" stroke-dasharray="3 2"/></g></svg>')
+
+# Vacuum: room it is cleaning now (sensor.fp_vacuum_room from templates.yaml) = green fill + outline, so it doesn't
+# mix with yellow light and cyan motion. The upper part of the entry L is split like the Roborock segments:
+# left (to the kitchen/storage/WC) = segment 3 «Коридор1», right = 7 «Прихожая».
+VAC = {"kukhnia": room_pts["kitchen"], "koridor2": room_pts["corridor2"], "koridor": room_pts["corridor"],
+       "spalnia": room_pts["bedroom"], "zal": room_pts["hall"], "detskaia": room_pts["kids"],
+       "prokhod": "230,720 320,720 320,775 230,775", "prikhozhaia": "320,720 370,720 370,825 320,825"}
+for rid, pts in VAC.items():
+    open(f"fp-vac-{rid}.svg", "w").write(HEAD + f'<g>{PULSE}<polygon points="{pts}" fill="#66bb6a" fill-opacity=".2" '
+        f'stroke="#66bb6a" stroke-width="3" stroke-linejoin="round"/></g></svg>')
+
+# Second vacuum (Roborock S5, sensor.fp_vacuum2_room): same rooms in purple (cyan is motion, green — Qrevo).
+# Its segment 18 covers the bath together with the small corridor.
+VAC2 = dict(VAC, koridor2="300,512 318,492 336,480 354,492 372,512 372,615 300,615")
+for rid, pts in VAC2.items():
+    open(f"fp-vac2-{rid}.svg", "w").write(HEAD + f'<g>{PULSE}<polygon points="{pts}" fill="#ba68c8" fill-opacity=".2" '
+        f'stroke="#ba68c8" stroke-width="3" stroke-linejoin="round"/></g></svg>')
+
+# Yandex stations playing (conditional on media_player state «playing»): pink sound waves around the station icon —
+# three rings growing and fading one after another. Positions = the station icons in map-desktop.yaml (left%, top%).
+STATIONS = {"u0086h0002ec9r": (24.2, 60.8), "t60jcw202w4z1k": (27.1, 69.1), "x11bmg2000x29z": (81, 34.7),
+            "m104q81001k74k": (47.9, 16), "lp00000000000047571100008ab064b1": (52.4, 70.9), "r10cv31007wqfn": (51.9, 22)}
+for sid, (lx, ty) in STATIONS.items():
+    x, y = round(lx * 6.2 - 10, 1), round(ty * 3.95 + 465, 1)
+    rings = "".join(
+        f'<circle cx="{x}" cy="{y}" r="6" fill="none" stroke="#f06292" stroke-width="2" opacity="0">'
+        f'<animate attributeName="r" values="6;20" dur="2.4s" begin="{i * 0.8}s" repeatCount="indefinite"/>'
+        f'<animate attributeName="opacity" values=".9;0" dur="2.4s" begin="{i * 0.8}s" repeatCount="indefinite"/></circle>'
+        for i in range(3))
+    open(f"fp-play-{sid}.svg", "w").write(HEAD + rings + '</svg>')

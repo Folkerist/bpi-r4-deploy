@@ -1,0 +1,12 @@
+{
+	"luci-app-modem-status": {
+		"description": "Grant read access to ModemManager status via mmcli",
+		"read": {
+			"file": {
+				"/usr/bin/mmcli": [ "exec" ],
+				"/usr/bin/mmcli *": [ "exec" ],
+				"/tmp/modem-signal": [ "read" ]
+			}
+		}
+	}
+}

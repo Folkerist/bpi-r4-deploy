@@ -1,0 +1,82 @@
+# Автоматизации HA. На роутере: /config/automations.yaml (в configuration.yaml — «automation: !include automations.yaml»).
+
+# Уборка голосом, всё решает фраза (переключатель на карте не участвует):
+#   «Алиса, пропылесось зал»  -> сценарий «Пылесось: зал» -> сухой (S5)
+#   «Алиса, помой на кухне»   -> «Помой: кухня»           -> мокрый (Qrevo)
+#   «Алиса, убери в спальне»  -> «Уборка: спальня»        -> сначала сухой, потом мокрый
+#   «…всю квартиру» / «…везде» -> «…: вся квартира»;  «останови уборку» -> «Уборка: пауза» -> оба на паузу;
+#   «пылесосы на базу» / «хватит убирать» -> «Уборка: стоп» -> оба на базу.
+# Сценарии создаёт yandex/ya_create.py: по фразе услышавшая колонка выполняет беззвучное «ничего не делай», интеграция
+# yandex_station присылает событие yandex_scenario с именем сценария и колонкой; ответ голосом — на той же колонке.
+# Сценарии HA для TTS называются «ХА <id>» и сюда не попадают. Повторные события в течение 5 с — отбрасываются.
+- id: fp_vacuum_voice
+  alias: Уборка по голосу (Алиса)
+  mode: single
+  max_exceeded: silent
+  triggers:
+    - trigger: event
+      event_type: yandex_scenario
+  conditions:
+    - condition: template
+      value_template: "{{ (trigger.event.data.scenario_name or '') is match('(Пылесось|Помой|Уборка): ') }}"
+  actions:
+    - variables:
+        rooms: {"зал": zal, "кухня": kukhnia, "спальня": spalnia, "детская": detskaia, "прихожая": prikhozhaia,
+                "коридор": koridor, "малый коридор": koridor2, "проход в коридоре": prokhod}
+        say: {zal: зал, kukhnia: кухню, spalnia: спальню, detskaia: детскую, prikhozhaia: прихожую, koridor: коридор,
+              koridor2: малый коридор, prokhod: проход в коридоре, all: всю квартиру}
+        verb: "{{ trigger.event.data.scenario_name.split(':', 1)[0] }}"
+        place: "{{ trigger.event.data.scenario_name.split(':', 1)[1] | trim | lower }}"
+        room: >-
+          {{ 'all' if place == 'вся квартира' else 'stop' if place == 'стоп' else 'pause' if place == 'пауза'
+             else rooms.get(place, '') }}
+        who: "{{ {'Пылесось': 'Сухой', 'Помой': 'Мокрый'}.get(verb, 'Вместе') }}"
+        ids: "{{ rooms.values() | list if room == 'all' else [room] }}"
+        speaker: "{{ trigger.event.data.entity_id }}"
+    - choose:
+        - conditions: "{{ room == 'stop' }}"
+          sequence:
+            - action: script.turn_off
+              target: {entity_id: script.fp_vacuum_together}
+            - action: vacuum.return_to_base
+              target: {entity_id: [vacuum.roborock_s5_8159_robot_cleaner, vacuum.koridor_roborock_qrevo]}
+            - action: media_player.play_media
+              target: {entity_id: "{{ speaker }}"}
+              data: {media_content_type: text, media_content_id: "Пылесосы едут на базу"}
+        # Пауза: «Вместе» прерывается (иначе после паузы и возврата S5 на базу Qrevo начал бы мыть). Пауза на стоящем
+        # пылесосе безвредна, а состояние S5 в HA запаздывает на ~20 с — поэтому без проверки состояния, ошибки не мешают.
+        - conditions: "{{ room == 'pause' }}"
+          sequence:
+            - action: script.turn_off
+              target: {entity_id: script.fp_vacuum_together}
+            - action: vacuum.pause
+              target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+              continue_on_error: true
+            - action: vacuum.pause
+              target: {entity_id: vacuum.koridor_roborock_qrevo}
+              continue_on_error: true
+            - action: media_player.play_media
+              target: {entity_id: "{{ speaker }}"}
+              data: {media_content_type: text, media_content_id: "Ставлю уборку на паузу"}
+        - conditions: "{{ room == '' }}"
+          sequence:
+            - action: media_player.play_media
+              target: {entity_id: "{{ speaker }}"}
+              data: {media_content_type: text, media_content_id: "Не знаю такую комнату: {{ place }}"}
+      default:
+        - if: "{{ who == 'Вместе' }}"
+          then:
+            - action: script.turn_on
+              target: {entity_id: script.fp_vacuum_together}
+              data: {variables: {rooms: "{{ ids }}"}}
+          else:
+            - action: script.fp_vacuum_clean
+              data: {rooms: "{{ ids }}", who: "{{ who }}"}
+        - action: media_player.play_media
+          target: {entity_id: "{{ speaker }}"}
+          data:
+            media_content_type: text
+            media_content_id: >
+              {{ {'Сухой': 'Пылесошу ', 'Мокрый': 'Мою '}.get(who, 'Убираю ') ~ say[room] }}{{
+                 ': сначала пылесос, потом мойка' if who == 'Вместе' else '' }}
+    - delay: "00:00:05"

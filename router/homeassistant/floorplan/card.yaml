@@ -1,0 +1,2867 @@
+# Панель «Карта»: Настройки → Панели → Карта → ✏️ → ⋮ → Редактор кода.
+# SVG кладутся в /config/www/ → доступны как /local/...
+# Нужен card-mod из HACS (иначе card_mod просто игнорируется).
+# Светлая/тёмная версия переключается вместе с темой HA (dark_mode_image).
+# После изменения SVG увеличивать ?v= у картинок (браузер кэширует /local/).
+# Позиции в % от картинки: viewBox -10 465 620 395 (x% = (x+10)/6.2, y% = (y-465)/3.95); план — x 80..520,
+# оверлеи комнат (свой viewBox 80 465 440 395) ставятся по центру шириной 70.97%. Слева/справа — боковые панели.
+views:
+  - title: Карта
+    path: map
+    icon: mdi:floor-plan
+    panel: true
+    cards:
+      # BEGIN map (генерирует gen-card.py из map-desktop.yaml — не править вручную)
+      - type: vertical-stack
+        cards:
+          # Компьютер / планшет / телефон боком.
+          - type: conditional
+            conditions: [{condition: screen, media_query: "(min-width: 768px)"}]
+            card:
+              type: picture-elements
+              image: /local/floorplan-light.svg?v=10
+              dark_mode_image: /local/floorplan-dark.svg?v=10
+              # card-mod (HACS): план целиком по высоте экрана; 1.114 = 440/395 — пропорции SVG.
+              card_mod:
+                style: |
+                  ha-card {
+                    max-width: calc((100vh - 72px) * 1.57);
+                    margin: 0 auto;
+                  }
+              elements:
+                # Подсветка комнаты, когда свет включён (на всю картинку, клики пропускает).
+                - type: image
+                  entity: switch.light_bath
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-light-vannaia.svg?v=2
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: switch.light_corridor
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-light-koridor.svg?v=2
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: switch.light_hall_main
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-light-koridor-main.svg?v=2
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: switch.light_hall_perimeter
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-light-koridor-perim.svg?v=2
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: switch.light_entry_main
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-light-prikhozhaia-main.svg?v=2
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: switch.light_entry_perimeter
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-light-prikhozhaia-perim.svg?v=2
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: switch.light_wc
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-light-tualet.svg?v=2
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: switch.light_storage
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-light-kladovka.svg?v=2
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: switch.light_kitchen_perimeter
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-light-kukhnia-perim.svg?v=3
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                # Движение (датчики Xiaomi): пульсирующая голубая рамка комнаты; на кухне ещё кольцо у стола.
+                - type: image
+                  entity: binary_sensor.kukhnia_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-motion-kukhnia.svg?v=1
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: binary_sensor.kukhnia_stol_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-motion-kukhnia-stol.svg?v=1
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: binary_sensor.vannaia_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-motion-vannaia.svg?v=1
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: binary_sensor.koridor_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-motion-koridor.svg?v=1
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: binary_sensor.tualet_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-motion-tualet.svg?v=1
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: binary_sensor.prikhozhaia_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-motion-prikhozhaia.svg?v=1
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                # Камера C700: поле зрения (статично) — на входную дверь.
+                - type: image
+                  image: /local/fp-camera-fov.svg?v=1
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                # Входная дверь открыта — красная створка (время — подписью у двери, ниже).
+                - type: image
+                  entity: binary_sensor.e4aaec6dff8c_contact
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-door-open.svg?v=1
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                # Пылесос: комната, которую убирает сейчас (sensor.fp_vacuum_room — templates.yaml), зелёная.
+                - type: image
+                  entity: sensor.fp_vacuum_room
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    kukhnia: /local/fp-vac-kukhnia.svg?v=1
+                    koridor2: /local/fp-vac-koridor2.svg?v=1
+                    prokhod: /local/fp-vac-prokhod.svg?v=1
+                    spalnia: /local/fp-vac-spalnia.svg?v=1
+                    zal: /local/fp-vac-zal.svg?v=1
+                    koridor: /local/fp-vac-koridor.svg?v=1
+                    prikhozhaia: /local/fp-vac-prikhozhaia.svg?v=1
+                    detskaia: /local/fp-vac-detskaia.svg?v=1
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                # Второй пылесос (Roborock S5): его комната — фиолетовая (sensor.fp_vacuum2_room — templates.yaml).
+                - type: image
+                  entity: sensor.fp_vacuum2_room
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    kukhnia: /local/fp-vac2-kukhnia.svg?v=1
+                    koridor2: /local/fp-vac2-koridor2.svg?v=1
+                    prokhod: /local/fp-vac2-prokhod.svg?v=1
+                    spalnia: /local/fp-vac2-spalnia.svg?v=1
+                    zal: /local/fp-vac2-zal.svg?v=1
+                    koridor: /local/fp-vac2-koridor.svg?v=1
+                    prikhozhaia: /local/fp-vac2-prikhozhaia.svg?v=1
+                    detskaia: /local/fp-vac2-detskaia.svg?v=1
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                # Яндекс Станции играют: розовые волны вокруг колонки (значки и подписи — ниже).
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_u0086h0002ec9r, state: playing}]
+                  elements:
+                    - {type: image, image: "/local/fp-play-u0086h0002ec9r.svg?v=1", tap_action: {action: none}, hold_action: {action: none},
+                       style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_tv_t60jcw202w4z1k, state: playing}]
+                  elements:
+                    - {type: image, image: "/local/fp-play-t60jcw202w4z1k.svg?v=1", tap_action: {action: none}, hold_action: {action: none},
+                       style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_x11bmg2000x29z, state: playing}]
+                  elements:
+                    - {type: image, image: "/local/fp-play-x11bmg2000x29z.svg?v=1", tap_action: {action: none}, hold_action: {action: none},
+                       style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_m104q81001k74k, state: playing}]
+                  elements:
+                    - {type: image, image: "/local/fp-play-m104q81001k74k.svg?v=1", tap_action: {action: none}, hold_action: {action: none},
+                       style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_lp00000000000047571100008ab064b1, state: playing}]
+                  elements:
+                    - {type: image, image: "/local/fp-play-lp00000000000047571100008ab064b1.svg?v=1", tap_action: {action: none}, hold_action: {action: none},
+                       style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_r10cv31007wqfn, state: playing}]
+                  elements:
+                    - {type: image, image: "/local/fp-play-r10cv31007wqfn.svg?v=1", tap_action: {action: none}, hold_action: {action: none},
+                       style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}}
+                - type: image
+                  entity: light.zal_yeelight_hall
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-light-zal.svg?v=1
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: light.spalnia_yeelight_bed
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-light-spalnia.svg?v=1
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                # Нажатие на комнату — свет; долгое — уборка комнаты пылесосом с переключателя «Кто убирает» (script.fp_vacuum_clean).
+                - type: image
+                  entity: switch.light_kitchen_main
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-light-kukhnia-main.svg?v=4
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: switch.light_bath
+                  image: /local/fp-empty.svg?v=2
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 55.8%, top: 14.9%, width: 11.6%, height: 22.3%}
+                - type: image
+                  entity: switch.light_corridor
+                  image: /local/fp-empty.svg?v=2
+                  tap_action: {action: toggle}
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: koridor2}
+                    confirmation: {text: "Пылесос: убрать малый коридор?"}
+                  style: {left: 55.8%, top: 32%, width: 11.6%, height: 11.9%}
+                - type: image
+                  entity: switch.light_hall_main
+                  image: /local/fp-empty.svg?v=2
+                  tap_action: {action: toggle}
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: koridor}
+                    confirmation: {text: "Пылесос: убрать коридор?"}
+                  style: {left: 55.8%, top: 51.3%, width: 11.6%, height: 26.6%}
+                # Верх Г прихожей: левая часть (к кухне, кладовке, WC) = сегмент 3 «Коридор1», правая = 7 «Прихожая».
+                - type: image
+                  entity: switch.light_entry_main
+                  image: /local/fp-empty.svg?v=2
+                  tap_action: {action: toggle}
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prokhod}
+                    confirmation: {text: "Пылесос: убрать проход к кухне?"}
+                  style: {left: 46%, top: 71.5%, width: 14.5%, height: 13.9%}
+                - type: image
+                  entity: switch.light_entry_main
+                  image: /local/fp-empty.svg?v=2
+                  tap_action: {action: toggle}
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prikhozhaia}
+                    confirmation: {text: "Пылесос: убрать прихожую?"}
+                  style: {left: 57.2%, top: 71.5%, width: 8.1%, height: 13.9%}
+                - type: image
+                  entity: switch.light_entry_main
+                  image: /local/fp-empty.svg?v=2
+                  tap_action: {action: toggle}
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prikhozhaia}
+                    confirmation: {text: "Пылесос: убрать прихожую?"}
+                  style: {left: 57.2%, top: 84.8%, width: 8.1%, height: 12.7%}
+                - type: image
+                  entity: switch.light_wc
+                  image: /local/fp-empty.svg?v=2
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 50.4%, top: 84.8%, width: 5.7%, height: 12.7%}
+                - type: image
+                  entity: switch.light_storage
+                  image: /local/fp-empty.svg?v=2
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 43.1%, top: 84.8%, width: 8.9%, height: 12.7%}
+                - type: image
+                  entity: switch.light_kitchen_perimeter
+                  image: /local/fp-empty.svg?v=2
+                  tap_action: {action: toggle}
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: kukhnia}
+                    confirmation: {text: "Пылесос: убрать кухню?"}
+                  style: {left: 27.9%, top: 77.8%, width: 21.8%, height: 26.6%}
+                - type: image
+                  entity: switch.light_kitchen_main
+                  image: /local/fp-empty.svg?v=2
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 33%, top: 83.5%, width: 8.1%, height: 12.7%}
+                - type: image
+                  entity: light.zal_yeelight_hall
+                  image: /local/fp-empty.svg?v=2
+                  tap_action: {action: toggle}
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: zal}
+                    confirmation: {text: "Пылесос: убрать зал?"}
+                  style: {left: 35.9%, top: 51.3%, width: 28.2%, height: 26.6%}
+                - type: image
+                  entity: light.spalnia_yeelight_bed
+                  image: /local/fp-empty.svg?v=2
+                  tap_action: {action: toggle}
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: spalnia}
+                    confirmation: {text: "Пылесос: убрать спальню?"}
+                  style: {left: 72.4%, top: 24.9%, width: 21.4%, height: 26.1%}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: detskaia}
+                    confirmation: {text: "Пылесос: убрать детскую?"}
+                  style: {left: 39.9%, top: 24.9%, width: 20.2%, height: 26.1%}
+                # Значки: лампы, люстра и подсветка по периметру.
+                - type: state-icon
+                  entity: switch.light_bath
+                  icon: mdi:ceiling-light
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 55.8%, top: 9%, --mdc-icon-size: 36px}
+                - type: state-icon
+                  entity: switch.light_corridor
+                  icon: mdi:ceiling-light
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 55.8%, top: 30.1%, --mdc-icon-size: 36px}
+                - type: state-icon
+                  entity: switch.light_hall_main
+                  icon: mdi:chandelier
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 55.8%, top: 44.3%, --mdc-icon-size: 36px}
+                - type: state-icon
+                  entity: switch.light_hall_perimeter
+                  icon: mdi:led-strip-variant
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 55.8%, top: 59.5%, --mdc-icon-size: 36px}
+                - type: state-icon
+                  entity: switch.light_entry_perimeter
+                  icon: mdi:led-strip-variant
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 47.6%, top: 70.1%, --mdc-icon-size: 36px}
+                - type: state-icon
+                  entity: switch.light_wc
+                  icon: mdi:toilet
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 50.4%, top: 83.3%, --mdc-icon-size: 28px}
+                - type: state-icon
+                  entity: switch.light_entry_main
+                  icon: mdi:chandelier
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 57.2%, top: 70.9%, --mdc-icon-size: 36px}
+                - type: state-icon
+                  entity: switch.light_storage
+                  icon: mdi:ceiling-light
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 43%, top: 83.3%, --mdc-icon-size: 28px}
+                - type: state-icon
+                  entity: switch.light_kitchen_main
+                  icon: mdi:chandelier
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 33%, top: 83.5%, --mdc-icon-size: 36px}
+                - type: state-icon
+                  entity: switch.light_kitchen_perimeter
+                  icon: mdi:led-strip-variant
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 22.6%, top: 84.8%, --mdc-icon-size: 36px}
+                - type: state-icon
+                  entity: camera.c700
+                  icon: mdi:cctv
+                  tap_action: {action: more-info}
+                  style: {left: 55.8%, top: 36.5%, --mdc-icon-size: 28px, color: "#4fc3f7"}
+                - type: state-icon
+                  entity: light.zal_yeelight_hall
+                  icon: mdi:ceiling-light
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 35.9%, top: 44.3%, --mdc-icon-size: 36px}
+                - type: state-icon
+                  entity: light.spalnia_yeelight_bed
+                  icon: mdi:ceiling-light
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 72.3%, top: 19%, --mdc-icon-size: 36px}
+                # Пылесос Roborock Qrevo: база на кухне; цвет значка = состояние, нажатие — управление.
+                - type: state-icon
+                  entity: vacuum.koridor_roborock_qrevo
+                  icon: mdi:robot-vacuum
+                  tap_action: {action: more-info}
+                  style: {left: 37.1%, top: 76.7%, --mdc-icon-size: 30px}
+                # Второй пылесос Roborock S5: база рядом с Qrevo (по карте Map Extractor — у правой стены кухни).
+                - type: state-icon
+                  entity: vacuum.roborock_s5_8159_robot_cleaner
+                  icon: mdi:robot-vacuum-variant
+                  tap_action: {action: more-info}
+                  style: {left: 37.1%, top: 82.8%, --mdc-icon-size: 26px}
+                # Яндекс Станции: нажатие — пауза/продолжить, долгое — громкость и что играет. Когда играет — розовая нота,
+                # под ней название трека (у ТВ Станции его нет), вокруг — волны (fp-play-*.svg, выше в оверлеях).
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_u0086h0002ec9r, state_not: playing}]
+                  elements:
+                    - {type: state-icon, entity: media_player.yandex_station_u0086h0002ec9r, icon: mdi:speaker, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_u0086h0002ec9r}},
+                       hold_action: {action: more-info}, style: {left: 24.2%, top: 60.8%, --mdc-icon-size: 24px}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_u0086h0002ec9r, state: playing}]
+                  elements:
+                    - {type: state-icon, entity: media_player.yandex_station_u0086h0002ec9r, icon: mdi:music, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_u0086h0002ec9r}},
+                       hold_action: {action: more-info}, style: {left: 24.2%, top: 60.8%, --mdc-icon-size: 24px, color: "#f06292"}}
+                    - {type: state-label, entity: media_player.yandex_station_u0086h0002ec9r, attribute: media_title, prefix: "♪ ", tap_action: {action: more-info},
+                       style: {left: 24.2%, top: 64.4%, color: "#f06292", font-size: 10px, max-width: 90px, overflow: hidden,
+                               white-space: nowrap, text-overflow: ellipsis}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_tv_t60jcw202w4z1k, state_not: playing}]
+                  elements:
+                    - {type: state-icon, entity: media_player.yandex_tv_t60jcw202w4z1k, icon: mdi:speaker, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_tv_t60jcw202w4z1k}},
+                       hold_action: {action: more-info}, style: {left: 27.1%, top: 69.1%, --mdc-icon-size: 24px}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_tv_t60jcw202w4z1k, state: playing}]
+                  elements:
+                    - {type: state-icon, entity: media_player.yandex_tv_t60jcw202w4z1k, icon: mdi:music, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_tv_t60jcw202w4z1k}},
+                       hold_action: {action: more-info}, style: {left: 27.1%, top: 69.1%, --mdc-icon-size: 24px, color: "#f06292"}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_x11bmg2000x29z, state_not: playing}]
+                  elements:
+                    - {type: state-icon, entity: media_player.yandex_station_x11bmg2000x29z, icon: mdi:speaker, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_x11bmg2000x29z}},
+                       hold_action: {action: more-info}, style: {left: 81%, top: 34.7%, --mdc-icon-size: 24px}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_x11bmg2000x29z, state: playing}]
+                  elements:
+                    - {type: state-icon, entity: media_player.yandex_station_x11bmg2000x29z, icon: mdi:music, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_x11bmg2000x29z}},
+                       hold_action: {action: more-info}, style: {left: 81%, top: 34.7%, --mdc-icon-size: 24px, color: "#f06292"}}
+                    - {type: state-label, entity: media_player.yandex_station_x11bmg2000x29z, attribute: media_title, prefix: "♪ ", tap_action: {action: more-info},
+                       style: {left: 81%, top: 38.3%, color: "#f06292", font-size: 10px, max-width: 90px, overflow: hidden,
+                               white-space: nowrap, text-overflow: ellipsis}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_m104q81001k74k, state_not: playing}]
+                  elements:
+                    - {type: state-icon, entity: media_player.yandex_station_m104q81001k74k, icon: mdi:speaker, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_m104q81001k74k}},
+                       hold_action: {action: more-info}, style: {left: 47.9%, top: 16%, --mdc-icon-size: 24px}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_m104q81001k74k, state: playing}]
+                  elements:
+                    - {type: state-icon, entity: media_player.yandex_station_m104q81001k74k, icon: mdi:music, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_m104q81001k74k}},
+                       hold_action: {action: more-info}, style: {left: 47.9%, top: 16%, --mdc-icon-size: 24px, color: "#f06292"}}
+                    - {type: state-label, entity: media_player.yandex_station_m104q81001k74k, attribute: media_title, prefix: "♪ ", tap_action: {action: more-info},
+                       style: {left: 41.5%, top: 16%, color: "#f06292", font-size: 10px, max-width: 90px, overflow: hidden,
+                               white-space: nowrap, text-overflow: ellipsis}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_lp00000000000047571100008ab064b1, state_not: playing}]
+                  elements:
+                    - {type: state-icon, entity: media_player.yandex_station_lp00000000000047571100008ab064b1, icon: mdi:speaker, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_lp00000000000047571100008ab064b1}},
+                       hold_action: {action: more-info}, style: {left: 52.4%, top: 70.9%, --mdc-icon-size: 24px}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_lp00000000000047571100008ab064b1, state: playing}]
+                  elements:
+                    - {type: state-icon, entity: media_player.yandex_station_lp00000000000047571100008ab064b1, icon: mdi:music, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_lp00000000000047571100008ab064b1}},
+                       hold_action: {action: more-info}, style: {left: 52.4%, top: 70.9%, --mdc-icon-size: 24px, color: "#f06292"}}
+                    - {type: state-label, entity: media_player.yandex_station_lp00000000000047571100008ab064b1, attribute: media_title, prefix: "♪ ", tap_action: {action: more-info},
+                       style: {left: 52.4%, top: 74.5%, color: "#f06292", font-size: 10px, max-width: 90px, overflow: hidden,
+                               white-space: nowrap, text-overflow: ellipsis}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_r10cv31007wqfn, state_not: playing}]
+                  elements:
+                    - {type: state-icon, entity: media_player.yandex_station_r10cv31007wqfn, icon: mdi:speaker, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_r10cv31007wqfn}},
+                       hold_action: {action: more-info}, style: {left: 51.9%, top: 22%, --mdc-icon-size: 22px}}
+                - type: conditional
+                  conditions: [{entity: media_player.yandex_station_r10cv31007wqfn, state: playing}]
+                  elements:
+                    - {type: state-icon, entity: media_player.yandex_station_r10cv31007wqfn, icon: mdi:music, tap_action: {action: perform-action, perform_action: media_player.media_play_pause, target: {entity_id: media_player.yandex_station_r10cv31007wqfn}},
+                       hold_action: {action: more-info}, style: {left: 51.9%, top: 22%, --mdc-icon-size: 22px, color: "#f06292"}}
+                    - {type: state-label, entity: media_player.yandex_station_r10cv31007wqfn, attribute: media_title, prefix: "♪ ", tap_action: {action: more-info},
+                       style: {left: 51.9%, top: 25.6%, color: "#f06292", font-size: 10px, max-width: 90px, overflow: hidden,
+                               white-space: nowrap, text-overflow: ellipsis}}
+                # ⚠ в комнате, где у устройства батарея < 20% или нет связи (binary_sensor.fp_problem_* — templates.yaml);
+                # нажатие — список устройств (атрибут devices).
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_gostinaia, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_gostinaia, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 24.2%, top: 41.3%, --mdc-icon-size: 22px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_kukhnia, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_kukhnia, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 36.3%, top: 67.6%, --mdc-icon-size: 22px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_spalnia, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_spalnia, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 81.5%, top: 14.4%, --mdc-icon-size: 22px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_detskaia, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_detskaia, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 31.9%, top: 34.9%, --mdc-icon-size: 22px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_prikhozhaia, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_prikhozhaia, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 60%, top: 67.6%, --mdc-icon-size: 22px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_koridor, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_koridor, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 60.3%, top: 60.8%, --mdc-icon-size: 22px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_vannaia, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_vannaia, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 60%, top: 14.4%, --mdc-icon-size: 20px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_tualet, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_tualet, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 52.1%, top: 80.3%, --mdc-icon-size: 18px, color: "#ff9800"}}
+                - type: conditional
+                  conditions: [{entity: binary_sensor.fp_problem_kladovka, state: "on"}]
+                  elements:
+                    - {type: state-icon, entity: binary_sensor.fp_problem_kladovka, icon: "mdi:alert", tap_action: {action: more-info},
+                       style: {left: 46.5%, top: 80.3%, --mdc-icon-size: 18px, color: "#ff9800"}}
+                # Входная дверь: сколько минут открыта (sensor.fp_door_open_min), подпись снаружи у двери.
+                - type: conditional
+                  conditions: [{entity: binary_sensor.e4aaec6dff8c_contact, state: "on"}]
+                  elements:
+                    - {type: state-label, entity: sensor.fp_door_open_min, prefix: "🚪 открыта ", tap_action: {action: more-info},
+                       style: {left: 66.1%, top: 95.4%, color: "#ff5252", font-size: 12px, font-weight: 600}}
+                # Сколько минут назад было движение (sensor.fp_motion_ago_*), только если меньше двух часов.
+                - type: conditional
+                  conditions: [{condition: numeric_state, entity: sensor.fp_motion_ago_kukhnia, below: 120}]
+                  elements:
+                    - {type: state-label, entity: sensor.fp_motion_ago_kukhnia, prefix: "🚶 ", tap_action: {action: more-info},
+                       style: {left: 28.2%, top: 88.6%, color: var(--secondary-text-color), font-size: 11px}}
+                - type: conditional
+                  conditions: [{condition: numeric_state, entity: sensor.fp_motion_ago_koridor, below: 120}]
+                  elements:
+                    - {type: state-label, entity: sensor.fp_motion_ago_koridor, prefix: "🚶 ", tap_action: {action: more-info},
+                       style: {left: 55.8%, top: 62.8%, color: var(--secondary-text-color), font-size: 11px}}
+                - type: conditional
+                  conditions: [{condition: numeric_state, entity: sensor.fp_motion_ago_prikhozhaia, below: 120}]
+                  elements:
+                    - {type: state-label, entity: sensor.fp_motion_ago_prikhozhaia, prefix: "🚶 ", tap_action: {action: more-info},
+                       style: {left: 57.3%, top: 88.6%, color: var(--secondary-text-color), font-size: 11px}}
+                # Климат: температура и влажность под названием комнаты, нажатие — график.
+                - type: state-label
+                  entity: sensor.zal_temperature
+                  prefix: "🌡 "
+                  tap_action: {action: more-info}
+                  style: {left: 33.3%, top: 56.5%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}
+                - type: state-label
+                  entity: sensor.zal_humidity
+                  prefix: "💧 "
+                  tap_action: {action: more-info}
+                  style: {left: 39.7%, top: 56.5%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}
+                - type: state-label
+                  entity: sensor.koridor_temperature
+                  prefix: "🌡 "
+                  tap_action: {action: more-info}
+                  style: {left: 53.5%, top: 54.7%, color: var(--primary-text-color), font-size: 12px, opacity: 0.85}
+                - type: state-label
+                  entity: sensor.koridor_humidity
+                  prefix: "💧 "
+                  tap_action: {action: more-info}
+                  style: {left: 58.1%, top: 54.7%, color: var(--primary-text-color), font-size: 12px, opacity: 0.85}
+                - type: state-label
+                  entity: sensor.detskaia_temperature
+                  prefix: "🌡 "
+                  tap_action: {action: more-info}
+                  style: {left: 37.4%, top: 29.1%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}
+                - type: state-label
+                  entity: sensor.detskaia_humidity
+                  prefix: "💧 "
+                  tap_action: {action: more-info}
+                  style: {left: 42.3%, top: 29.1%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}
+                - type: state-label
+                  entity: sensor.kukhnia_temperature
+                  prefix: "🌡 "
+                  tap_action: {action: more-info}
+                  style: {left: 22.9%, top: 79.2%, color: var(--primary-text-color), font-size: 14px, opacity: 0.85}
+                - type: state-label
+                  entity: sensor.kukhnia_humidity
+                  prefix: "💧 "
+                  tap_action: {action: more-info}
+                  style: {left: 27.4%, top: 79.2%, color: var(--primary-text-color), font-size: 14px, opacity: 0.85}
+                - type: state-label
+                  entity: sensor.vannaia_temperature
+                  prefix: "🌡 "
+                  tap_action: {action: more-info}
+                  style: {left: 53.7%, top: 18.2%, color: var(--primary-text-color), font-size: 12px, opacity: 0.85}
+                # Ванная: влажность выше 70% (после душа) — красным и жирным.
+                - type: conditional
+                  conditions: [{condition: numeric_state, entity: sensor.vannaia_humidity, below: 70.01}]
+                  elements:
+                    - {type: state-label, entity: sensor.vannaia_humidity, prefix: "💧 ", tap_action: {action: more-info},
+                       style: {left: 58.1%, top: 18.2%, color: var(--primary-text-color), font-size: 12px, opacity: 0.85}}
+                - type: conditional
+                  conditions: [{condition: numeric_state, entity: sensor.vannaia_humidity, above: 70}]
+                  elements:
+                    - {type: state-label, entity: sensor.vannaia_humidity, prefix: "💧 ", tap_action: {action: more-info},
+                       style: {left: 58.1%, top: 18.2%, color: "#ff7043", font-size: 12px, font-weight: 700}}
+                - type: state-label
+                  entity: sensor.spalnia_temperature
+                  prefix: "🌡 "
+                  tap_action: {action: more-info}
+                  style: {left: 69.9%, top: 29.1%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}
+                - type: state-label
+                  entity: sensor.spalnia_humidity
+                  prefix: "💧 "
+                  tap_action: {action: more-info}
+                  style: {left: 74.7%, top: 29.1%, color: var(--primary-text-color), font-size: 15px, opacity: 0.85}
+                # --- Боковые панели: слева уборка комнат, справа камера, свет, пылесос (подписи и плашки — в SVG).
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: zal}
+                    confirmation: {text: "Пылесос: убрать — Зал?"}
+                  style: {left: 7.3%, top: 12.4%, width: 11.94%, height: 7.09%}
+                - type: icon
+                  icon: mdi:sofa
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: zal}
+                    confirmation: {text: "Пылесос: убрать — Зал?"}
+                  style: {left: 3.1%, top: 12.4%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: kukhnia}
+                    confirmation: {text: "Пылесос: убрать — Кухня?"}
+                  style: {left: 7.3%, top: 20.8%, width: 11.94%, height: 7.09%}
+                - type: icon
+                  icon: mdi:stove
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: kukhnia}
+                    confirmation: {text: "Пылесос: убрать — Кухня?"}
+                  style: {left: 3.1%, top: 20.8%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: spalnia}
+                    confirmation: {text: "Пылесос: убрать — Спальня?"}
+                  style: {left: 7.3%, top: 29.1%, width: 11.94%, height: 7.09%}
+                - type: icon
+                  icon: mdi:bed-king
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: spalnia}
+                    confirmation: {text: "Пылесос: убрать — Спальня?"}
+                  style: {left: 3.1%, top: 29.1%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: detskaia}
+                    confirmation: {text: "Пылесос: убрать — Детская?"}
+                  style: {left: 7.3%, top: 37.5%, width: 11.94%, height: 7.09%}
+                - type: icon
+                  icon: mdi:teddy-bear
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: detskaia}
+                    confirmation: {text: "Пылесос: убрать — Детская?"}
+                  style: {left: 3.1%, top: 37.5%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prikhozhaia}
+                    confirmation: {text: "Пылесос: убрать — Прихожая?"}
+                  style: {left: 7.3%, top: 45.8%, width: 11.94%, height: 7.09%}
+                - type: icon
+                  icon: mdi:door
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prikhozhaia}
+                    confirmation: {text: "Пылесос: убрать — Прихожая?"}
+                  style: {left: 3.1%, top: 45.8%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: koridor}
+                    confirmation: {text: "Пылесос: убрать — Коридор?"}
+                  style: {left: 7.3%, top: 54.2%, width: 11.94%, height: 7.09%}
+                - type: icon
+                  icon: mdi:walk
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: koridor}
+                    confirmation: {text: "Пылесос: убрать — Коридор?"}
+                  style: {left: 3.1%, top: 54.2%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: koridor2}
+                    confirmation: {text: "Пылесос: убрать — Малый коридор?"}
+                  style: {left: 7.3%, top: 62.5%, width: 11.94%, height: 7.09%}
+                - type: icon
+                  icon: mdi:walk
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: koridor2}
+                    confirmation: {text: "Пылесос: убрать — Малый коридор?"}
+                  style: {left: 3.1%, top: 62.5%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prokhod}
+                    confirmation: {text: "Пылесос: убрать — Проход к кухне?"}
+                  style: {left: 7.3%, top: 70.9%, width: 11.94%, height: 7.09%}
+                - type: icon
+                  icon: mdi:walk
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data: {rooms: prokhod}
+                    confirmation: {text: "Пылесос: убрать — Проход к кухне?"}
+                  style: {left: 3.1%, top: 70.9%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                # Кто убирает по долгому нажатию на комнату и кнопкам «Уборка» (input_select.fp_vacuum): Мокрый → Сухой → Вместе.
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_select.select_next
+                    target: {entity_id: input_select.fp_vacuum}
+                  style: {left: 7.3%, top: 85.3%, width: 11.94%, height: 7.09%}
+                - type: icon
+                  icon: mdi:robot-vacuum
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_select.select_next
+                    target: {entity_id: input_select.fp_vacuum}
+                  style: {left: 3.1%, top: 85.3%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                - type: state-label
+                  entity: input_select.fp_vacuum
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_select.select_next
+                    target: {entity_id: input_select.fp_vacuum}
+                  style: {left: 8.5%, top: 85.3%, color: var(--primary-text-color), font-size: 12px, font-weight: 500}
+                # Всё вместе: вся квартира, сначала S5 (сухая), потом Qrevo (мойка) — script.fp_vacuum_together.
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.turn_on
+                    target: {entity_id: script.fp_vacuum_together}
+                    confirmation: {text: "Вся квартира: сначала сухой пылесосит, потом мокрый моет?"}
+                  style: {left: 7.3%, top: 93.9%, width: 11.94%, height: 7.09%}
+                - type: icon
+                  icon: mdi:broom
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.turn_on
+                    target: {entity_id: script.fp_vacuum_together}
+                    confirmation: {text: "Вся квартира: сначала сухой пылесосит, потом мокрый моет?"}
+                  style: {left: 3.1%, top: 93.9%, --mdc-icon-size: 20px, color: var(--primary-color)}
+                # Погода: анимированный значок (Basmilius weather-icons, MIT) по состоянию + температура; нажатие — прогноз.
+                - type: image
+                  entity: weather.pavshino
+                  image: /local/weather/not-available.svg
+                  state_image:
+                    "clear-night": /local/weather/clear-night.svg
+                    "cloudy": /local/weather/cloudy.svg
+                    "exceptional": /local/weather/not-available.svg
+                    "fog": /local/weather/fog.svg
+                    "hail": /local/weather/hail.svg
+                    "lightning": /local/weather/thunderstorms.svg
+                    "lightning-rainy": /local/weather/thunderstorms-rain.svg
+                    "partlycloudy": /local/weather/partly-cloudy-day.svg
+                    "pouring": /local/weather/rain.svg
+                    "rainy": /local/weather/rain.svg
+                    "snowy": /local/weather/snow.svg
+                    "snowy-rainy": /local/weather/sleet.svg
+                    "sunny": /local/weather/clear-day.svg
+                    "windy": /local/weather/wind.svg
+                    "windy-variant": /local/weather/wind.svg
+                  tap_action: {action: more-info}
+                  style: {left: 89.7%, top: 13.2%, width: 5.5%}
+                - type: state-label
+                  entity: weather.pavshino
+                  attribute: temperature
+                  suffix: " °C"
+                  tap_action: {action: more-info}
+                  style: {left: 95.5%, top: 13.2%, color: var(--primary-text-color), font-size: 18px, font-weight: 500}
+                # Камера: снимок; при движении (binary_sensor.c700_motion) — красная рамка.
+                - type: image
+                  entity: camera.c700
+                  camera_image: camera.c700
+                  camera_view: auto
+                  tap_action: {action: more-info}
+                  style: {left: 92.7%, top: 31.6%, width: 11.94%, border-radius: 6px, overflow: hidden}
+                - type: conditional
+                  conditions:
+                    - entity: binary_sensor.c700_motion
+                      state: "on"
+                  elements:
+                    - type: image
+                      image: /local/fp-camera-motion.svg?v=1
+                      tap_action: {action: none}
+                      style: {left: 92.7%, top: 31.6%, width: 12.9%, pointer-events: none}
+                # Свет: сколько горит (sensor.lights_on — помощник-шаблон) и кнопки «Вкл»/«Выкл» для всего света.
+                - type: state-label
+                  entity: sensor.lights_on
+                  prefix: "💡 Горит: "
+                  tap_action: {action: none}
+                  style: {left: 90.6%, top: 44.8%, color: var(--primary-text-color), font-size: 12px}
+                # Сколько Яндекс Станций играет (sensor.fp_media_playing — templates.yaml); нажатие — какие и что играет.
+                - type: state-label
+                  entity: sensor.fp_media_playing
+                  prefix: "🎵 "
+                  tap_action: {action: more-info}
+                  style: {left: 97.3%, top: 44.8%, color: var(--primary-text-color), font-size: 12px}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: homeassistant.turn_on
+                    target:
+                      entity_id:
+                        - switch.light_bath
+                        - switch.light_corridor
+                        - switch.light_hall_main
+                        - switch.light_hall_perimeter
+                        - switch.light_entry_main
+                        - switch.light_entry_perimeter
+                        - switch.light_wc
+                        - switch.light_storage
+                        - switch.light_kitchen_main
+                        - switch.light_kitchen_perimeter
+                        - light.zal_yeelight_hall
+                        - light.spalnia_yeelight_bed
+                    confirmation: {text: "Включить весь свет?"}
+                  style: {left: 89.68%, top: 49.4%, width: 5.81%, height: 7.09%}
+                - type: icon
+                  icon: mdi:lightbulb-group
+                  tap_action:
+                    action: perform-action
+                    perform_action: homeassistant.turn_on
+                    target:
+                      entity_id:
+                        - switch.light_bath
+                        - switch.light_corridor
+                        - switch.light_hall_main
+                        - switch.light_hall_perimeter
+                        - switch.light_entry_main
+                        - switch.light_entry_perimeter
+                        - switch.light_wc
+                        - switch.light_storage
+                        - switch.light_kitchen_main
+                        - switch.light_kitchen_perimeter
+                        - light.zal_yeelight_hall
+                        - light.spalnia_yeelight_bed
+                    confirmation: {text: "Включить весь свет?"}
+                  style: {left: 88.2%, top: 49.4%, --mdc-icon-size: 18px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: homeassistant.turn_off
+                    target:
+                      entity_id:
+                        - switch.light_bath
+                        - switch.light_corridor
+                        - switch.light_hall_main
+                        - switch.light_hall_perimeter
+                        - switch.light_entry_main
+                        - switch.light_entry_perimeter
+                        - switch.light_wc
+                        - switch.light_storage
+                        - switch.light_kitchen_main
+                        - switch.light_kitchen_perimeter
+                        - light.zal_yeelight_hall
+                        - light.spalnia_yeelight_bed
+                    confirmation: {text: "Выключить весь свет?"}
+                  style: {left: 95.81%, top: 49.4%, width: 5.81%, height: 7.09%}
+                - type: icon
+                  icon: mdi:lightbulb-group-off
+                  tap_action:
+                    action: perform-action
+                    perform_action: homeassistant.turn_off
+                    target:
+                      entity_id:
+                        - switch.light_bath
+                        - switch.light_corridor
+                        - switch.light_hall_main
+                        - switch.light_hall_perimeter
+                        - switch.light_entry_main
+                        - switch.light_entry_perimeter
+                        - switch.light_wc
+                        - switch.light_storage
+                        - switch.light_kitchen_main
+                        - switch.light_kitchen_perimeter
+                        - light.zal_yeelight_hall
+                        - light.spalnia_yeelight_bed
+                    confirmation: {text: "Выключить весь свет?"}
+                  style: {left: 94.35%, top: 49.4%, --mdc-icon-size: 18px, color: var(--primary-color)}
+                # Пылесосы: статус, заряд и маленькие плашки Старт / Пауза / На базу (плашки и подписи — в SVG).
+                - type: state-label
+                  entity: sensor.koridor_roborock_qrevo_status
+                  tap_action: {action: more-info}
+                  style: {left: 92.7%, top: 60.5%, color: var(--primary-text-color), font-size: 12px}
+                - type: state-label
+                  entity: sensor.koridor_roborock_qrevo_battery
+                  prefix: "🔋 "
+                  tap_action: {action: more-info}
+                  style: {left: 92.7%, top: 63.8%, color: var(--secondary-text-color), font-size: 11px}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.start
+                    target: {entity_id: vacuum.koridor_roborock_qrevo}
+                  style: {left: 88.4%, top: 69.1%, width: 3.87%, height: 6.08%}
+                - type: icon
+                  icon: mdi:play
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.start
+                    target: {entity_id: vacuum.koridor_roborock_qrevo}
+                  style: {left: 88.4%, top: 69.1%, --mdc-icon-size: 18px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.pause
+                    target: {entity_id: vacuum.koridor_roborock_qrevo}
+                  style: {left: 92.7%, top: 69.1%, width: 3.87%, height: 6.08%}
+                - type: icon
+                  icon: mdi:pause
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.pause
+                    target: {entity_id: vacuum.koridor_roborock_qrevo}
+                  style: {left: 92.7%, top: 69.1%, --mdc-icon-size: 18px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.return_to_base
+                    target: {entity_id: vacuum.koridor_roborock_qrevo}
+                  style: {left: 97.1%, top: 69.1%, width: 3.87%, height: 6.08%}
+                - type: icon
+                  icon: mdi:home-import-outline
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.return_to_base
+                    target: {entity_id: vacuum.koridor_roborock_qrevo}
+                  style: {left: 97.1%, top: 69.1%, --mdc-icon-size: 18px, color: var(--primary-color)}
+                - type: state-label
+                  entity: sensor.roborock_s5_8159_status
+                  tap_action: {action: more-info}
+                  style: {left: 92.7%, top: 80.3%, color: var(--primary-text-color), font-size: 12px}
+                - type: state-label
+                  entity: sensor.roborock_s5_8159_battery_level
+                  prefix: "🔋 "
+                  tap_action: {action: more-info}
+                  style: {left: 92.7%, top: 83.5%, color: var(--secondary-text-color), font-size: 11px}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.start
+                    target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+                  style: {left: 88.4%, top: 88.9%, width: 3.87%, height: 6.08%}
+                - type: icon
+                  icon: mdi:play
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.start
+                    target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+                  style: {left: 88.4%, top: 88.9%, --mdc-icon-size: 18px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.pause
+                    target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+                  style: {left: 92.7%, top: 88.9%, width: 3.87%, height: 6.08%}
+                - type: icon
+                  icon: mdi:pause
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.pause
+                    target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+                  style: {left: 92.7%, top: 88.9%, --mdc-icon-size: 18px, color: var(--primary-color)}
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.return_to_base
+                    target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+                  style: {left: 97.1%, top: 88.9%, width: 3.87%, height: 6.08%}
+                - type: icon
+                  icon: mdi:home-import-outline
+                  tap_action:
+                    action: perform-action
+                    perform_action: vacuum.return_to_base
+                    target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+                  style: {left: 97.1%, top: 88.9%, --mdc-icon-size: 18px, color: var(--primary-color)}
+          # Телефон: план на всю ширину, боковые панели — карточками ниже.
+          - type: conditional
+            conditions: [{condition: screen, media_query: "(max-width: 767px)"}]
+            card:
+              type: vertical-stack
+              cards:
+              - type: picture-elements
+                image: /local/floorplan-m-light.svg?v=10
+                dark_mode_image: /local/floorplan-m-dark.svg?v=10
+                card_mod:
+                  style: 'ha-card { container-type: inline-size; }
+
+                    '
+                elements:
+                - type: image
+                  entity: switch.light_bath
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-light-vannaia.svg?v=2
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: switch.light_corridor
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-light-koridor.svg?v=2
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: switch.light_hall_main
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-light-koridor-main.svg?v=2
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: switch.light_hall_perimeter
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-light-koridor-perim.svg?v=2
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: switch.light_entry_main
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-light-prikhozhaia-main.svg?v=2
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: switch.light_entry_perimeter
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-light-prikhozhaia-perim.svg?v=2
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: switch.light_wc
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-light-tualet.svg?v=2
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: switch.light_storage
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-light-kladovka.svg?v=2
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: switch.light_kitchen_perimeter
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-light-kukhnia-perim.svg?v=3
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: binary_sensor.kukhnia_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-motion-kukhnia.svg?v=1
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: binary_sensor.kukhnia_stol_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-motion-kukhnia-stol.svg?v=1
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: binary_sensor.vannaia_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-motion-vannaia.svg?v=1
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: binary_sensor.koridor_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-motion-koridor.svg?v=1
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: binary_sensor.tualet_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-motion-tualet.svg?v=1
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: binary_sensor.prikhozhaia_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-motion-prikhozhaia.svg?v=1
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  image: /local/fp-camera-fov.svg?v=1
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: binary_sensor.e4aaec6dff8c_contact
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-door-open.svg?v=1
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: sensor.fp_vacuum_room
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    kukhnia: /local/fp-vac-kukhnia.svg?v=1
+                    koridor2: /local/fp-vac-koridor2.svg?v=1
+                    prokhod: /local/fp-vac-prokhod.svg?v=1
+                    spalnia: /local/fp-vac-spalnia.svg?v=1
+                    zal: /local/fp-vac-zal.svg?v=1
+                    koridor: /local/fp-vac-koridor.svg?v=1
+                    prikhozhaia: /local/fp-vac-prikhozhaia.svg?v=1
+                    detskaia: /local/fp-vac-detskaia.svg?v=1
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: sensor.fp_vacuum2_room
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    kukhnia: /local/fp-vac2-kukhnia.svg?v=1
+                    koridor2: /local/fp-vac2-koridor2.svg?v=1
+                    prokhod: /local/fp-vac2-prokhod.svg?v=1
+                    spalnia: /local/fp-vac2-spalnia.svg?v=1
+                    zal: /local/fp-vac2-zal.svg?v=1
+                    koridor: /local/fp-vac2-koridor.svg?v=1
+                    prikhozhaia: /local/fp-vac2-prikhozhaia.svg?v=1
+                    detskaia: /local/fp-vac2-detskaia.svg?v=1
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_u0086h0002ec9r
+                    state: playing
+                  elements:
+                  - type: image
+                    image: /local/fp-play-u0086h0002ec9r.svg?v=1
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+                    style:
+                      left: 50%
+                      top: 50%
+                      width: 100%
+                      pointer-events: none
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_tv_t60jcw202w4z1k
+                    state: playing
+                  elements:
+                  - type: image
+                    image: /local/fp-play-t60jcw202w4z1k.svg?v=1
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+                    style:
+                      left: 50%
+                      top: 50%
+                      width: 100%
+                      pointer-events: none
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_x11bmg2000x29z
+                    state: playing
+                  elements:
+                  - type: image
+                    image: /local/fp-play-x11bmg2000x29z.svg?v=1
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+                    style:
+                      left: 50%
+                      top: 50%
+                      width: 100%
+                      pointer-events: none
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_m104q81001k74k
+                    state: playing
+                  elements:
+                  - type: image
+                    image: /local/fp-play-m104q81001k74k.svg?v=1
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+                    style:
+                      left: 50%
+                      top: 50%
+                      width: 100%
+                      pointer-events: none
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_lp00000000000047571100008ab064b1
+                    state: playing
+                  elements:
+                  - type: image
+                    image: /local/fp-play-lp00000000000047571100008ab064b1.svg?v=1
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+                    style:
+                      left: 50%
+                      top: 50%
+                      width: 100%
+                      pointer-events: none
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_r10cv31007wqfn
+                    state: playing
+                  elements:
+                  - type: image
+                    image: /local/fp-play-r10cv31007wqfn.svg?v=1
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+                    style:
+                      left: 50%
+                      top: 50%
+                      width: 100%
+                      pointer-events: none
+                - type: image
+                  entity: light.zal_yeelight_hall
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-light-zal.svg?v=1
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: light.spalnia_yeelight_bed
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-light-spalnia.svg?v=1
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: switch.light_kitchen_main
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-light-kukhnia-main.svg?v=4
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: switch.light_bath
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 58.2%
+                    top: 14.9%
+                    width: 16.3%
+                    height: 22.3%
+                - type: image
+                  entity: switch.light_corridor
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: koridor2
+                    confirmation:
+                      text: 'Пылесос: убрать малый коридор?'
+                  style:
+                    left: 58.2%
+                    top: 32%
+                    width: 16.3%
+                    height: 11.9%
+                - type: image
+                  entity: switch.light_hall_main
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: koridor
+                    confirmation:
+                      text: 'Пылесос: убрать коридор?'
+                  style:
+                    left: 58.2%
+                    top: 51.3%
+                    width: 16.3%
+                    height: 26.6%
+                - type: image
+                  entity: switch.light_entry_main
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: prokhod
+                    confirmation:
+                      text: 'Пылесос: убрать проход к кухне?'
+                  style:
+                    left: 44.4%
+                    top: 71.5%
+                    width: 20.4%
+                    height: 13.9%
+                - type: image
+                  entity: switch.light_entry_main
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: prikhozhaia
+                    confirmation:
+                      text: 'Пылесос: убрать прихожую?'
+                  style:
+                    left: 60.1%
+                    top: 71.5%
+                    width: 11.4%
+                    height: 13.9%
+                - type: image
+                  entity: switch.light_entry_main
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: prikhozhaia
+                    confirmation:
+                      text: 'Пылесос: убрать прихожую?'
+                  style:
+                    left: 60.1%
+                    top: 84.8%
+                    width: 11.4%
+                    height: 12.7%
+                - type: image
+                  entity: switch.light_wc
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 50.6%
+                    top: 84.8%
+                    width: 8%
+                    height: 12.7%
+                - type: image
+                  entity: switch.light_storage
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 40.3%
+                    top: 84.8%
+                    width: 12.5%
+                    height: 12.7%
+                - type: image
+                  entity: switch.light_kitchen_perimeter
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: kukhnia
+                    confirmation:
+                      text: 'Пылесос: убрать кухню?'
+                  style:
+                    left: 18.9%
+                    top: 77.8%
+                    width: 30.7%
+                    height: 26.6%
+                - type: image
+                  entity: switch.light_kitchen_main
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 26%
+                    top: 83.5%
+                    width: 11.4%
+                    height: 12.7%
+                - type: image
+                  entity: light.zal_yeelight_hall
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: zal
+                    confirmation:
+                      text: 'Пылесос: убрать зал?'
+                  style:
+                    left: 30.1%
+                    top: 51.3%
+                    width: 39.7%
+                    height: 26.6%
+                - type: image
+                  entity: light.spalnia_yeelight_bed
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: spalnia
+                    confirmation:
+                      text: 'Пылесос: убрать спальню?'
+                  style:
+                    left: 81.6%
+                    top: 24.9%
+                    width: 30.2%
+                    height: 26.1%
+                - type: image
+                  image: /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: detskaia
+                    confirmation:
+                      text: 'Пылесос: убрать детскую?'
+                  style:
+                    left: 35.8%
+                    top: 24.9%
+                    width: 28.5%
+                    height: 26.1%
+                - type: state-icon
+                  entity: switch.light_bath
+                  icon: mdi:ceiling-light
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 58.2%
+                    top: 9%
+                    --mdc-icon-size: 4.6cqw
+                - type: state-icon
+                  entity: switch.light_corridor
+                  icon: mdi:ceiling-light
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 58.2%
+                    top: 30.1%
+                    --mdc-icon-size: 4.6cqw
+                - type: state-icon
+                  entity: switch.light_hall_main
+                  icon: mdi:chandelier
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 58.2%
+                    top: 44.3%
+                    --mdc-icon-size: 4.6cqw
+                - type: state-icon
+                  entity: switch.light_hall_perimeter
+                  icon: mdi:led-strip-variant
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 58.2%
+                    top: 59.5%
+                    --mdc-icon-size: 4.6cqw
+                - type: state-icon
+                  entity: switch.light_entry_perimeter
+                  icon: mdi:led-strip-variant
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 46.6%
+                    top: 70.1%
+                    --mdc-icon-size: 4.6cqw
+                - type: state-icon
+                  entity: switch.light_wc
+                  icon: mdi:toilet
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 50.6%
+                    top: 83.3%
+                    --mdc-icon-size: 3.6cqw
+                - type: state-icon
+                  entity: switch.light_entry_main
+                  icon: mdi:chandelier
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 60.1%
+                    top: 70.9%
+                    --mdc-icon-size: 4.6cqw
+                - type: state-icon
+                  entity: switch.light_storage
+                  icon: mdi:ceiling-light
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 40.1%
+                    top: 83.3%
+                    --mdc-icon-size: 3.6cqw
+                - type: state-icon
+                  entity: switch.light_kitchen_main
+                  icon: mdi:chandelier
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 26%
+                    top: 83.5%
+                    --mdc-icon-size: 4.6cqw
+                - type: state-icon
+                  entity: switch.light_kitchen_perimeter
+                  icon: mdi:led-strip-variant
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 11.4%
+                    top: 84.8%
+                    --mdc-icon-size: 4.6cqw
+                - type: state-icon
+                  entity: camera.c700
+                  icon: mdi:cctv
+                  tap_action:
+                    action: more-info
+                  style:
+                    left: 58.2%
+                    top: 36.5%
+                    --mdc-icon-size: 3.6cqw
+                    color: '#4fc3f7'
+                - type: state-icon
+                  entity: light.zal_yeelight_hall
+                  icon: mdi:ceiling-light
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 30.1%
+                    top: 44.3%
+                    --mdc-icon-size: 4.6cqw
+                - type: state-icon
+                  entity: light.spalnia_yeelight_bed
+                  icon: mdi:ceiling-light
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 81.4%
+                    top: 19%
+                    --mdc-icon-size: 4.6cqw
+                - type: state-icon
+                  entity: vacuum.koridor_roborock_qrevo
+                  icon: mdi:robot-vacuum
+                  tap_action:
+                    action: more-info
+                  style:
+                    left: 31.8%
+                    top: 76.7%
+                    --mdc-icon-size: 3.8cqw
+                - type: state-icon
+                  entity: vacuum.roborock_s5_8159_robot_cleaner
+                  icon: mdi:robot-vacuum-variant
+                  tap_action:
+                    action: more-info
+                  style:
+                    left: 31.8%
+                    top: 82.8%
+                    --mdc-icon-size: 3.3cqw
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_u0086h0002ec9r
+                    state_not: playing
+                  elements:
+                  - type: state-icon
+                    entity: media_player.yandex_station_u0086h0002ec9r
+                    icon: mdi:speaker
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_play_pause
+                      target:
+                        entity_id: media_player.yandex_station_u0086h0002ec9r
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 13.6%
+                      top: 60.8%
+                      --mdc-icon-size: 3.1cqw
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_u0086h0002ec9r
+                    state: playing
+                  elements:
+                  - type: state-icon
+                    entity: media_player.yandex_station_u0086h0002ec9r
+                    icon: mdi:music
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_play_pause
+                      target:
+                        entity_id: media_player.yandex_station_u0086h0002ec9r
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 13.6%
+                      top: 60.8%
+                      --mdc-icon-size: 3.1cqw
+                      color: '#f06292'
+                  - type: state-label
+                    entity: media_player.yandex_station_u0086h0002ec9r
+                    attribute: media_title
+                    prefix: '♪ '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 13.6%
+                      top: 64.4%
+                      color: '#f06292'
+                      font-size: 2.0cqw
+                      max-width: 18.0cqw
+                      overflow: hidden
+                      white-space: nowrap
+                      text-overflow: ellipsis
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_tv_t60jcw202w4z1k
+                    state_not: playing
+                  elements:
+                  - type: state-icon
+                    entity: media_player.yandex_tv_t60jcw202w4z1k
+                    icon: mdi:speaker
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_play_pause
+                      target:
+                        entity_id: media_player.yandex_tv_t60jcw202w4z1k
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 17.7%
+                      top: 69.1%
+                      --mdc-icon-size: 3.1cqw
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_tv_t60jcw202w4z1k
+                    state: playing
+                  elements:
+                  - type: state-icon
+                    entity: media_player.yandex_tv_t60jcw202w4z1k
+                    icon: mdi:music
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_play_pause
+                      target:
+                        entity_id: media_player.yandex_tv_t60jcw202w4z1k
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 17.7%
+                      top: 69.1%
+                      --mdc-icon-size: 3.1cqw
+                      color: '#f06292'
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_x11bmg2000x29z
+                    state_not: playing
+                  elements:
+                  - type: state-icon
+                    entity: media_player.yandex_station_x11bmg2000x29z
+                    icon: mdi:speaker
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_play_pause
+                      target:
+                        entity_id: media_player.yandex_station_x11bmg2000x29z
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 93.7%
+                      top: 34.7%
+                      --mdc-icon-size: 3.1cqw
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_x11bmg2000x29z
+                    state: playing
+                  elements:
+                  - type: state-icon
+                    entity: media_player.yandex_station_x11bmg2000x29z
+                    icon: mdi:music
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_play_pause
+                      target:
+                        entity_id: media_player.yandex_station_x11bmg2000x29z
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 93.7%
+                      top: 34.7%
+                      --mdc-icon-size: 3.1cqw
+                      color: '#f06292'
+                  - type: state-label
+                    entity: media_player.yandex_station_x11bmg2000x29z
+                    attribute: media_title
+                    prefix: '♪ '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 93.7%
+                      top: 38.3%
+                      color: '#f06292'
+                      font-size: 2.0cqw
+                      max-width: 18.0cqw
+                      overflow: hidden
+                      white-space: nowrap
+                      text-overflow: ellipsis
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_m104q81001k74k
+                    state_not: playing
+                  elements:
+                  - type: state-icon
+                    entity: media_player.yandex_station_m104q81001k74k
+                    icon: mdi:speaker
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_play_pause
+                      target:
+                        entity_id: media_player.yandex_station_m104q81001k74k
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 47%
+                      top: 16%
+                      --mdc-icon-size: 3.1cqw
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_m104q81001k74k
+                    state: playing
+                  elements:
+                  - type: state-icon
+                    entity: media_player.yandex_station_m104q81001k74k
+                    icon: mdi:music
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_play_pause
+                      target:
+                        entity_id: media_player.yandex_station_m104q81001k74k
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 47%
+                      top: 16%
+                      --mdc-icon-size: 3.1cqw
+                      color: '#f06292'
+                  - type: state-label
+                    entity: media_player.yandex_station_m104q81001k74k
+                    attribute: media_title
+                    prefix: '♪ '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 38%
+                      top: 16%
+                      color: '#f06292'
+                      font-size: 2.0cqw
+                      max-width: 18.0cqw
+                      overflow: hidden
+                      white-space: nowrap
+                      text-overflow: ellipsis
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_lp00000000000047571100008ab064b1
+                    state_not: playing
+                  elements:
+                  - type: state-icon
+                    entity: media_player.yandex_station_lp00000000000047571100008ab064b1
+                    icon: mdi:speaker
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_play_pause
+                      target:
+                        entity_id: media_player.yandex_station_lp00000000000047571100008ab064b1
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 53.4%
+                      top: 70.9%
+                      --mdc-icon-size: 3.1cqw
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_lp00000000000047571100008ab064b1
+                    state: playing
+                  elements:
+                  - type: state-icon
+                    entity: media_player.yandex_station_lp00000000000047571100008ab064b1
+                    icon: mdi:music
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_play_pause
+                      target:
+                        entity_id: media_player.yandex_station_lp00000000000047571100008ab064b1
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 53.4%
+                      top: 70.9%
+                      --mdc-icon-size: 3.1cqw
+                      color: '#f06292'
+                  - type: state-label
+                    entity: media_player.yandex_station_lp00000000000047571100008ab064b1
+                    attribute: media_title
+                    prefix: '♪ '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 53.4%
+                      top: 74.5%
+                      color: '#f06292'
+                      font-size: 2.0cqw
+                      max-width: 18.0cqw
+                      overflow: hidden
+                      white-space: nowrap
+                      text-overflow: ellipsis
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_r10cv31007wqfn
+                    state_not: playing
+                  elements:
+                  - type: state-icon
+                    entity: media_player.yandex_station_r10cv31007wqfn
+                    icon: mdi:speaker
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_play_pause
+                      target:
+                        entity_id: media_player.yandex_station_r10cv31007wqfn
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 52.7%
+                      top: 22%
+                      --mdc-icon-size: 2.8cqw
+                - type: conditional
+                  conditions:
+                  - entity: media_player.yandex_station_r10cv31007wqfn
+                    state: playing
+                  elements:
+                  - type: state-icon
+                    entity: media_player.yandex_station_r10cv31007wqfn
+                    icon: mdi:music
+                    tap_action:
+                      action: perform-action
+                      perform_action: media_player.media_play_pause
+                      target:
+                        entity_id: media_player.yandex_station_r10cv31007wqfn
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 52.7%
+                      top: 22%
+                      --mdc-icon-size: 2.8cqw
+                      color: '#f06292'
+                  - type: state-label
+                    entity: media_player.yandex_station_r10cv31007wqfn
+                    attribute: media_title
+                    prefix: '♪ '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 52.7%
+                      top: 25.6%
+                      color: '#f06292'
+                      font-size: 2.0cqw
+                      max-width: 18.0cqw
+                      overflow: hidden
+                      white-space: nowrap
+                      text-overflow: ellipsis
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_gostinaia
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_gostinaia
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 13.6%
+                      top: 41.3%
+                      --mdc-icon-size: 2.8cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_kukhnia
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_kukhnia
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 30.7%
+                      top: 67.6%
+                      --mdc-icon-size: 2.8cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_spalnia
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_spalnia
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 94.4%
+                      top: 14.4%
+                      --mdc-icon-size: 2.8cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_detskaia
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_detskaia
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 24.5%
+                      top: 34.9%
+                      --mdc-icon-size: 2.8cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_prikhozhaia
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_prikhozhaia
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 64.1%
+                      top: 67.6%
+                      --mdc-icon-size: 2.8cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_koridor
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_koridor
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 64.5%
+                      top: 60.8%
+                      --mdc-icon-size: 2.8cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_vannaia
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_vannaia
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 64.1%
+                      top: 14.4%
+                      --mdc-icon-size: 2.6cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_tualet
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_tualet
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 53%
+                      top: 80.3%
+                      --mdc-icon-size: 2.3cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.fp_problem_kladovka
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: binary_sensor.fp_problem_kladovka
+                    icon: mdi:alert
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 45.1%
+                      top: 80.3%
+                      --mdc-icon-size: 2.3cqw
+                      color: '#ff9800'
+                - type: conditional
+                  conditions:
+                  - entity: binary_sensor.e4aaec6dff8c_contact
+                    state: 'on'
+                  elements:
+                  - type: state-label
+                    entity: sensor.fp_door_open_min
+                    prefix: '🚪 открыта '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 72.7%
+                      top: 95.4%
+                      color: '#ff5252'
+                      font-size: 2.4cqw
+                      font-weight: 600
+                - type: conditional
+                  conditions:
+                  - condition: numeric_state
+                    entity: sensor.fp_motion_ago_kukhnia
+                    below: 120
+                  elements:
+                  - type: state-label
+                    entity: sensor.fp_motion_ago_kukhnia
+                    prefix: '🚶 '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 19.3%
+                      top: 88.6%
+                      color: var(--secondary-text-color)
+                      font-size: 2.2cqw
+                - type: conditional
+                  conditions:
+                  - condition: numeric_state
+                    entity: sensor.fp_motion_ago_koridor
+                    below: 120
+                  elements:
+                  - type: state-label
+                    entity: sensor.fp_motion_ago_koridor
+                    prefix: '🚶 '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 58.2%
+                      top: 62.8%
+                      color: var(--secondary-text-color)
+                      font-size: 2.2cqw
+                - type: conditional
+                  conditions:
+                  - condition: numeric_state
+                    entity: sensor.fp_motion_ago_prikhozhaia
+                    below: 120
+                  elements:
+                  - type: state-label
+                    entity: sensor.fp_motion_ago_prikhozhaia
+                    prefix: '🚶 '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 60.3%
+                      top: 88.6%
+                      color: var(--secondary-text-color)
+                      font-size: 2.2cqw
+                - type: state-label
+                  entity: sensor.zal_temperature
+                  prefix: '🌡 '
+                  tap_action:
+                    action: more-info
+                  style:
+                    left: 31%
+                    top: 56.5%
+                    color: var(--primary-text-color)
+                    font-size: 2.8cqw
+                    opacity: 0.85
+                - type: state-label
+                  entity: sensor.koridor_temperature
+                  prefix: '🌡 '
+                  tap_action:
+                    action: more-info
+                  style:
+                    left: 58.2%
+                    top: 54.7%
+                    color: var(--primary-text-color)
+                    font-size: 2.8cqw
+                    opacity: 0.85
+                - type: state-label
+                  entity: sensor.detskaia_temperature
+                  prefix: '🌡 '
+                  tap_action:
+                    action: more-info
+                  style:
+                    left: 35.7%
+                    top: 29.1%
+                    color: var(--primary-text-color)
+                    font-size: 2.8cqw
+                    opacity: 0.85
+                - type: state-label
+                  entity: sensor.kukhnia_temperature
+                  prefix: '🌡 '
+                  tap_action:
+                    action: more-info
+                  style:
+                    left: 15%
+                    top: 79.2%
+                    color: var(--primary-text-color)
+                    font-size: 2.8cqw
+                    opacity: 0.85
+                - type: state-label
+                  entity: sensor.vannaia_temperature
+                  prefix: '🌡 '
+                  tap_action:
+                    action: more-info
+                  style:
+                    left: 58.3%
+                    top: 18.2%
+                    color: var(--primary-text-color)
+                    font-size: 2.8cqw
+                    opacity: 0.85
+                - type: conditional
+                  conditions:
+                  - condition: numeric_state
+                    entity: sensor.vannaia_humidity
+                    above: 70
+                  elements:
+                  - type: state-label
+                    entity: sensor.vannaia_humidity
+                    prefix: '💧 '
+                    tap_action:
+                      action: more-info
+                    style:
+                      left: 58.3%
+                      top: 22.7%
+                      color: '#ff7043'
+                      font-size: 2.4cqw
+                      font-weight: 700
+                - type: state-label
+                  entity: sensor.spalnia_temperature
+                  prefix: '🌡 '
+                  tap_action:
+                    action: more-info
+                  style:
+                    left: 81.4%
+                    top: 29.1%
+                    color: var(--primary-text-color)
+                    font-size: 2.8cqw
+                    opacity: 0.85
+              - type: grid
+                columns: 2
+                square: false
+                cards:
+                - type: weather-forecast
+                  entity: weather.pavshino
+                  forecast_type: daily
+                  show_current: true
+                  show_forecast: false
+                - type: picture-entity
+                  entity: camera.c700
+                  name: Прихожая
+                  show_state: false
+                  camera_view: auto
+                  card_mod:
+                    style: 'ha-card { {% if is_state(''binary_sensor.c700_motion'',''on'') %}box-shadow: 0 0 0 3px #ff5252;{% endif %} }
+
+                      '
+              - type: grid
+                columns: 3
+                square: false
+                cards:
+                - type: tile
+                  entity: sensor.lights_on
+                  name: Горит
+                  icon: mdi:lightbulb-on
+                - type: button
+                  name: Весь свет
+                  icon: mdi:lightbulb-group
+                  tap_action:
+                    action: perform-action
+                    perform_action: homeassistant.turn_on
+                    target:
+                      entity_id: &id001
+                      - switch.light_bath
+                      - switch.light_corridor
+                      - switch.light_hall_main
+                      - switch.light_hall_perimeter
+                      - switch.light_entry_main
+                      - switch.light_entry_perimeter
+                      - switch.light_wc
+                      - switch.light_storage
+                      - switch.light_kitchen_main
+                      - switch.light_kitchen_perimeter
+                      - light.zal_yeelight_hall
+                      - light.spalnia_yeelight_bed
+                    confirmation:
+                      text: Включить весь свет?
+                - type: button
+                  name: Выключить
+                  icon: mdi:lightbulb-group-off
+                  tap_action:
+                    action: perform-action
+                    perform_action: homeassistant.turn_off
+                    target:
+                      entity_id: *id001
+                    confirmation:
+                      text: Выключить весь свет?
+              - type: conditional
+                conditions:
+                - condition: numeric_state
+                  entity: sensor.fp_media_playing
+                  above: 0
+                card:
+                  type: tile
+                  entity: sensor.fp_media_playing
+                  name: Играет
+                  icon: mdi:music
+                  color: pink
+              - type: tile
+                entity: vacuum.koridor_roborock_qrevo
+                name: Мокрый (Qrevo)
+                features_position: bottom
+                features:
+                - type: vacuum-commands
+                  commands:
+                  - start_pause
+                  - stop
+                  - return_home
+              - type: tile
+                entity: vacuum.roborock_s5_8159_robot_cleaner
+                name: Сухой (S5)
+                features_position: bottom
+                features:
+                - type: vacuum-commands
+                  commands:
+                  - start_pause
+                  - stop
+                  - return_home
+              - type: grid
+                columns: 2
+                square: false
+                cards:
+                - type: tile
+                  entity: input_select.fp_vacuum
+                  name: Кто убирает
+                  features_position: bottom
+                  features:
+                  - type: select-options
+                - type: button
+                  name: Всё вместе
+                  icon: mdi:broom
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.turn_on
+                    target:
+                      entity_id: script.fp_vacuum_together
+                    confirmation:
+                      text: 'Вся квартира: сначала сухой пылесосит, потом мокрый моет?'
+              - type: grid
+                title: Убрать комнату
+                columns: 4
+                square: false
+                cards:
+                - type: button
+                  name: Зал
+                  icon: mdi:sofa
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: zal
+                    confirmation:
+                      text: 'Убрать: Зал?'
+                - type: button
+                  name: Кухня
+                  icon: mdi:stove
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: kukhnia
+                    confirmation:
+                      text: 'Убрать: Кухня?'
+                - type: button
+                  name: Спальня
+                  icon: mdi:bed-king
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: spalnia
+                    confirmation:
+                      text: 'Убрать: Спальня?'
+                - type: button
+                  name: Детская (Лекс)
+                  icon: mdi:teddy-bear
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: detskaia
+                    confirmation:
+                      text: 'Убрать: Детская (Лекс)?'
+                - type: button
+                  name: Прихожая
+                  icon: mdi:door
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: prikhozhaia
+                    confirmation:
+                      text: 'Убрать: Прихожая?'
+                - type: button
+                  name: Коридор
+                  icon: mdi:walk
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: koridor
+                    confirmation:
+                      text: 'Убрать: Коридор?'
+                - type: button
+                  name: Проход к кухне
+                  icon: mdi:walk
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: prokhod
+                    confirmation:
+                      text: 'Убрать: Проход к кухне?'
+                - type: button
+                  name: Малый коридор
+                  icon: mdi:walk
+                  tap_action:
+                    action: perform-action
+                    perform_action: script.fp_vacuum_clean
+                    data:
+                      rooms: koridor2
+                    confirmation:
+                      text: 'Убрать: Малый коридор?'
+      # END map
+  - title: Камера
+    path: camera
+    icon: mdi:cctv
+    panel: true
+    cards:
+      - type: picture-entity
+        entity: camera.c700
+        name: Прихожая
+        camera_view: live
+        tap_action: {action: more-info}
+  - title: Пылесос
+    path: vacuum
+    icon: mdi:robot-vacuum
+    cards:
+      - type: tile
+        entity: vacuum.koridor_roborock_qrevo
+        name: Мокрый (Qrevo)
+        features_position: bottom
+        features:
+          - type: vacuum-commands
+            commands: [start_pause, stop, return_home, locate]
+      - type: glance
+        show_name: true
+        entities:
+          - entity: sensor.koridor_roborock_qrevo_battery
+            name: Заряд
+          - entity: sensor.koridor_roborock_qrevo_status
+            name: Статус
+          - entity: sensor.koridor_roborock_qrevo_current_room
+            name: Комната
+          - entity: sensor.koridor_roborock_qrevo_cleaning_progress
+            name: Прогресс
+      - type: entities
+        title: Режимы
+        entities:
+          - entity: select.koridor_roborock_qrevo_cleaning_mode
+            name: Режим уборки
+          - entity: select.koridor_roborock_qrevo_mop_mode
+            name: Режим швабры
+          - entity: select.koridor_roborock_qrevo_mop_intensity
+            name: Подача воды
+      # Второй пылесос: Roborock S5 (Xiaomi Miot, только сухая уборка), карта — Xiaomi Cloud Map Extractor.
+      - type: tile
+        entity: vacuum.roborock_s5_8159_robot_cleaner
+        name: Сухой (S5)
+        features_position: bottom
+        features:
+          - type: vacuum-commands
+            commands: [start_pause, stop, return_home, locate]
+      - type: glance
+        show_name: true
+        entities:
+          - entity: sensor.roborock_s5_8159_battery_level
+            name: Заряд
+          - entity: sensor.roborock_s5_8159_status
+            name: Статус
+          - entity: sensor.robot_pylesos_vacuum_room_id
+            name: Сегмент
+          - entity: select.roborock_s5_8159_mode
+            name: Мощность
+      # Кто убирает по кнопкам ниже и долгому нажатию на карте (input_select.fp_vacuum); «Вместе» — сначала сухой (S5), потом мокрый (Qrevo) моет.
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: tile
+            entity: input_select.fp_vacuum
+            name: Кто убирает
+            features_position: bottom
+            features: [{type: select-options}]
+          - type: button
+            name: Всё вместе
+            icon: mdi:broom
+            tap_action:
+              action: perform-action
+              perform_action: script.turn_on
+              target: {entity_id: script.fp_vacuum_together}
+              confirmation: {text: "Вся квартира: сначала сухой пылесосит, потом мокрый моет?"}
+      # Уборка по комнатам (script.fp_vacuum_clean, сегменты обоих пылесосов — в scripts.yaml). Qrevo (roborock.get_maps):
+      # 1 Кухня, 2 Коридор3 = малый коридор у ванной, 3 Коридор1 = проход от прихожей к кухне, 4 Главная спальня,
+      # 5 Зал, 6 Коридор = основной, 7 Прихожая, 8 Лекс = детская. Номера в приложении — другие (порядок показа).
+      - type: grid
+        title: Убрать комнату
+        columns: 4
+        square: false
+        cards:
+          - type: button
+            name: Зал
+            icon: mdi:sofa
+            tap_action:
+              action: perform-action
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: zal}
+              confirmation: {text: "Убрать: Зал?"}
+          - type: button
+            name: Кухня
+            icon: mdi:stove
+            tap_action:
+              action: perform-action
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: kukhnia}
+              confirmation: {text: "Убрать: Кухня?"}
+          - type: button
+            name: Спальня
+            icon: mdi:bed-king
+            tap_action:
+              action: perform-action
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: spalnia}
+              confirmation: {text: "Убрать: Спальня?"}
+          - type: button
+            name: Детская (Лекс)
+            icon: mdi:teddy-bear
+            tap_action:
+              action: perform-action
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: detskaia}
+              confirmation: {text: "Убрать: Детская (Лекс)?"}
+          - type: button
+            name: Прихожая
+            icon: mdi:door
+            tap_action:
+              action: perform-action
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: prikhozhaia}
+              confirmation: {text: "Убрать: Прихожая?"}
+          - type: button
+            name: Коридор
+            icon: mdi:walk
+            tap_action:
+              action: perform-action
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: koridor}
+              confirmation: {text: "Убрать: Коридор?"}
+          - type: button
+            name: Проход к кухне
+            icon: mdi:walk
+            tap_action:
+              action: perform-action
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: prokhod}
+              confirmation: {text: "Убрать: Проход к кухне?"}
+          - type: button
+            name: Малый коридор
+            icon: mdi:walk
+            tap_action:
+              action: perform-action
+              perform_action: script.fp_vacuum_clean
+              data: {rooms: koridor2}
+              confirmation: {text: "Убрать: Малый коридор?"}
+      - type: picture-entity
+        entity: image.koridor_roborock_qrevo_map_0
+        name: Карта мокрого (Qrevo)
+        show_state: false
+      - type: picture-entity
+        entity: image.robot_pylesos_live_map
+        name: Карта сухого (S5)
+        show_state: false
+  - title: Погода
+    path: weather
+    icon: mdi:weather-partly-cloudy
+    cards:
+      - type: weather-forecast
+        entity: weather.pavshino
+        forecast_type: hourly
+        show_current: true
+        show_forecast: true
+      - type: weather-forecast
+        entity: weather.pavshino
+        forecast_type: daily
+        show_current: false
+        show_forecast: true
