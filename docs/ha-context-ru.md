@@ -218,6 +218,17 @@
   Вход — токен из приложения (`adb logcat | grep x-token`, без root), не логиниться заново: может выкинуть телефон,
   а SMS на китайский номер может не прийти. Токен у пользователя в `~/.homerun_token` (не коммитить).
 
+- Обновление HA (вариант Container: нет Supervisor, поэтому в HA нет ни уведомления, ни кнопки «Обновить»).
+  Сверка версий: `docker exec homeassistant python3 -c "from homeassistant.const import __version__ as v; print(v)"`
+  и https://version.home-assistant.io/stable.json. Порядок: копия конфигурации в `/mnt/nvme/backup/`
+  (BusyBox tar: исключения через `-X файл`, без `--exclude`; ~2 ГБ, из них папка `backups`), пометить старый образ
+  `docker image tag homeassistant/home-assistant:stable homeassistant/home-assistant:<версия>-prev`, затем в
+  `/mnt/nvme/compose/homeassistant`: `docker compose pull homeassistant && docker compose up -d homeassistant`.
+  2026-11-17: 2026.9.3 → 2026.11.2, копия `ha-config-2026.9.3-20261117-1833.tar.gz`, образ `2026.9.3-prev`.
+- Xiaomi Miot при старте берёт список устройств из облака Xiaomi cn (`api.io.mi.com`). Если облако в этот момент
+  недоступно (бывают зависания TLS у провайдера), S5, управление камерой C700 и `binary_sensor.c700_motion` остаются
+  `unavailable` до перезагрузки интеграции (Xiaomi Miot → ⋮ → Перезагрузить), когда облако снова отвечает.
+
 ## Сеть
 - Сейчас: BPI-R4 = роутер `192.168.1.1`, основной канал LTE; forkop (sing-box) направляет заблокированное
   в WireGuard `wg0` → RB5009 (`10.10.10.9` → `10.10.10.1`), резерв — подписка (priority group, без RU).
