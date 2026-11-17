@@ -262,6 +262,15 @@ views:
                   tap_action: {action: none}
                   hold_action: {action: none}
                   style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: switch.light_kids
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-light-detskaia.svg?v=1
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
                 # Нажатие на комнату — свет; долгое — уборка комнаты пылесосом с переключателя «Кто убирает» (script.fp_vacuum_clean).
                 - type: image
                   entity: switch.light_kitchen_main
@@ -378,8 +387,9 @@ views:
                     confirmation: {text: "Пылесос: убрать спальню?"}
                   style: {left: 72.4%, top: 24.9%, width: 21.4%, height: 26.1%}
                 - type: image
+                  entity: switch.light_kids
                   image: /local/fp-empty.svg?v=2
-                  tap_action: {action: none}
+                  tap_action: {action: toggle}
                   hold_action:
                     action: perform-action
                     perform_action: script.fp_vacuum_clean
@@ -464,6 +474,12 @@ views:
                   tap_action: {action: toggle}
                   hold_action: {action: more-info}
                   style: {left: 72.3%, top: 19%, --mdc-icon-size: 36px}
+                - type: state-icon
+                  entity: switch.light_kids
+                  icon: mdi:ceiling-light
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 39.8%, top: 19%, --mdc-icon-size: 36px}
                 # Пылесос Roborock Qrevo: база на кухне; цвет значка = состояние, нажатие — управление.
                 - type: state-icon
                   entity: vacuum.koridor_roborock_qrevo
@@ -932,6 +948,7 @@ views:
                         - switch.light_kitchen_perimeter
                         - light.zal_yeelight_hall
                         - light.spalnia_yeelight_bed
+                        - switch.light_kids
                     confirmation: {text: "Включить весь свет?"}
                   style: {left: 89.68%, top: 49.4%, width: 5.81%, height: 7.09%}
                 - type: icon
@@ -953,6 +970,7 @@ views:
                         - switch.light_kitchen_perimeter
                         - light.zal_yeelight_hall
                         - light.spalnia_yeelight_bed
+                        - switch.light_kids
                     confirmation: {text: "Включить весь свет?"}
                   style: {left: 88.2%, top: 49.4%, --mdc-icon-size: 18px, color: var(--primary-color)}
                 - type: image
@@ -974,6 +992,7 @@ views:
                         - switch.light_kitchen_perimeter
                         - light.zal_yeelight_hall
                         - light.spalnia_yeelight_bed
+                        - switch.light_kids
                     confirmation: {text: "Выключить весь свет?"}
                   style: {left: 95.81%, top: 49.4%, width: 5.81%, height: 7.09%}
                 - type: icon
@@ -995,6 +1014,7 @@ views:
                         - switch.light_kitchen_perimeter
                         - light.zal_yeelight_hall
                         - light.spalnia_yeelight_bed
+                        - switch.light_kids
                     confirmation: {text: "Выключить весь свет?"}
                   style: {left: 94.35%, top: 49.4%, --mdc-icon-size: 18px, color: var(--primary-color)}
                 # Пылесосы: статус, заряд и маленькие плашки Старт / Пауза / На базу (плашки и подписи — в SVG).
@@ -1533,6 +1553,21 @@ views:
                     width: 100%
                     pointer-events: none
                 - type: image
+                  entity: switch.light_kids
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-light-detskaia.svg?v=1
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
                   entity: switch.light_kitchen_main
                   image: /local/fp-empty.svg?v=2
                   state_image:
@@ -1732,9 +1767,10 @@ views:
                     width: 30.2%
                     height: 26.1%
                 - type: image
+                  entity: switch.light_kids
                   image: /local/fp-empty.svg?v=2
                   tap_action:
-                    action: none
+                    action: toggle
                   hold_action:
                     action: perform-action
                     perform_action: script.fp_vacuum_clean
@@ -1887,6 +1923,17 @@ views:
                     action: more-info
                   style:
                     left: 81.4%
+                    top: 19%
+                    --mdc-icon-size: 4.6cqw
+                - type: state-icon
+                  entity: switch.light_kids
+                  icon: mdi:ceiling-light
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 35.6%
                     top: 19%
                     --mdc-icon-size: 4.6cqw
                 - type: state-icon
@@ -2544,6 +2591,7 @@ views:
                       - switch.light_kitchen_perimeter
                       - light.zal_yeelight_hall
                       - light.spalnia_yeelight_bed
+                      - switch.light_kids
                     confirmation:
                       text: Включить весь свет?
                 - type: button

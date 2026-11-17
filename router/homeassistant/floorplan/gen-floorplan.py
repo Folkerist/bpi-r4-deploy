@@ -184,6 +184,11 @@ bed = next(r[3] for r in rooms if r[0] == "bedroom")
 open("fp-light-spalnia.svg", "w").write(
     HEAD + f'<polygon points="{bed}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
 
+# Kids room light (Aqara E1 single rocker, switch.light_kids) = room fill.
+kids = next(r[3] for r in rooms if r[0] == "kids")
+open("fp-light-detskaia.svg", "w").write(
+    HEAD + f'<polygon points="{kids}" fill="#ffc107" fill-opacity=".38" stroke="#ffc107" stroke-opacity=".7" stroke-width="2"/></svg>')
+
 # Camera motion frame: drawn around the camera snapshot on the right panel (conditional element in card.yaml).
 open("fp-camera-motion.svg", "w").write(
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 48"><rect x="1.5" y="1.5" width="77" height="45" rx="6" '
