@@ -384,8 +384,8 @@
 - id: entrance_door_telegram_photo
   alias: 'Входная дверь: фото в Telegram'
   description: >-
-    Входная дверь открылась — два кадра с камеры C700 (сразу и через 4 с) в группу Telegram «Home».
-    Отправка через script.tg_camera_photo (до 6 попыток: загрузка в Telegram через туннель нестабильна).
+    Входная дверь открылась — два кадра с камеры C700 (запрос сразу и через 8 с; кадр готов ~через 7 с) в группу Telegram «Home».
+    Отправка через script.tg_camera_photo.
   mode: single
   max_exceeded: silent
   triggers:
@@ -400,7 +400,7 @@
       target: {entity_id: script.tg_camera_photo}
       data:
         variables: {caption: "🚪 Открыта входная дверь, {{ when }} (кадр 1)"}
-    - delay: "00:00:04"
+    - delay: "00:00:08"
     - action: script.turn_on
       target: {entity_id: script.tg_camera_photo}
       data:

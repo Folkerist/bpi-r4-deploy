@@ -160,7 +160,21 @@ home_morning:
       target: {entity_id: media_player.yandex_tv_t60jcw202w4z1k}  # ТВ Станция на кухне
       data: {media_content_type: command, media_content_id: Включи утреннее шоу}
 
-# Кадр с камеры C700 в группу Telegram «Home» с повторами: загрузка файлов в Telegram через туннель (mihomo
+# Кадр с камеры C700 в группу Telegram «Home». Камера отдаёт кадр на ближайшем опорном кадре (~7–8 с).
+# Повторов нет: ответ send_photo пустой, по нему успех не определить (с повторами слались дубли).
+# Если перестанут приходить (500) — сменить узел в группе «Telegram» mihomo на RB5009.
+tg_camera_photo:
+  alias: Telegram — кадр с камеры
+  mode: parallel
+  fields:
+    caption: {description: Подпись к фото, example: "🚪 Открыта входная дверь"}
+  sequence:
+    - action: telegram_bot.send_photo
+      data:
+        config_entry_id: 01M7TCDWR6QKZ4YC6JWJ4VQD4P
+        chat_id: -5154704279
+        url: "http://127.0.0.1:1985/api/frame.jpeg?src=c700"
+        caption: "{{ caption }}"
 # на RB5009) проходит примерно 1 раз из 4 (ошибка 500 / таймаут), поэтому до 6 попыток с паузой 3 с.
 tg_camera_photo:
   alias: Telegram — кадр с камеры
