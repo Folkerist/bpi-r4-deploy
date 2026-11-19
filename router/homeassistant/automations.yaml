@@ -80,3 +80,104 @@
               {{ {'Сухой': 'Пылесошу ', 'Мокрый': 'Мою '}.get(who, 'Убираю ') ~ say[room] }}{{
                  ': сначала пылесос, потом мойка' if who == 'Вместе' else '' }}
     - delay: "00:00:05"
+- id: motion_sensor_test_blink
+  alias: Тест датчиков движения
+  description: >-
+    Режим проверки: каждый датчик движения при срабатывании моргает своим светом
+    (переключает на 1,5 с и возвращает). Включать вручную на время проверки.
+  initial_state: false
+  mode: parallel
+  max: 20
+  triggers:
+    - trigger: state
+      entity_id:
+        - binary_sensor.vannaia_motion
+        - binary_sensor.tualet_motion
+        - binary_sensor.koridor_motion
+        - binary_sensor.prikhozhaia_motion
+        - binary_sensor.kukhnia_motion
+        - binary_sensor.kukhnia_stol_motion
+        - binary_sensor.prikhozhaia_vkhod_motion
+        - binary_sensor.kladovka_motion
+        - binary_sensor.zal_motion
+  # Без to/from: срабатывает и на повторные события датчика, пока он уже в «on»
+  # (датчик шлёт повтор не чаще раза в 25–60 с).
+  conditions:
+    - condition: template
+      value_template: >-
+        {{ trigger.to_state is not none and trigger.to_state.state == 'on'
+           and trigger.from_state is not none
+           and trigger.from_state.state not in ['unavailable', 'unknown'] }}
+  variables:
+    lights:
+      binary_sensor.vannaia_motion: switch.light_bath
+      binary_sensor.tualet_motion: switch.light_wc
+      binary_sensor.koridor_motion: switch.light_corridor
+      binary_sensor.prikhozhaia_motion: switch.light_entry_main
+      binary_sensor.kukhnia_motion: switch.light_kitchen_perimeter
+      binary_sensor.kukhnia_stol_motion: switch.light_kitchen_main
+      binary_sensor.prikhozhaia_vkhod_motion: switch.light_entry_perimeter
+      binary_sensor.kladovka_motion: switch.light_storage
+      binary_sensor.zal_motion: switch.light_hall_perimeter
+    target: "{{ lights[trigger.entity_id] }}"
+  actions:
+    - action: homeassistant.toggle
+      target:
+        entity_id: "{{ target }}"
+    - delay: "00:00:01.5"
+    - action: homeassistant.toggle
+      target:
+        entity_id: "{{ target }}"
+- id: low_battery_notify
+  alias: Низкий заряд батареек
+  description: >-
+    Уведомление на телефон, когда у датчика заряд ниже 15% (сразу при падении и сводкой каждый день в 10:00).
+    Новый датчик с батарейкой — добавить в оба списка ниже. Телефон, планшет и пылесосы не учитываются.
+  mode: queued
+  triggers:
+    - trigger: numeric_state
+      id: drop
+      below: 15
+      entity_id: &batteries
+        - sensor.a4c13804447f_battery
+        - sensor.a4c13843f704_battery
+        - sensor.a4c138d0c5b1_battery
+        - sensor.a4c138dc8f4f_battery
+        - sensor.detskaia_battery
+        - sensor.kukhnia_battery
+        - sensor.e4aaec6dff8c_battery
+        - sensor.e4aaec6f2c95_battery
+        - sensor.e4aaec6f9b2a_battery
+        - sensor.kladovka_motion_battery
+        - sensor.koridor_motion_battery
+        - sensor.kukhnia_motion_battery
+        - sensor.kukhnia_stol_motion_battery
+        - sensor.prikhozhaia_motion_battery
+        - sensor.prikhozhaia_vkhod_motion_battery
+        - sensor.tualet_motion_battery
+        - sensor.vannaia_motion_battery
+        - sensor.zal_motion_battery
+    - trigger: time
+      id: daily
+      at: "10:00:00"
+  variables:
+    batteries: *batteries
+    low: >-
+      {% set ns = namespace(items=[]) %}
+      {% for e in batteries if states(e) | is_number and states(e) | float < 15 %}
+        {% set ns.items = ns.items + [state_attr(e, 'friendly_name') ~ ': ' ~ (states(e) | float | round(0) | int) ~ '%'] %}
+      {% endfor %}
+      {{ ns.items }}
+  conditions:
+    - condition: template
+      value_template: "{{ trigger.id | default('') == 'drop' or low | count > 0 }}"
+  actions:
+    - action: notify.mobile_app_vivo_x200
+      data:
+        title: "🔋 Пора менять батарейку"
+        message: >-
+          {% if trigger.id | default('') == 'drop' %}{{ trigger.to_state.name }}: {{ trigger.to_state.state | float | round(0) | int }}%
+          {% else %}Низкий заряд: {{ low | join(', ') if low | count > 0 else 'всё в порядке' }}{% endif %}
+        data:
+          tag: low-battery
+          channel: Батарейки
