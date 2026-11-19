@@ -15,7 +15,7 @@ if (q.get("demo")) {
   set("media_player.yandex_station_x11bmg2000x29z", "playing", { media_title: "Nothing Else Matters", media_artist: "Metallica", volume_level: 0.35 });
   set("binary_sensor.kukhnia_motion", "on");
   set("vacuum.koridor_roborock_qrevo", "cleaning"); set("sensor.fp_vacuum_room", "kukhnia"); set("sensor.koridor_roborock_qrevo_cleaning_progress", "42");
-  if (q.get("demo") === "2") { set("binary_sensor.e4aaec6dff8c_contact", "on"); set("sensor.fp_door_open_min", "4"); set("binary_sensor.c700_motion", "on"); }
+  if (q.get("demo") === "2") { set("binary_sensor.prikhozhaia_dver_contact", "on"); set("sensor.fp_door_open_min", "4"); set("binary_sensor.c700_motion", "on"); }
 }
 // ?lbdemo=1 — неделя истории лотка (визиты и вес), ?lbdemo=2 — ещё и кошка внутри и полный ящик.
 if (q.get("lbdemo")) {

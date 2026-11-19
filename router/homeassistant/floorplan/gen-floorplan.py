@@ -214,7 +214,7 @@ motion_room("fp-motion-kladovka.svg", room_pts["storage"])
 motion_room("fp-motion-zal.svg", room_pts["hall"])
 motion_spot("fp-motion-prikhozhaia-vkhod.svg", 350, 806, 15)  # sensor at the entrance door (bottom of the entry leg)
 
-# Entrance door open (binary_sensor.e4aaec6dff8c_contact): red leaf + swing on top of the plan's door symbol
+# Entrance door open (binary_sensor.prikhozhaia_dver_contact): red leaf + swing on top of the plan's door symbol
 # (door "h" 825, 336..364, hinge at 364, opens outwards), red line across the opening.
 open("fp-door-open.svg", "w").write(HEAD + f'<g>{PULSE}<path d="M364 825 L364 853 A28 28 0 0 1 336 825 Z" fill="#ff5252" '
     'fill-opacity=".18"/><line x1="364" y1="825" x2="364" y2="853" stroke="#ff5252" stroke-width="3" stroke-linecap="round"/>'

@@ -201,7 +201,7 @@ views:
                   style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
                 # Входная дверь открыта — красная створка (время — подписью у двери, ниже).
                 - type: image
-                  entity: binary_sensor.e4aaec6dff8c_contact
+                  entity: binary_sensor.prikhozhaia_dver_contact
                   image: /local/fp-empty.svg?v=2
                   state_image:
                     "on": /local/fp-door-open.svg?v=1
@@ -645,7 +645,7 @@ views:
                        style: {left: 46.5%, top: 80.3%, --mdc-icon-size: 18px, color: "#ff9800"}}
                 # Входная дверь: сколько минут открыта (sensor.fp_door_open_min), подпись снаружи у двери.
                 - type: conditional
-                  conditions: [{entity: binary_sensor.e4aaec6dff8c_contact, state: "on"}]
+                  conditions: [{entity: binary_sensor.prikhozhaia_dver_contact, state: "on"}]
                   elements:
                     - {type: state-label, entity: sensor.fp_door_open_min, prefix: "🚪 открыта ", tap_action: {action: more-info},
                        style: {left: 66.1%, top: 95.4%, color: "#ff5252", font-size: 12px, font-weight: 600}}
@@ -1443,7 +1443,7 @@ views:
                     width: 100%
                     pointer-events: none
                 - type: image
-                  entity: binary_sensor.e4aaec6dff8c_contact
+                  entity: binary_sensor.prikhozhaia_dver_contact
                   image: /local/fp-empty.svg?v=2
                   state_image:
                     'on': /local/fp-door-open.svg?v=1
@@ -2472,7 +2472,7 @@ views:
                       color: '#ff9800'
                 - type: conditional
                   conditions:
-                  - entity: binary_sensor.e4aaec6dff8c_contact
+                  - entity: binary_sensor.prikhozhaia_dver_contact
                     state: 'on'
                   elements:
                   - type: state-label

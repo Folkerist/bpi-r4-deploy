@@ -22,7 +22,7 @@ const ROOMS = [
     media: ["media_player.yandex_station_m104q81001k74k"], problem: "binary_sensor.fp_problem_detskaia", vac: ["detskaia"] },
   { id: "prikhozhaia", area: "prikhozhaia", name: "Прихожая", icon: "door", group: "other", plan: ["entry"],
     lights: ["switch.light_entry_main", "switch.light_entry_perimeter"],
-    motion: ["binary_sensor.prikhozhaia_motion"], door: "binary_sensor.e4aaec6dff8c_contact",
+    motion: ["binary_sensor.prikhozhaia_motion"], door: "binary_sensor.prikhozhaia_dver_contact",
     media: ["media_player.yandex_station_lp00000000000047571100008ab064b1"], problem: "binary_sensor.fp_problem_prikhozhaia",
     vac: ["prikhozhaia", "prokhod"] },
   { id: "koridor", area: "koridor", name: "Коридор", icon: "shoe-print", group: "other", plan: ["corridor", "corridor2"],
@@ -104,7 +104,7 @@ const S5_MODE = "select.roborock_s5_8159_mode";
 const WEATHER = "weather.pavshino";
 const CAMERA = "camera.c700";
 const CAMERA_MOTION = "binary_sensor.c700_motion";
-const DOOR = "binary_sensor.e4aaec6dff8c_contact";
+const DOOR = "binary_sensor.prikhozhaia_dver_contact";
 const DOOR_MIN = "sensor.fp_door_open_min";
 const PERSON = "person.folk";
 const TRACKERS = [["device_tracker.vivo_x200", "sensor.vivo_x200_battery_level", "Телефон", "cellphone"],

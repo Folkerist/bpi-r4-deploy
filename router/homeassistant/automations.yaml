@@ -139,15 +139,15 @@
       id: drop
       below: 15
       entity_id: &batteries
-        - sensor.a4c13804447f_battery
-        - sensor.a4c13843f704_battery
-        - sensor.a4c138d0c5b1_battery
-        - sensor.a4c138dc8f4f_battery
+        - sensor.spalnia_battery
+        - sensor.zal_battery
+        - sensor.koridor_battery
+        - sensor.vannaia_battery
         - sensor.detskaia_battery
         - sensor.kukhnia_battery
-        - sensor.e4aaec6dff8c_battery
+        - sensor.prikhozhaia_dver_battery
         - sensor.kladovka_dver_battery
-        - sensor.e4aaec6f9b2a_battery
+        - sensor.vannaia_dver_battery
         - sensor.kladovka_motion_battery
         - sensor.koridor_motion_battery
         - sensor.kukhnia_motion_battery
