@@ -176,6 +176,15 @@ views:
                   hold_action: {action: none}
                   style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
                 - type: image
+                  entity: binary_sensor.zal_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-motion-zal.svg?v=1
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
                   entity: binary_sensor.prikhozhaia_vkhod_motion
                   image: /local/fp-empty.svg?v=2
                   state_image:
@@ -1382,6 +1391,21 @@ views:
                   image: /local/fp-empty.svg?v=2
                   state_image:
                     'on': /local/fp-motion-kladovka.svg?v=1
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: binary_sensor.zal_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-motion-zal.svg?v=1
                     'off': /local/fp-empty.svg?v=2
                   tap_action:
                     action: none
