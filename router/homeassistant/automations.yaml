@@ -237,3 +237,62 @@
           sequence:
             - action: switch.turn_off
               target: {entity_id: switch.light_storage}
+- id: auto_off_no_motion
+  alias: 'Автовыключение света без движения'
+  description: >-
+    Раз в минуту: если в комнате горит свет (включён 30+ мин назад) и все её датчики движения
+    30+ мин в состоянии «нет движения», свет комнаты выключается. Датчик не на связи — не выключать.
+    Кладовка — своя автоматизация; в спальне и детской датчиков нет.
+  mode: single
+  triggers:
+    - trigger: time_pattern
+      minutes: "/1"
+  variables:
+    minutes: 30
+    rooms:
+      - name: Кухня
+        sensors: [binary_sensor.kukhnia_motion, binary_sensor.kukhnia_stol_motion]
+        lights: [switch.light_kitchen_main, switch.light_kitchen_perimeter]
+      - name: Зал
+        sensors: [binary_sensor.zal_motion]
+        lights: [light.zal_yeelight_hall, light.zal_yeelight_hall_ambilight]
+      - name: Коридор
+        sensors: [binary_sensor.koridor_motion]
+        lights: [switch.light_corridor, switch.light_hall_main, switch.light_hall_perimeter]
+      - name: Прихожая
+        sensors: [binary_sensor.prikhozhaia_motion, binary_sensor.prikhozhaia_vkhod_motion]
+        lights: [switch.light_entry_main, switch.light_entry_perimeter]
+      - name: Ванная
+        sensors: [binary_sensor.vannaia_motion]
+        lights: [switch.light_bath]
+      - name: Туалет
+        sensors: [binary_sensor.tualet_motion]
+        lights: [switch.light_wc]
+    to_off: >-
+      {% set limit = minutes * 60 %}
+      {% set ns = namespace(out=[]) %}
+      {% for r in rooms %}
+        {% set q = namespace(quiet=true) %}
+        {% for s in r.sensors %}
+          {% set st = states[s.split('.')[0]][s.split('.')[1]] %}
+          {% if st is none or st.state != 'off' or (now() - st.last_changed).total_seconds() < limit %}
+            {% set q.quiet = false %}
+          {% endif %}
+        {% endfor %}
+        {% if q.quiet %}
+          {% for l in r.lights %}
+            {% set ls = states[l.split('.')[0]][l.split('.')[1]] %}
+            {% if ls is not none and ls.state == 'on' and (now() - ls.last_changed).total_seconds() >= limit %}
+              {% set ns.out = ns.out + [l] %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+      {{ ns.out }}
+  conditions:
+    - condition: template
+      value_template: "{{ to_off | count > 0 }}"
+  actions:
+    - action: homeassistant.turn_off
+      target:
+        entity_id: "{{ to_off }}"
