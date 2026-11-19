@@ -348,3 +348,36 @@
           then:
             - action: switch.turn_on
               target: {entity_id: switch.light_bath}
+- id: wc_light_motion
+  alias: 'Туалет: свет по движению'
+  description: >-
+    Движение в туалете — свет WC включается (всегда). 5 мин без движения — выключается.
+  mode: single
+  triggers:
+    # Без to/from: и на повторные события датчика, пока он уже в «on».
+    - trigger: state
+      entity_id: binary_sensor.tualet_motion
+      id: motion
+    - trigger: state
+      entity_id: binary_sensor.tualet_motion
+      to: "off"
+      for: "00:05:00"
+      id: quiet
+  conditions:
+    - condition: template
+      value_template: >-
+        {% if trigger.id == 'motion' %}
+          {{ trigger.to_state is not none and trigger.to_state.state == 'on'
+             and trigger.from_state is not none
+             and trigger.from_state.state not in ['unavailable', 'unknown']
+             and is_state('switch.light_wc', 'off') }}
+        {% else %}{{ is_state('switch.light_wc', 'on') }}{% endif %}
+  actions:
+    - choose:
+        - conditions: [{condition: trigger, id: quiet}]
+          sequence:
+            - action: switch.turn_off
+              target: {entity_id: switch.light_wc}
+      default:
+        - action: switch.turn_on
+          target: {entity_id: switch.light_wc}
