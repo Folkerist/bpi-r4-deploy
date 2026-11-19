@@ -182,33 +182,61 @@
           tag: low-battery
           channel: Батарейки
 - id: kladovka_light_by_door
-  alias: 'Кладовка: свет по двери'
+  alias: 'Кладовка: свет по двери и движению'
   description: >-
-    Дверь кладовки открыли — свет включается, закрыли — выключается.
-    Если дверь осталась открытой 15 минут — свет выключается.
+    Дверь открыли — свет вкл. Движение в кладовке — свет вкл (и отменяет выключение).
+    Дверь закрыли — через 40 с выкл, если за это время внутри нет движения.
+    Свет выключается и после 15 минут подряд без движения (отсчёт от последнего движения).
   mode: restart
   triggers:
     - trigger: state
       entity_id: binary_sensor.kladovka_dver_contact
       from: "off"
       to: "on"
-      id: open
+      id: door_open
     - trigger: state
       entity_id: binary_sensor.kladovka_dver_contact
       from: "on"
       to: "off"
-      id: closed
+      id: door_closed
+    # Без to/from: срабатывает и на повторные события датчика, пока он уже в «on».
+    - trigger: state
+      entity_id: binary_sensor.kladovka_motion
+      id: motion
+    - trigger: state
+      entity_id: binary_sensor.kladovka_motion
+      to: "off"
+      for: "00:15:00"
+      id: quiet
     - trigger: state
       entity_id: binary_sensor.kladovka_dver_contact
       to: "on"
       for: "00:15:00"
-      id: left_open
+      id: quiet
+  conditions:
+    - condition: template
+      value_template: >-
+        {% if trigger.id == 'motion' %}
+          {{ trigger.to_state is not none and trigger.to_state.state == 'on'
+             and trigger.from_state is not none
+             and trigger.from_state.state not in ['unavailable', 'unknown'] }}
+        {% elif trigger.id == 'quiet' %}
+          {{ is_state('switch.light_storage', 'on') and is_state('binary_sensor.kladovka_motion', 'off')
+             and (now() - states.binary_sensor.kladovka_motion.last_changed).total_seconds() >= 900 }}
+        {% else %}true{% endif %}
   actions:
     - choose:
-        - conditions: [{condition: trigger, id: open}]
+        - conditions: [{condition: trigger, id: [door_open, motion]}]
           sequence:
             - action: switch.turn_on
               target: {entity_id: switch.light_storage}
-      default:
-        - action: switch.turn_off
-          target: {entity_id: switch.light_storage}
+        - conditions: [{condition: trigger, id: door_closed}]
+          sequence:
+            # Новое движение за эти 40 с перезапустит автоматизацию (mode: restart) и отменит выключение.
+            - delay: "00:00:40"
+            - action: switch.turn_off
+              target: {entity_id: switch.light_storage}
+        - conditions: [{condition: trigger, id: quiet}]
+          sequence:
+            - action: switch.turn_off
+              target: {entity_id: switch.light_storage}
