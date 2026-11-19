@@ -44,6 +44,7 @@ PPE (flow_offloading_hw) ускоряет только кабель, до Wi-Fi 
 - as21xxx.ko из PR 24990 лежит в overlay (taint O) — только для 6.18.55.
 
 ## Обновление r36928 → r37395+ (отложено 18.10.2026)
+- 19.11.2026: свежий снапшот r38468-ecd9120f04 (ядро 6.18.60, 698 коммитов после r37770): mt76 2026-10-28 (mt7996: проверки ответов MCU, NSS beamforming), mtk_wed фиксы (rx reset, detach, PCIe domain 2), ~70 фиксов hostapd по MLO, firewall4/procd/dnsmasq/mbedtls 3.6.8. Для 8X отдельно ничего; PR 25751 и 24990 не влиты. as21xxx.ko из PR 24990 под 6.18.60 не подойдёт (другой vermagic).
 - Зачем: ~130 коммитов по MLO/hostapd/wifi-scripts (стабильность AP MLD, station dump по линкам, PMF на EHT/6 ГГц), mt76 2026-10-08 (фиксы mt7996), фикс WED WDMA TX hang. Ядро то же 6.18.55.
 - Перед: `sysupgrade-prepare.sh` (уже не сохраняет board-base.json), копия `/etc/config/wireless`.
 - После: `lsmod | grep as21xxx` (модуль из PR 24990 может не загрузиться при другом vermagic); BSSID Wi-Fi может смениться (MAC теперь раздаёт netifd); `iw dev ap-mld0 station dump` с Pixel.
