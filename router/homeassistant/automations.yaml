@@ -303,10 +303,10 @@
       target:
         entity_id: "{{ to_off }}"
 - id: bath_mirror_on
-  alias: 'Ванная: подсветка зеркала'
+  alias: 'Ванная: зеркало и свет'
   description: >-
-    Подсветка зеркала включается при открытии двери ванной или при движении в ванной — всегда, и ночью тоже.
-    Выключается через 5 минут после того, как датчик ванной перестал видеть движение.
+    Дверь ванной открыли или движение: подсветка зеркала — всегда; основной свет — только 9:00–22:00.
+    5 мин без движения: гаснет зеркало, а 9:00–22:00 и основной свет (ночью основной — общее правило 30 мин).
   mode: single
   triggers:
     - trigger: state
@@ -337,6 +337,14 @@
           sequence:
             - action: switch.turn_off
               target: {entity_id: switch.light_bath_mirror}
+            - if: [{condition: time, after: "09:00:00", before: "22:00:00"}]
+              then:
+                - action: switch.turn_off
+                  target: {entity_id: switch.light_bath}
       default:
         - action: switch.turn_on
           target: {entity_id: switch.light_bath_mirror}
+        - if: [{condition: time, after: "09:00:00", before: "22:00:00"}]
+          then:
+            - action: switch.turn_on
+              target: {entity_id: switch.light_bath}
