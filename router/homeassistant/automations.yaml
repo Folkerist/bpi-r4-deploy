@@ -83,25 +83,23 @@
 - id: motion_sensor_test_blink
   alias: Тест датчиков движения
   description: >-
-    Режим проверки: каждый датчик движения при срабатывании моргает своим светом
-    (переключает на 1,5 с и возвращает). Включать вручную на время проверки.
+    Режим проверки: каждый датчик движения на каждое событие моргает (2 раза) всем светом своей комнаты
+    и возвращает как было. Кладовки нет — там свой автосвет. Включать вручную на время проверки.
   initial_state: false
   mode: parallel
   max: 20
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.vannaia_motion
-        - binary_sensor.tualet_motion
-        - binary_sensor.koridor_motion
-        - binary_sensor.prikhozhaia_motion
         - binary_sensor.kukhnia_motion
         - binary_sensor.kukhnia_stol_motion
-        - binary_sensor.prikhozhaia_vkhod_motion
-        - binary_sensor.kladovka_motion
         - binary_sensor.zal_motion
-  # Без to/from: срабатывает и на повторные события датчика, пока он уже в «on»
-  # (датчик шлёт повтор не чаще раза в 25–60 с).
+        - binary_sensor.koridor_motion
+        - binary_sensor.prikhozhaia_motion
+        - binary_sensor.prikhozhaia_vkhod_motion
+        - binary_sensor.vannaia_motion
+        - binary_sensor.tualet_motion
+  # Без to/from: срабатывает и на повторные события датчика, пока он уже в «on».
   conditions:
     - condition: template
       value_template: >-
@@ -109,25 +107,24 @@
            and trigger.from_state is not none
            and trigger.from_state.state not in ['unavailable', 'unknown'] }}
   variables:
-    lights:
-      binary_sensor.vannaia_motion: switch.light_bath
-      binary_sensor.tualet_motion: switch.light_wc
-      binary_sensor.koridor_motion: switch.light_corridor
-      binary_sensor.prikhozhaia_motion: switch.light_entry_main
-      binary_sensor.kukhnia_motion: switch.light_kitchen_perimeter
-      binary_sensor.kukhnia_stol_motion: switch.light_kitchen_main
-      binary_sensor.prikhozhaia_vkhod_motion: switch.light_entry_perimeter
-      binary_sensor.kladovka_motion: switch.light_storage
-      binary_sensor.zal_motion: switch.light_hall_perimeter
-    target: "{{ lights[trigger.entity_id] }}"
+    rooms:
+      binary_sensor.kukhnia_motion: [switch.light_kitchen_perimeter]
+      binary_sensor.kukhnia_stol_motion: [switch.light_kitchen_main]
+      binary_sensor.zal_motion: [light.zal_yeelight_hall]
+      binary_sensor.koridor_motion: [switch.light_corridor, switch.light_hall_main, switch.light_hall_perimeter]
+      binary_sensor.prikhozhaia_motion: [switch.light_entry_main]
+      binary_sensor.prikhozhaia_vkhod_motion: [switch.light_entry_perimeter]
+      binary_sensor.vannaia_motion: [switch.light_bath]
+      binary_sensor.tualet_motion: [switch.light_wc]
+    target: "{{ rooms[trigger.entity_id] }}"
   actions:
-    - action: homeassistant.toggle
-      target:
-        entity_id: "{{ target }}"
-    - delay: "00:00:01.5"
-    - action: homeassistant.toggle
-      target:
-        entity_id: "{{ target }}"
+    - repeat:
+        count: 4
+        sequence:
+          - action: homeassistant.toggle
+            target:
+              entity_id: "{{ target }}"
+          - delay: "00:00:01"
 - id: low_battery_notify
   alias: Низкий заряд батареек
   description: >-
