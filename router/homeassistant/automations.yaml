@@ -265,7 +265,7 @@
         lights: [switch.light_entry_main, switch.light_entry_perimeter]
       - name: Ванная
         sensors: [binary_sensor.vannaia_motion]
-        lights: [switch.light_bath]
+        lights: [switch.light_bath, switch.light_bath_mirror]
       - name: Туалет
         sensors: [binary_sensor.tualet_motion]
         lights: [switch.light_wc]
@@ -302,3 +302,29 @@
     - action: homeassistant.turn_off
       target:
         entity_id: "{{ to_off }}"
+- id: bath_mirror_on
+  alias: 'Ванная: подсветка зеркала'
+  description: >-
+    Подсветка зеркала включается при открытии двери ванной или при движении в ванной — всегда, и ночью тоже.
+    Выключает её общая автоматизация «Автовыключение света без движения» (комната Ванная).
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.vannaia_dver_contact
+      from: "off"
+      to: "on"
+    # Без to/from: и на повторные события датчика, пока он уже в «on».
+    - trigger: state
+      entity_id: binary_sensor.vannaia_motion
+  conditions:
+    - condition: template
+      value_template: >-
+        {{ trigger.to_state is not none and trigger.to_state.state == 'on'
+           and trigger.from_state is not none
+           and trigger.from_state.state not in ['unavailable', 'unknown'] }}
+    - condition: state
+      entity_id: switch.light_bath_mirror
+      state: "off"
+  actions:
+    - action: switch.turn_on
+      target: {entity_id: switch.light_bath_mirror}
