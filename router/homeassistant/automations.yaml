@@ -381,3 +381,34 @@
       default:
         - action: switch.turn_on
           target: {entity_id: switch.light_wc}
+- id: entrance_door_telegram_photo
+  alias: 'Входная дверь: фото в Telegram'
+  description: >-
+    Входная дверь открылась — два кадра с камеры C700 (через 1 и 4 с) в группу Telegram «Home» (бот HOME).
+    Кадр берётся у go2rtc (/api/frame.jpeg?src=c700). Ошибка отправки не останавливает автоматизацию.
+  mode: single
+  max_exceeded: silent
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.prikhozhaia_dver_contact
+      from: "off"
+      to: "on"
+  variables:
+    when: "{{ now().strftime('%H:%M:%S') }}"
+  actions:
+    - delay: "00:00:01"
+    - action: telegram_bot.send_photo
+      continue_on_error: true
+      data:
+        config_entry_id: 01M7TCDWR6QKZ4YC6JWJ4VQD4P
+        chat_id: -5154704279
+        url: "http://127.0.0.1:1985/api/frame.jpeg?src=c700"
+        caption: "🚪 Открыта входная дверь, {{ when }} (кадр 1)"
+    - delay: "00:00:03"
+    - action: telegram_bot.send_photo
+      continue_on_error: true
+      data:
+        config_entry_id: 01M7TCDWR6QKZ4YC6JWJ4VQD4P
+        chat_id: -5154704279
+        url: "http://127.0.0.1:1985/api/frame.jpeg?src=c700"
+        caption: "🚪 Открыта входная дверь, {{ when }} (кадр 2)"

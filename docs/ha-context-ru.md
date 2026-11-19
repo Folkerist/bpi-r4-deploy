@@ -295,6 +295,13 @@
   вкл (всегда, и ночью), 5 мин без движения → выкл. Датчик в Mi Home «движ кот» — если кот будет включать свет ночью,
   ограничить включение по времени.
 
+- Telegram (19.11.2026): интеграция Telegram bot, бот «HOME», режим Polling (api.telegram.org идёт через mihomo на
+  RB5009 — FakeIP 198.18.x; прокси в интеграции не нужен). Токен введён в UI HA, в репозиторий/чат не попадал.
+  config_entry_id 01M7TCDWR6QKZ4YC6JWJ4VQD4P, разрешённый чат — группа «Home» `-5154704279` (id видно в логе HA
+  «Unauthorized update … chat id …», пока чат не разрешён), notify-объект `notify.home`.
+  Автоматизация «Входная дверь: фото в Telegram» (id entrance_door_telegram_photo): `prikhozhaia_dver_contact`
+  off→on → через 1 и 4 с `telegram_bot.send_photo` url `http://127.0.0.1:1985/api/frame.jpeg?src=c700` (go2rtc).
+
 ## Сеть
 - Сейчас: BPI-R4 = роутер `192.168.1.1`, основной канал LTE; forkop (sing-box) направляет заблокированное
   в WireGuard `wg0` → RB5009 (`10.10.10.9` → `10.10.10.1`), резерв — подписка (priority group, без RU).
