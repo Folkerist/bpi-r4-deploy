@@ -146,7 +146,7 @@
         - sensor.detskaia_battery
         - sensor.kukhnia_battery
         - sensor.e4aaec6dff8c_battery
-        - sensor.e4aaec6f2c95_battery
+        - sensor.kladovka_dver_battery
         - sensor.e4aaec6f9b2a_battery
         - sensor.kladovka_motion_battery
         - sensor.koridor_motion_battery
@@ -181,3 +181,34 @@
         data:
           tag: low-battery
           channel: Батарейки
+- id: kladovka_light_by_door
+  alias: 'Кладовка: свет по двери'
+  description: >-
+    Дверь кладовки открыли — свет включается, закрыли — выключается.
+    Если дверь осталась открытой 15 минут — свет выключается.
+  mode: restart
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.kladovka_dver_contact
+      from: "off"
+      to: "on"
+      id: open
+    - trigger: state
+      entity_id: binary_sensor.kladovka_dver_contact
+      from: "on"
+      to: "off"
+      id: closed
+    - trigger: state
+      entity_id: binary_sensor.kladovka_dver_contact
+      to: "on"
+      for: "00:15:00"
+      id: left_open
+  actions:
+    - choose:
+        - conditions: [{condition: trigger, id: open}]
+          sequence:
+            - action: switch.turn_on
+              target: {entity_id: switch.light_storage}
+      default:
+        - action: switch.turn_off
+          target: {entity_id: switch.light_storage}
