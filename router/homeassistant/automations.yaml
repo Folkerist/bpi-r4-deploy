@@ -242,7 +242,7 @@
   description: >-
     Раз в минуту: если в комнате горит свет (включён 30+ мин назад) и все её датчики движения
     30+ мин в состоянии «нет движения», свет комнаты выключается. Датчик не на связи — не выключать.
-    Кладовка — своя автоматизация; в спальне и детской датчиков нет.
+    Детская и спальня (датчиков нет): свет выключается, если горит 60+ мин. Кладовка — своя автоматизация.
   mode: single
   triggers:
     - trigger: time_pattern
@@ -268,10 +268,19 @@
       - name: Туалет
         sensors: [binary_sensor.tualet_motion]
         lights: [switch.light_wc]
+      # Без датчиков движения: просто выключить, если свет горит дольше указанного времени.
+      - name: Детская
+        sensors: []
+        minutes: 60
+        lights: [switch.light_kids]
+      - name: Спальня
+        sensors: []
+        minutes: 60
+        lights: [light.spalnia_yeelight_bed, light.spalnia_yeelight_bed_ambilight]
     to_off: >-
-      {% set limit = minutes * 60 %}
       {% set ns = namespace(out=[]) %}
       {% for r in rooms %}
+        {% set limit = (r.minutes | default(minutes)) * 60 %}
         {% set q = namespace(quiet=true) %}
         {% for s in r.sensors %}
           {% set st = states[s.split('.')[0]][s.split('.')[1]] %}
