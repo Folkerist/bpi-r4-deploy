@@ -210,6 +210,8 @@ motion_room("fp-motion-tualet.svg", room_pts["wc"])
 motion_room("fp-motion-prikhozhaia.svg", room_pts["entry"])
 motion_spot("fp-motion-kukhnia-stol.svg", tx, ty, 22)
 motion_room("fp-motion-vannaia.svg", room_pts["bath"])
+motion_room("fp-motion-kladovka.svg", room_pts["storage"])
+motion_spot("fp-motion-prikhozhaia-vkhod.svg", 350, 806, 15)  # sensor at the entrance door (bottom of the entry leg)
 
 # Entrance door open (binary_sensor.e4aaec6dff8c_contact): red leaf + swing on top of the plan's door symbol
 # (door "h" 825, 336..364, hinge at 364, opens outwards), red line across the opening.

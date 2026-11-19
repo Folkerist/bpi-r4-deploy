@@ -166,6 +166,24 @@ views:
                   tap_action: {action: none}
                   hold_action: {action: none}
                   style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: binary_sensor.kladovka_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-motion-kladovka.svg?v=1
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
+                - type: image
+                  entity: binary_sensor.prikhozhaia_vkhod_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    "on": /local/fp-motion-prikhozhaia-vkhod.svg?v=1
+                    "off": /local/fp-empty.svg?v=2
+                  tap_action: {action: none}
+                  hold_action: {action: none}
+                  style: {left: 50%, top: 50%, width: 70.97%, pointer-events: none}
                 # Камера C700: поле зрения (статично) — на входную дверь.
                 - type: image
                   image: /local/fp-camera-fov.svg?v=1
@@ -1349,6 +1367,36 @@ views:
                   image: /local/fp-empty.svg?v=2
                   state_image:
                     'on': /local/fp-motion-prikhozhaia.svg?v=1
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: binary_sensor.kladovka_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-motion-kladovka.svg?v=1
+                    'off': /local/fp-empty.svg?v=2
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: none
+                  style:
+                    left: 50%
+                    top: 50%
+                    width: 100%
+                    pointer-events: none
+                - type: image
+                  entity: binary_sensor.prikhozhaia_vkhod_motion
+                  image: /local/fp-empty.svg?v=2
+                  state_image:
+                    'on': /local/fp-motion-prikhozhaia-vkhod.svg?v=1
                     'off': /local/fp-empty.svg?v=2
                   tap_action:
                     action: none
