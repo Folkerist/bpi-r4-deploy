@@ -18,7 +18,7 @@ const ROOMS = [
     lights: ["light.spalnia_yeelight_bed", "light.spalnia_yeelight_bed_ambilight"],
     media: ["media_player.yandex_station_x11bmg2000x29z"], problem: "binary_sensor.fp_problem_spalnia", vac: ["spalnia"] },
   { id: "detskaia", area: "detskaia", name: "Детская", icon: "teddy-bear", group: "live", plan: ["kids", "balcony"],
-    temp: "sensor.detskaia_temperature", hum: "sensor.detskaia_humidity",
+    temp: "sensor.detskaia_temperature", hum: "sensor.detskaia_humidity", lights: ["switch.light_kids"],
     media: ["media_player.yandex_station_m104q81001k74k"], problem: "binary_sensor.fp_problem_detskaia", vac: ["detskaia"] },
   { id: "prikhozhaia", area: "prikhozhaia", name: "Прихожая", icon: "door", group: "other", plan: ["entry"],
     lights: ["switch.light_entry_main", "switch.light_entry_perimeter"],
@@ -31,7 +31,7 @@ const ROOMS = [
     motion: ["binary_sensor.koridor_motion"], camera: "camera.c700", problem: "binary_sensor.fp_problem_koridor",
     vac: ["koridor", "koridor2"] },
   { id: "vannaia", area: "vannaia", name: "Ванная", icon: "shower-head", group: "other", plan: ["bath"],
-    temp: "sensor.vannaia_temperature", hum: "sensor.vannaia_humidity", lights: ["switch.light_bath"],
+    temp: "sensor.vannaia_temperature", hum: "sensor.vannaia_humidity", lights: ["switch.light_bath", "switch.light_bath_mirror"],
     motion: ["binary_sensor.vannaia_motion"], media: ["media_player.yandex_station_r10cv31007wqfn"],
     problem: "binary_sensor.fp_problem_vannaia" },
   { id: "tualet", area: "tualet", name: "Туалет", icon: "toilet", group: "other", plan: ["wc"],
@@ -50,7 +50,7 @@ const LIGHT_NAMES = {
   "light.spalnia_yeelight_bed": "Люстра", "light.spalnia_yeelight_bed_ambilight": "Подсветка",
   "switch.light_entry_main": "Люстра", "switch.light_entry_perimeter": "Подсветка",
   "switch.light_hall_main": "Люстра", "switch.light_hall_perimeter": "Подсветка", "switch.light_corridor": "Малый коридор",
-  "switch.light_bath": "Свет", "switch.light_wc": "Свет", "switch.light_storage": "Свет",
+  "switch.light_bath": "Свет", "switch.light_bath_mirror": "Зеркало", "switch.light_kids": "Свет", "switch.light_wc": "Свет", "switch.light_storage": "Свет",
 };
 
 // Зоны уборки (как в script.fp_vacuum_clean) и их контуры на плане.

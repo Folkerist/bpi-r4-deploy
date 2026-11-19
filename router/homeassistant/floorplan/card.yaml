@@ -502,6 +502,12 @@ views:
                   hold_action: {action: more-info}
                   style: {left: 72.3%, top: 19%, --mdc-icon-size: 36px}
                 - type: state-icon
+                  entity: switch.light_bath_mirror
+                  icon: mdi:mirror
+                  tap_action: {action: toggle}
+                  hold_action: {action: more-info}
+                  style: {left: 51.6%, top: 21.5%, --mdc-icon-size: 24px}
+                - type: state-icon
                   entity: switch.light_kids
                   icon: mdi:ceiling-light
                   tap_action: {action: toggle}
@@ -976,6 +982,7 @@ views:
                         - light.zal_yeelight_hall
                         - light.spalnia_yeelight_bed
                         - switch.light_kids
+                        - switch.light_bath_mirror
                     confirmation: {text: "Включить весь свет?"}
                   style: {left: 89.68%, top: 49.4%, width: 5.81%, height: 7.09%}
                 - type: icon
@@ -998,6 +1005,7 @@ views:
                         - light.zal_yeelight_hall
                         - light.spalnia_yeelight_bed
                         - switch.light_kids
+                        - switch.light_bath_mirror
                     confirmation: {text: "Включить весь свет?"}
                   style: {left: 88.2%, top: 49.4%, --mdc-icon-size: 18px, color: var(--primary-color)}
                 - type: image
@@ -1020,6 +1028,7 @@ views:
                         - light.zal_yeelight_hall
                         - light.spalnia_yeelight_bed
                         - switch.light_kids
+                        - switch.light_bath_mirror
                     confirmation: {text: "Выключить весь свет?"}
                   style: {left: 95.81%, top: 49.4%, width: 5.81%, height: 7.09%}
                 - type: icon
@@ -1042,6 +1051,7 @@ views:
                         - light.zal_yeelight_hall
                         - light.spalnia_yeelight_bed
                         - switch.light_kids
+                        - switch.light_bath_mirror
                     confirmation: {text: "Выключить весь свет?"}
                   style: {left: 94.35%, top: 49.4%, --mdc-icon-size: 18px, color: var(--primary-color)}
                 # Пылесосы: статус, заряд и маленькие плашки Старт / Пауза / На базу (плашки и подписи — в SVG).
@@ -1998,6 +2008,17 @@ views:
                     top: 19%
                     --mdc-icon-size: 4.6cqw
                 - type: state-icon
+                  entity: switch.light_bath_mirror
+                  icon: mdi:mirror
+                  tap_action:
+                    action: toggle
+                  hold_action:
+                    action: more-info
+                  style:
+                    left: 52.3%
+                    top: 21.5%
+                    --mdc-icon-size: 3.1cqw
+                - type: state-icon
                   entity: switch.light_kids
                   icon: mdi:ceiling-light
                   tap_action:
@@ -2664,6 +2685,7 @@ views:
                       - light.zal_yeelight_hall
                       - light.spalnia_yeelight_bed
                       - switch.light_kids
+                      - switch.light_bath_mirror
                     confirmation:
                       text: Включить весь свет?
                 - type: button

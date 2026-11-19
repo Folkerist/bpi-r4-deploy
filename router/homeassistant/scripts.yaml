@@ -122,7 +122,7 @@ home_leave:
                     switch.light_kitchen_perimeter, light.spalnia_yeelight_bed, light.spalnia_yeelight_bed_ambilight,
                     switch.light_entry_main, switch.light_entry_perimeter, switch.light_hall_main,
                     switch.light_hall_perimeter, switch.light_corridor, switch.light_bath, switch.light_wc,
-                    switch.light_storage]
+                    switch.light_storage, switch.light_kids, switch.light_bath_mirror]
 
 # «Спокойной ночи» — сценарий Яндекса «Ночной режим» (его фраза «Выключи все»: свет, ТВ, колонки, фитолампа,
 # динамики, гирлянда) + то, чего нет в Яндексе: пылесосы, которые убирают, — на базу.

@@ -306,25 +306,37 @@
   alias: 'Ванная: подсветка зеркала'
   description: >-
     Подсветка зеркала включается при открытии двери ванной или при движении в ванной — всегда, и ночью тоже.
-    Выключает её общая автоматизация «Автовыключение света без движения» (комната Ванная).
+    Выключается через 5 минут после того, как датчик ванной перестал видеть движение.
   mode: single
   triggers:
     - trigger: state
       entity_id: binary_sensor.vannaia_dver_contact
       from: "off"
       to: "on"
+      id: door
     # Без to/from: и на повторные события датчика, пока он уже в «on».
     - trigger: state
       entity_id: binary_sensor.vannaia_motion
+      id: motion
+    - trigger: state
+      entity_id: binary_sensor.vannaia_motion
+      to: "off"
+      for: "00:05:00"
+      id: quiet
   conditions:
     - condition: template
       value_template: >-
-        {{ trigger.to_state is not none and trigger.to_state.state == 'on'
-           and trigger.from_state is not none
-           and trigger.from_state.state not in ['unavailable', 'unknown'] }}
-    - condition: state
-      entity_id: switch.light_bath_mirror
-      state: "off"
+        {% if trigger.id == 'motion' %}
+          {{ trigger.to_state is not none and trigger.to_state.state == 'on'
+             and trigger.from_state is not none
+             and trigger.from_state.state not in ['unavailable', 'unknown'] }}
+        {% else %}true{% endif %}
   actions:
-    - action: switch.turn_on
-      target: {entity_id: switch.light_bath_mirror}
+    - choose:
+        - conditions: [{condition: trigger, id: quiet}]
+          sequence:
+            - action: switch.turn_off
+              target: {entity_id: switch.light_bath_mirror}
+      default:
+        - action: switch.turn_on
+          target: {entity_id: switch.light_bath_mirror}
