@@ -84,7 +84,9 @@ phone = {"type": "vertical-stack", "cards": [
     {"type": "picture-elements",
      "image": src["image"].replace("floorplan-", "floorplan-m-"),
      "dark_mode_image": src["dark_mode_image"].replace("floorplan-", "floorplan-m-"),
-     "card_mod": {"style": "ha-card { container-type: inline-size; }\n"},
+     "card_mod": {"style": "ha-card { container-type: inline-size; }\n"
+                           "@keyframes fp-spin { from { transform: translate(-50%, -50%) rotate(0deg); }"
+                           " to { transform: translate(-50%, -50%) rotate(360deg); } }\n"},
      "elements": els},
     {"type": "grid", "columns": 2, "square": False, "cards": [
         {"type": "weather-forecast", "entity": "weather.pavshino", "forecast_type": "daily",

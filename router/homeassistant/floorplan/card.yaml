@@ -28,6 +28,11 @@ views:
                     max-width: calc((100vh - 72px) * 1.57);
                     margin: 0 auto;
                   }
+                  /* вращение значка вытяжки (элементы центрируются через translate(-50%,-50%) — сохраняем его) */
+                  @keyframes fp-spin {
+                    from { transform: translate(-50%, -50%) rotate(0deg); }
+                    to { transform: translate(-50%, -50%) rotate(360deg); }
+                  }
               elements:
                 # Подсветка комнаты, когда свет включён (на всю картинку, клики пропускает).
                 - type: image
@@ -501,6 +506,25 @@ views:
                   tap_action: {action: toggle}
                   hold_action: {action: more-info}
                   style: {left: 72.3%, top: 19%, --mdc-icon-size: 36px}
+                # Вытяжка ванной: крутится, пока работает; нажатие — вкл/выкл.
+                - type: conditional
+                  conditions: [{entity: switch.vannaia_vytiazhka, state: "on"}]
+                  elements:
+                    - type: state-icon
+                      entity: switch.vannaia_vytiazhka
+                      icon: mdi:fan
+                      tap_action: {action: toggle}
+                      hold_action: {action: more-info}
+                      style: {left: 60%, top: 21.5%, --mdc-icon-size: 24px, color: "#4fc3f7", animation: fp-spin 1.2s linear infinite}
+                - type: conditional
+                  conditions: [{entity: switch.vannaia_vytiazhka, state_not: "on"}]
+                  elements:
+                    - type: state-icon
+                      entity: switch.vannaia_vytiazhka
+                      icon: mdi:fan
+                      tap_action: {action: toggle}
+                      hold_action: {action: more-info}
+                      style: {left: 60%, top: 21.5%, --mdc-icon-size: 24px}
                 - type: state-icon
                   entity: switch.light_bath_mirror
                   icon: mdi:mirror
@@ -1168,6 +1192,8 @@ views:
                 dark_mode_image: /local/floorplan-m-dark.svg?v=10
                 card_mod:
                   style: 'ha-card { container-type: inline-size; }
+
+                    @keyframes fp-spin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
 
                     '
                 elements:
@@ -2007,6 +2033,40 @@ views:
                     left: 81.4%
                     top: 19%
                     --mdc-icon-size: 4.6cqw
+                - type: conditional
+                  conditions:
+                  - entity: switch.vannaia_vytiazhka
+                    state: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: switch.vannaia_vytiazhka
+                    icon: mdi:fan
+                    tap_action:
+                      action: toggle
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 64.1%
+                      top: 21.5%
+                      --mdc-icon-size: 3.1cqw
+                      color: '#4fc3f7'
+                      animation: fp-spin 1.2s linear infinite
+                - type: conditional
+                  conditions:
+                  - entity: switch.vannaia_vytiazhka
+                    state_not: 'on'
+                  elements:
+                  - type: state-icon
+                    entity: switch.vannaia_vytiazhka
+                    icon: mdi:fan
+                    tap_action:
+                      action: toggle
+                    hold_action:
+                      action: more-info
+                    style:
+                      left: 64.1%
+                      top: 21.5%
+                      --mdc-icon-size: 3.1cqw
                 - type: state-icon
                   entity: switch.light_bath_mirror
                   icon: mdi:mirror

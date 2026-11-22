@@ -410,8 +410,9 @@
 - id: bath_fan_humidity
   alias: 'Ванная: вытяжка по влажности'
   description: >-
-    ВКЛ: ванная влажнее квартиры на 8+ (sensor.vannaia_humidity_delta), или рост 4+ между показаниями датчика,
-    или влажность 65%+. ВЫКЛ (если включила автоматика): разница ≤ 3 и влажность < 65 и проработала 10+ мин.
+    ВКЛ: включился основной свет ванной (выключателем или по движению); или ванная влажнее квартиры на 8+
+    (sensor.vannaia_humidity_delta), или рост 4+ между показаниями датчика, или влажность 65%+.
+    Пока свет горит — работает; после выключения света — ещё 5+ мин и до нормальной влажности. ВЫКЛ (если включила автоматика): разница ≤ 3 и влажность < 65 и проработала 10+ мин.
     Включили рукой — выкл через 20 мин, если влажность в норме. Предохранитель — 90 мин.
     Выключили, пока влажно (рукой или предохранитель), — пауза 30 мин (input_boolean.vytiazhka_pauza_avtomatiki). Датчик ванной шлёт данные раз в ~8 мин.
   mode: queued
@@ -427,6 +428,11 @@
       entity_id: switch.vannaia_vytiazhka
       to: "off"
       id: fan_off
+    - trigger: state
+      entity_id: switch.light_bath
+      from: "off"
+      to: "on"
+      id: light_on
   variables:
     fan: switch.vannaia_vytiazhka
     flag: input_boolean.vytiazhka_vkliuchena_avtomatikoi
@@ -444,6 +450,9 @@
     auto: "{{ is_state(flag, 'on') }}"
     humid: "{{ d >= 8 or rise | float >= 4 or h >= 65 }}"
     normal: "{{ d <= 3 and h < 65 }}"
+    light_on: "{{ is_state('switch.light_bath', 'on') }}"
+    light_off_min: >-
+      {{ 0 if light_on else ((now() - states.switch.light_bath.last_changed).total_seconds() / 60) | round(1) }}
   actions:
     - choose:
         # Вытяжку выключили — сбросить признак «включено автоматикой»; если выключили, пока ещё влажно
@@ -462,7 +471,7 @@
             - action: input_boolean.turn_off
               target: {entity_id: "{{ pause }}"}
         # Включить: влажно, вытяжка выключена, нет паузы.
-        - conditions: "{{ not fan_on and humid and is_state(pause, 'off') }}"
+        - conditions: "{{ not fan_on and (humid or trigger.id == 'light_on') and is_state(pause, 'off') }}"
           sequence:
             - action: switch.turn_on
               target: {entity_id: "{{ fan }}"}
@@ -471,7 +480,7 @@
         # Выключить: включила автоматика и влажность в норме 10+ мин работы; включили рукой — 20 мин и норма;
         # или предохранитель 90 мин.
         - conditions: >-
-            {{ fan_on and ((auto and normal and minutes >= 10)
+            {{ fan_on and ((auto and normal and minutes >= 10 and not light_on and light_off_min >= 5)
                            or (not auto and normal and d < 5 and minutes >= 20)
                            or minutes >= 90) }}
           sequence:
