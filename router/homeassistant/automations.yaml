@@ -486,3 +486,67 @@
           sequence:
             - action: switch.turn_off
               target: {entity_id: "{{ fan }}"}
+- id: koridor_night_light
+  alias: 'Коридор: ночник у лотка'
+  description: >-
+    21:00–09:00, если в обоих коридорах не горит ни один свет: движение у лотка (binary_sensor.koridor_motion) —
+    ночник вкл; 2 мин без движения — выкл. Включили основной/доп. свет коридора — ночник (включённый автоматикой) выкл.
+    Включили вручную (Алиса, кнопка розетки, HA) — выкл через 2 часа.
+  mode: queued
+  max: 5
+  triggers:
+    # Без to/from: и на повторные события датчика, пока он уже в «on».
+    - trigger: state
+      entity_id: binary_sensor.koridor_motion
+      id: motion
+    - trigger: state
+      entity_id: binary_sensor.koridor_motion
+      to: "off"
+      for: "00:02:00"
+      id: quiet
+    - trigger: state
+      entity_id: [switch.light_corridor, switch.light_hall_main, switch.light_hall_perimeter]
+      to: "on"
+      id: main_on
+    # Раз в 5 мин: ручное включение старше 2 ч (по last_changed — переживает перезапуск HA).
+    - trigger: time_pattern
+      minutes: /5
+      id: manual_timeout
+    - trigger: state
+      entity_id: switch.koridor_nochnik
+      to: "off"
+      id: lamp_off
+  variables:
+    lamp: switch.koridor_nochnik
+    flag: input_boolean.nochnik_vkliuchen_avtomatikoi
+    dark: >-
+      {{ is_state('switch.light_corridor', 'off') and is_state('switch.light_hall_main', 'off')
+         and is_state('switch.light_hall_perimeter', 'off') }}
+  actions:
+    - choose:
+        - conditions: "{{ trigger.id == 'lamp_off' }}"
+          sequence:
+            - action: input_boolean.turn_off
+              target: {entity_id: "{{ flag }}"}
+        - conditions:
+            - "{{ trigger.id == 'motion' and trigger.to_state is not none and trigger.to_state.state == 'on' }}"
+            - "{{ trigger.from_state is not none and trigger.from_state.state not in ['unavailable', 'unknown'] }}"
+            - condition: time
+              after: "21:00:00"
+              before: "09:00:00"
+            - "{{ dark and is_state(lamp, 'off') }}"
+          sequence:
+            - action: input_boolean.turn_on
+              target: {entity_id: "{{ flag }}"}
+            - action: switch.turn_on
+              target: {entity_id: "{{ lamp }}"}
+        - conditions: "{{ trigger.id in ['quiet', 'main_on'] and is_state(flag, 'on') and is_state(lamp, 'on') }}"
+          sequence:
+            - action: switch.turn_off
+              target: {entity_id: "{{ lamp }}"}
+        - conditions: >-
+            {{ trigger.id == 'manual_timeout' and is_state(flag, 'off') and is_state(lamp, 'on')
+               and (now() - states[lamp].last_changed).total_seconds() >= 7200 }}
+          sequence:
+            - action: switch.turn_off
+              target: {entity_id: "{{ lamp }}"}

@@ -325,6 +325,12 @@
   На карте — значок mdi:fan в ванной (крутится при работе: @keyframes fp-spin в card_mod карты и в gen-card.py). По мотивам блюпринтов Blackshome/zanix
   («Bathroom Humidity Exhaust Fan») и «Bathroom Light & Fan Control Pro».
 
+- Ночник в коридоре у лотка (22.11.2026): умная розетка Uascent по Matter, `switch.koridor_nochnik`. Автоматизация
+  «Коридор: ночник у лотка» (id koridor_night_light): 21:00–09:00 и все три света коридора выключены
+  (light_corridor, light_hall_main, light_hall_perimeter) → движение `koridor_motion` → ночник вкл
+  (`input_boolean.nochnik_vkliuchen_avtomatikoi`); 2 мин без движения или включили свет коридора → выкл.
+  Включили вручную (Алиса через Yandex Smart Home, кнопка, HA) → выкл через 2 ч (проверка раз в 5 мин по last_changed).
+
 ## Сеть
 - Сейчас: BPI-R4 = роутер `192.168.1.1`, основной канал LTE; forkop (sing-box) направляет заблокированное
   в WireGuard `wg0` → RB5009 (`10.10.10.9` → `10.10.10.1`), резерв — подписка (priority group, без RU).
