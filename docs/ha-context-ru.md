@@ -300,7 +300,10 @@
   config_entry_id 01M7TCDWR6QKZ4YC6JWJ4VQD4P, разрешённый чат — группа «Home» `-5154704279` (id видно в логе HA
   «Unauthorized update … chat id …», пока чат не разрешён), notify-объект `notify.home`.
   Автоматизация «Входная дверь: фото в Telegram» (id entrance_door_telegram_photo): `prikhozhaia_dver_contact`
-  off→on → сразу и через 8 с `script.tg_camera_photo` (send_photo url `http://127.0.0.1:1985/api/frame.jpeg?src=c700`,
+  off→on (22.11: «Входная дверь: фото и видео в Telegram») → сразу фото `script.tg_camera_photo` и видео
+  `telegram_bot.send_video` url `http://127.0.0.1:1985/api/stream.mp4?src=c700&duration=15` (~10 с, H.265 1080p 10 fps,
+  ~200 КБ, в Telegram открывается; приходит ~через 17 с). api.io.mi.com теперь через mihomo (FakeIP), таймаутов нет.
+  Раньше: сразу и через 8 с `script.tg_camera_photo` (send_photo url `http://127.0.0.1:1985/api/frame.jpeg?src=c700`,
   без повторов: ответ send_photo пустой, с повторами слались дубли). Кадр готов ~через 7–8 с (ждёт опорный кадр камеры). go2rtc: `preload: c700: "video"` (поток всегда подключён, кадр ~4 с; без него первые
   запросы кадра пустые 10 с; старт потока зависит от облака Xiaomi cn api.io.mi.com).
   ПРОБЛЕМА 19.11: любые загрузки файлов в Telegram (multipart sendPhoto/sendDocument) отвечают 500 «Internal Server
