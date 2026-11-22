@@ -170,3 +170,30 @@
       state: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('kladovka') != '' }}"
       attributes:
         devices: "{% from 'floorplan.jinja' import room_problems %}{{ room_problems('kladovka') }}"
+
+# Влажность для вытяжки ванной: «база» — средняя влажность квартиры (коридор, спальня, зал), «разница» — насколько
+# ванная влажнее базы. Сравнение с базой, а не с фиксированным порогом: летом влажно везде, вытяжка зря не гоняет.
+- sensor:
+    - name: Влажность квартиры (база для вытяжки)
+      unique_id: vannaia_humidity_baseline
+      default_entity_id: sensor.vannaia_humidity_baseline
+      unit_of_measurement: "%"
+      device_class: humidity
+      state_class: measurement
+      state: >
+        {% set v = ['sensor.koridor_humidity','sensor.spalnia_humidity','sensor.zal_humidity']
+                   | map('states') | select('is_number') | map('float') | list %}
+        {{ (v | sum / v | count) | round(1) if v else none }}
+      availability: >
+        {{ ['sensor.koridor_humidity','sensor.spalnia_humidity','sensor.zal_humidity']
+           | map('states') | select('is_number') | list | count > 0 }}
+    - name: Ванная — влажнее квартиры на
+      unique_id: vannaia_humidity_delta
+      default_entity_id: sensor.vannaia_humidity_delta
+      unit_of_measurement: "%"
+      state_class: measurement
+      icon: mdi:water-percent-alert
+      state: >
+        {{ (states('sensor.vannaia_humidity') | float - states('sensor.vannaia_humidity_baseline') | float) | round(1) }}
+      availability: >
+        {{ states('sensor.vannaia_humidity') | is_number and states('sensor.vannaia_humidity_baseline') | is_number }}

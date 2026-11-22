@@ -314,6 +314,15 @@
   (MetaCubeXD 192.168.255.2) — 8/8, фото с двери приходят. Если снова 500 на загрузках — сменить узел в этой группе.
   Ключ сессии Xiaomi из go2rtc.yaml (блок `xiaomi:`) 19.11 попал в чат — обновить (перелогин Xiaomi, заново добавить камеру).
 
+- Вытяжка ванной (22.11.2026): SONOFF Smart Plug-in Unit по Matter (Wi-Fi), `switch.vannaia_vytiazhka`. Датчик
+  влажности ванной (LYWSD03MMC по BLE) шлёт раз в ~8 мин; обычно 37–40%, после душа +12…20 до 52–60%.
+  templates.yaml: `sensor.vannaia_humidity_baseline` (средняя коридор/спальня/зал) и `sensor.vannaia_humidity_delta`
+  (ванная − база). Помощники (UI): `input_boolean.vytiazhka_vkliuchena_avtomatikoi`, `input_boolean.vytiazhka_pauza_avtomatiki`.
+  Автоматизация «Ванная: вытяжка по влажности» (id bath_fan_humidity): ВКЛ — разница ≥ 8, или рост ≥ 4 между
+  показаниями, или ≥ 65%; ВЫКЛ (автовключённая) — разница ≤ 3, < 65% и 10+ мин; включённая рукой — 20 мин и норма;
+  предохранитель 90 мин; выключили, пока влажно, — пауза 30 мин. По мотивам блюпринтов Blackshome/zanix
+  («Bathroom Humidity Exhaust Fan») и «Bathroom Light & Fan Control Pro».
+
 ## Сеть
 - Сейчас: BPI-R4 = роутер `192.168.1.1`, основной канал LTE; forkop (sing-box) направляет заблокированное
   в WireGuard `wg0` → RB5009 (`10.10.10.9` → `10.10.10.1`), резерв — подписка (priority group, без RU).

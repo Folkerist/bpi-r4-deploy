@@ -407,3 +407,73 @@
         chat_id: -5154704279
         url: "http://127.0.0.1:1985/api/stream.mp4?src=c700&duration=15"
         caption: "🎥 Входная дверь, {{ when }}"
+- id: bath_fan_humidity
+  alias: 'Ванная: вытяжка по влажности'
+  description: >-
+    ВКЛ: ванная влажнее квартиры на 8+ (sensor.vannaia_humidity_delta), или рост 4+ между показаниями датчика,
+    или влажность 65%+. ВЫКЛ (если включила автоматика): разница ≤ 3 и влажность < 65 и проработала 10+ мин.
+    Включили рукой — выкл через 20 мин, если влажность в норме. Предохранитель — 90 мин.
+    Выключили, пока влажно (рукой или предохранитель), — пауза 30 мин (input_boolean.vytiazhka_pauza_avtomatiki). Датчик ванной шлёт данные раз в ~8 мин.
+  mode: queued
+  max: 5
+  triggers:
+    - trigger: state
+      entity_id: [sensor.vannaia_humidity, sensor.vannaia_humidity_delta]
+      id: hum
+    - trigger: time_pattern
+      minutes: /2
+      id: tick
+    - trigger: state
+      entity_id: switch.vannaia_vytiazhka
+      to: "off"
+      id: fan_off
+  variables:
+    fan: switch.vannaia_vytiazhka
+    flag: input_boolean.vytiazhka_vkliuchena_avtomatikoi
+    pause: input_boolean.vytiazhka_pauza_avtomatiki
+    h: "{{ states('sensor.vannaia_humidity') | float(0) }}"
+    d: "{{ states('sensor.vannaia_humidity_delta') | float(0) }}"
+    rise: >-
+      {% if trigger.id == 'hum' and trigger.entity_id == 'sensor.vannaia_humidity'
+            and trigger.from_state is not none and trigger.from_state.state | is_number
+            and trigger.to_state.state | is_number %}
+        {{ trigger.to_state.state | float - trigger.from_state.state | float }}
+      {% else %}0{% endif %}
+    fan_on: "{{ is_state(fan, 'on') }}"
+    minutes: "{{ ((now() - states[fan].last_changed).total_seconds() / 60) | round(1) if states[fan] else 0 }}"
+    auto: "{{ is_state(flag, 'on') }}"
+    humid: "{{ d >= 8 or rise | float >= 4 or h >= 65 }}"
+    normal: "{{ d <= 3 and h < 65 }}"
+  actions:
+    - choose:
+        # Вытяжку выключили — сбросить признак «включено автоматикой»; если выключили, пока ещё влажно
+        # (рукой или предохранитель 90 мин), — пауза автоматики на 30 мин.
+        - conditions: "{{ trigger.id == 'fan_off' }}"
+          sequence:
+            - action: input_boolean.turn_off
+              target: {entity_id: "{{ flag }}"}
+            - if: "{{ d >= 5 or h >= 65 }}"
+              then:
+                - action: input_boolean.turn_on
+                  target: {entity_id: "{{ pause }}"}
+        # Пауза закончилась (вытяжка выключена 30+ мин) — снять.
+        - conditions: "{{ is_state(pause, 'on') and not fan_on and minutes >= 30 }}"
+          sequence:
+            - action: input_boolean.turn_off
+              target: {entity_id: "{{ pause }}"}
+        # Включить: влажно, вытяжка выключена, нет паузы.
+        - conditions: "{{ not fan_on and humid and is_state(pause, 'off') }}"
+          sequence:
+            - action: switch.turn_on
+              target: {entity_id: "{{ fan }}"}
+            - action: input_boolean.turn_on
+              target: {entity_id: "{{ flag }}"}
+        # Выключить: включила автоматика и влажность в норме 10+ мин работы; включили рукой — 20 мин и норма;
+        # или предохранитель 90 мин.
+        - conditions: >-
+            {{ fan_on and ((auto and normal and minutes >= 10)
+                           or (not auto and normal and d < 5 and minutes >= 20)
+                           or minutes >= 90) }}
+          sequence:
+            - action: switch.turn_off
+              target: {entity_id: "{{ fan }}"}
