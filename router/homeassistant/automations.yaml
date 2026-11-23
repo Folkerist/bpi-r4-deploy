@@ -550,3 +550,28 @@
           sequence:
             - action: switch.turn_off
               target: {entity_id: "{{ lamp }}"}
+- id: miot_cloud_watchdog
+  alias: 'Xiaomi Miot: перезагрузка облачной записи при недоступности'
+  description: >-
+    Облачная запись Xiaomi Miot (камера C700) при старте берёт список устройств из облака Xiaomi; если облако не
+    ответило — камера недоступна, пока запись не перезагрузить. Камера недоступна 15+ мин — перезагрузить запись
+    (не чаще раза в час). Пылесос S5 вынесен в отдельную локальную запись (IP + токен) и от облака не зависит.
+  mode: single
+  max_exceeded: silent
+  triggers:
+    - trigger: state
+      entity_id: camera.chuangmi_81ac1_63f6_camera_control
+      to: unavailable
+      for: "00:15:00"
+    - trigger: time_pattern
+      minutes: "/30"
+  conditions:
+    - condition: state
+      entity_id: camera.chuangmi_81ac1_63f6_camera_control
+      state: unavailable
+      for: "00:15:00"
+    - "{{ this.attributes.last_triggered is none or (now() - this.attributes.last_triggered).total_seconds() > 3600 }}"
+  actions:
+    - action: homeassistant.reload_config_entry
+      data:
+        entry_id: 01M3JGZPZZ28HTARNZTS895GZ1
