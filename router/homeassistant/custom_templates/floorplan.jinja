@@ -1,0 +1,19 @@
+{#- Макросы для шаблонных сенсоров «Планировки» (templates.yaml). На роутере: /config/custom_templates/.
+    После правки: Инструменты разработчика → YAML → «Перезагрузить пользовательские шаблоны Jinja». -#}
+
+{#- Проблемные устройства в пространстве HA: батарея < 20% или нет связи (unavailable).
+    Возвращает строку «Имя: причина; …» (пустая — всё в порядке). Пылесос не считаем: его батарея садится при уборке. -#}
+{% macro room_problems(area) -%}
+{%- set ns = namespace(out=[]) -%}
+{%- for e in area_entities(area) if 'roborock' not in e -%}
+  {%- set d = e.split('.')[0] -%}
+  {%- set s = states(e) -%}
+  {%- set name = device_attr(device_id(e), 'name_by_user') or device_attr(device_id(e), 'name') or state_attr(e, 'friendly_name') or e -%}
+  {%- if d == 'sensor' and 'battery' in e and s | is_number and s | float < 20 -%}
+    {%- set ns.out = ns.out + [name ~ ': батарея ' ~ s | int ~ '%'] -%}
+  {%- elif d in ['sensor', 'binary_sensor', 'switch', 'light', 'camera'] and s == 'unavailable' -%}
+    {%- set ns.out = ns.out + [name ~ ': нет связи'] -%}
+  {%- endif -%}
+{%- endfor -%}
+{{- ns.out | unique | join('; ') -}}
+{%- endmacro %}

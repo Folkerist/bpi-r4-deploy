@@ -1,0 +1,22 @@
+# Initial Zigbee2MQTT config (Z2M 2.x). Z2M replaces GENERATE with real keys on first start and then
+# owns this file: never overwrite it on the router afterwards, and never commit the generated keys.
+homeassistant:
+  enabled: true
+frontend:
+  enabled: true
+  port: 8099
+mqtt:
+  server: mqtt://127.0.0.1:1883
+  base_topic: zigbee2mqtt
+serial:
+  port: /dev/ttyACM0
+  adapter: ember
+  baudrate: 115200
+  rtscts: false
+permit_join: false
+advanced:
+  channel: 25
+  network_key: GENERATE
+  pan_id: GENERATE
+  ext_pan_id: GENERATE
+  log_level: info

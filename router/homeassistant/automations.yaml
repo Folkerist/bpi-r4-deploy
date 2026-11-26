@@ -1,0 +1,577 @@
+# Автоматизации HA. На роутере: /config/automations.yaml (в configuration.yaml — «automation: !include automations.yaml»).
+
+# Уборка голосом, всё решает фраза (переключатель на карте не участвует):
+#   «Алиса, пропылесось зал»  -> сценарий «Пылесось: зал» -> сухой (S5)
+#   «Алиса, помой на кухне»   -> «Помой: кухня»           -> мокрый (Qrevo)
+#   «Алиса, убери в спальне»  -> «Уборка: спальня»        -> сначала сухой, потом мокрый
+#   «…всю квартиру» / «…везде» -> «…: вся квартира»;  «останови уборку» -> «Уборка: пауза» -> оба на паузу;
+#   «пылесосы на базу» / «хватит убирать» -> «Уборка: стоп» -> оба на базу.
+# Сценарии создаёт yandex/ya_create.py: по фразе услышавшая колонка выполняет беззвучное «ничего не делай», интеграция
+# yandex_station присылает событие yandex_scenario с именем сценария и колонкой; ответ голосом — на той же колонке.
+# Сценарии HA для TTS называются «ХА <id>» и сюда не попадают. Повторные события в течение 5 с — отбрасываются.
+- id: fp_vacuum_voice
+  alias: Уборка по голосу (Алиса)
+  mode: single
+  max_exceeded: silent
+  triggers:
+    - trigger: event
+      event_type: yandex_scenario
+  conditions:
+    - condition: template
+      value_template: "{{ (trigger.event.data.scenario_name or '') is match('(Пылесось|Помой|Уборка): ') }}"
+  actions:
+    - variables:
+        rooms: {"зал": zal, "кухня": kukhnia, "спальня": spalnia, "детская": detskaia, "прихожая": prikhozhaia,
+                "коридор": koridor, "малый коридор": koridor2, "проход в коридоре": prokhod}
+        say: {zal: зал, kukhnia: кухню, spalnia: спальню, detskaia: детскую, prikhozhaia: прихожую, koridor: коридор,
+              koridor2: малый коридор, prokhod: проход в коридоре, all: всю квартиру}
+        verb: "{{ trigger.event.data.scenario_name.split(':', 1)[0] }}"
+        place: "{{ trigger.event.data.scenario_name.split(':', 1)[1] | trim | lower }}"
+        room: >-
+          {{ 'all' if place == 'вся квартира' else 'stop' if place == 'стоп' else 'pause' if place == 'пауза'
+             else rooms.get(place, '') }}
+        who: "{{ {'Пылесось': 'Сухой', 'Помой': 'Мокрый'}.get(verb, 'Вместе') }}"
+        ids: "{{ rooms.values() | list if room == 'all' else [room] }}"
+        speaker: "{{ trigger.event.data.entity_id }}"
+    - choose:
+        - conditions: "{{ room == 'stop' }}"
+          sequence:
+            - action: script.turn_off
+              target: {entity_id: script.fp_vacuum_together}
+            - action: vacuum.return_to_base
+              target: {entity_id: [vacuum.roborock_s5_8159_robot_cleaner, vacuum.koridor_roborock_qrevo]}
+            - action: media_player.play_media
+              target: {entity_id: "{{ speaker }}"}
+              data: {media_content_type: text, media_content_id: "Пылесосы едут на базу"}
+        # Пауза: «Вместе» прерывается (иначе после паузы и возврата S5 на базу Qrevo начал бы мыть). Пауза на стоящем
+        # пылесосе безвредна, а состояние S5 в HA запаздывает на ~20 с — поэтому без проверки состояния, ошибки не мешают.
+        - conditions: "{{ room == 'pause' }}"
+          sequence:
+            - action: script.turn_off
+              target: {entity_id: script.fp_vacuum_together}
+            - action: vacuum.pause
+              target: {entity_id: vacuum.roborock_s5_8159_robot_cleaner}
+              continue_on_error: true
+            - action: vacuum.pause
+              target: {entity_id: vacuum.koridor_roborock_qrevo}
+              continue_on_error: true
+            - action: media_player.play_media
+              target: {entity_id: "{{ speaker }}"}
+              data: {media_content_type: text, media_content_id: "Ставлю уборку на паузу"}
+        - conditions: "{{ room == '' }}"
+          sequence:
+            - action: media_player.play_media
+              target: {entity_id: "{{ speaker }}"}
+              data: {media_content_type: text, media_content_id: "Не знаю такую комнату: {{ place }}"}
+      default:
+        - if: "{{ who == 'Вместе' }}"
+          then:
+            - action: script.turn_on
+              target: {entity_id: script.fp_vacuum_together}
+              data: {variables: {rooms: "{{ ids }}"}}
+          else:
+            - action: script.fp_vacuum_clean
+              data: {rooms: "{{ ids }}", who: "{{ who }}"}
+        - action: media_player.play_media
+          target: {entity_id: "{{ speaker }}"}
+          data:
+            media_content_type: text
+            media_content_id: >
+              {{ {'Сухой': 'Пылесошу ', 'Мокрый': 'Мою '}.get(who, 'Убираю ') ~ say[room] }}{{
+                 ': сначала пылесос, потом мойка' if who == 'Вместе' else '' }}
+    - delay: "00:00:05"
+- id: motion_sensor_test_blink
+  alias: Тест датчиков движения
+  description: >-
+    Режим проверки: каждый датчик движения на каждое событие моргает (2 раза) всем светом своей комнаты
+    и возвращает как было. Кладовки нет — там свой автосвет. Включать вручную на время проверки.
+  initial_state: false
+  mode: parallel
+  max: 20
+  triggers:
+    - trigger: state
+      entity_id:
+        - binary_sensor.kukhnia_motion
+        - binary_sensor.kukhnia_stol_motion
+        - binary_sensor.zal_motion
+        - binary_sensor.koridor_motion
+        - binary_sensor.prikhozhaia_motion
+        - binary_sensor.prikhozhaia_vkhod_motion
+        - binary_sensor.vannaia_motion
+        - binary_sensor.tualet_motion
+  # Без to/from: срабатывает и на повторные события датчика, пока он уже в «on».
+  conditions:
+    - condition: template
+      value_template: >-
+        {{ trigger.to_state is not none and trigger.to_state.state == 'on'
+           and trigger.from_state is not none
+           and trigger.from_state.state not in ['unavailable', 'unknown'] }}
+  variables:
+    rooms:
+      binary_sensor.kukhnia_motion: [switch.light_kitchen_perimeter]
+      binary_sensor.kukhnia_stol_motion: [switch.light_kitchen_main]
+      binary_sensor.zal_motion: [light.zal_yeelight_hall]
+      binary_sensor.koridor_motion: [switch.light_corridor, switch.light_hall_main, switch.light_hall_perimeter]
+      binary_sensor.prikhozhaia_motion: [switch.light_entry_main]
+      binary_sensor.prikhozhaia_vkhod_motion: [switch.light_entry_perimeter]
+      binary_sensor.vannaia_motion: [switch.light_bath]
+      binary_sensor.tualet_motion: [switch.light_wc]
+    target: "{{ rooms[trigger.entity_id] }}"
+  actions:
+    - repeat:
+        count: 4
+        sequence:
+          - action: homeassistant.toggle
+            target:
+              entity_id: "{{ target }}"
+          - delay: "00:00:01"
+- id: low_battery_notify
+  alias: Низкий заряд батареек
+  description: >-
+    Уведомление на телефон, когда у датчика заряд ниже 15% (сразу при падении и сводкой каждый день в 10:00).
+    Новый датчик с батарейкой — добавить в оба списка ниже. Телефон, планшет и пылесосы не учитываются.
+  mode: queued
+  triggers:
+    - trigger: numeric_state
+      id: drop
+      below: 15
+      entity_id: &batteries
+        - sensor.spalnia_battery
+        - sensor.zal_battery
+        - sensor.koridor_battery
+        - sensor.vannaia_battery
+        - sensor.detskaia_battery
+        - sensor.kukhnia_battery
+        - sensor.prikhozhaia_dver_battery
+        - sensor.kladovka_dver_battery
+        - sensor.vannaia_dver_battery
+        - sensor.kladovka_motion_battery
+        - sensor.koridor_motion_battery
+        - sensor.kukhnia_motion_battery
+        - sensor.kukhnia_stol_motion_battery
+        - sensor.prikhozhaia_motion_battery
+        - sensor.prikhozhaia_vkhod_motion_battery
+        - sensor.tualet_motion_battery
+        - sensor.vannaia_motion_battery
+        - sensor.zal_motion_battery
+    - trigger: time
+      id: daily
+      at: "10:00:00"
+  variables:
+    batteries: *batteries
+    low: >-
+      {% set ns = namespace(items=[]) %}
+      {% for e in batteries if states(e) | is_number and states(e) | float < 15 %}
+        {% set ns.items = ns.items + [state_attr(e, 'friendly_name') ~ ': ' ~ (states(e) | float | round(0) | int) ~ '%'] %}
+      {% endfor %}
+      {{ ns.items }}
+  conditions:
+    - condition: template
+      value_template: "{{ trigger.id | default('') == 'drop' or low | count > 0 }}"
+  actions:
+    - action: notify.mobile_app_vivo_x200
+      data:
+        title: "🔋 Пора менять батарейку"
+        message: >-
+          {% if trigger.id | default('') == 'drop' %}{{ trigger.to_state.name }}: {{ trigger.to_state.state | float | round(0) | int }}%
+          {% else %}Низкий заряд: {{ low | join(', ') if low | count > 0 else 'всё в порядке' }}{% endif %}
+        data:
+          tag: low-battery
+          channel: Батарейки
+- id: kladovka_light_by_door
+  alias: 'Кладовка: свет по двери и движению'
+  description: >-
+    Дверь открыли — свет вкл. Движение в кладовке — свет вкл (и отменяет выключение).
+    Дверь закрыли — через 40 с выкл, если за это время внутри нет движения.
+    Свет выключается и после 15 минут подряд без движения (отсчёт от последнего движения).
+  mode: restart
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.kladovka_dver_contact
+      from: "off"
+      to: "on"
+      id: door_open
+    - trigger: state
+      entity_id: binary_sensor.kladovka_dver_contact
+      from: "on"
+      to: "off"
+      id: door_closed
+    # Без to/from: срабатывает и на повторные события датчика, пока он уже в «on».
+    - trigger: state
+      entity_id: binary_sensor.kladovka_motion
+      id: motion
+    - trigger: state
+      entity_id: binary_sensor.kladovka_motion
+      to: "off"
+      for: "00:15:00"
+      id: quiet
+    - trigger: state
+      entity_id: binary_sensor.kladovka_dver_contact
+      to: "on"
+      for: "00:15:00"
+      id: quiet
+  conditions:
+    - condition: template
+      value_template: >-
+        {% if trigger.id == 'motion' %}
+          {{ trigger.to_state is not none and trigger.to_state.state == 'on'
+             and trigger.from_state is not none
+             and trigger.from_state.state not in ['unavailable', 'unknown'] }}
+        {% elif trigger.id == 'quiet' %}
+          {{ is_state('switch.light_storage', 'on') and is_state('binary_sensor.kladovka_motion', 'off')
+             and (now() - states.binary_sensor.kladovka_motion.last_changed).total_seconds() >= 900 }}
+        {% else %}true{% endif %}
+  actions:
+    - choose:
+        - conditions: [{condition: trigger, id: [door_open, motion]}]
+          sequence:
+            - action: switch.turn_on
+              target: {entity_id: switch.light_storage}
+        - conditions: [{condition: trigger, id: door_closed}]
+          sequence:
+            # Новое движение за эти 40 с перезапустит автоматизацию (mode: restart) и отменит выключение.
+            - delay: "00:00:40"
+            - action: switch.turn_off
+              target: {entity_id: switch.light_storage}
+        - conditions: [{condition: trigger, id: quiet}]
+          sequence:
+            - action: switch.turn_off
+              target: {entity_id: switch.light_storage}
+- id: auto_off_no_motion
+  alias: 'Автовыключение света без движения'
+  description: >-
+    Раз в минуту: если в комнате горит свет (включён 30+ мин назад) и все её датчики движения
+    30+ мин в состоянии «нет движения», свет комнаты выключается. Датчик не на связи — не выключать.
+    Спальня (датчика нет): свет выключается, если горит 60+ мин. Детская — не трогать (решение пользователя).
+    Кладовка — своя автоматизация.
+  mode: single
+  triggers:
+    - trigger: time_pattern
+      minutes: "/1"
+  variables:
+    minutes: 30
+    rooms:
+      - name: Кухня
+        sensors: [binary_sensor.kukhnia_motion, binary_sensor.kukhnia_stol_motion]
+        lights: [switch.light_kitchen_main, switch.light_kitchen_perimeter]
+      - name: Зал
+        sensors: [binary_sensor.zal_motion]
+        lights: [light.zal_yeelight_hall, light.zal_yeelight_hall_ambilight]
+      - name: Коридор
+        sensors: [binary_sensor.koridor_motion]
+        lights: [switch.light_corridor, switch.light_hall_main, switch.light_hall_perimeter]
+      - name: Прихожая
+        sensors: [binary_sensor.prikhozhaia_motion, binary_sensor.prikhozhaia_vkhod_motion]
+        lights: [switch.light_entry_main, switch.light_entry_perimeter]
+      - name: Ванная
+        sensors: [binary_sensor.vannaia_motion]
+        lights: [switch.light_bath, switch.light_bath_mirror]
+      - name: Туалет
+        sensors: [binary_sensor.tualet_motion]
+        lights: [switch.light_wc]
+      # Без датчиков движения: просто выключить, если свет горит дольше указанного времени.
+      - name: Спальня
+        sensors: []
+        minutes: 60
+        lights: [light.spalnia_yeelight_bed, light.spalnia_yeelight_bed_ambilight]
+    to_off: >-
+      {% set ns = namespace(out=[]) %}
+      {% for r in rooms %}
+        {% set limit = (r.minutes | default(minutes)) * 60 %}
+        {% set q = namespace(quiet=true) %}
+        {% for s in r.sensors %}
+          {% set st = states[s.split('.')[0]][s.split('.')[1]] %}
+          {% if st is none or st.state != 'off' or (now() - st.last_changed).total_seconds() < limit %}
+            {% set q.quiet = false %}
+          {% endif %}
+        {% endfor %}
+        {% if q.quiet %}
+          {% for l in r.lights %}
+            {% set ls = states[l.split('.')[0]][l.split('.')[1]] %}
+            {% if ls is not none and ls.state == 'on' and (now() - ls.last_changed).total_seconds() >= limit %}
+              {% set ns.out = ns.out + [l] %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+      {{ ns.out }}
+  conditions:
+    - condition: template
+      value_template: "{{ to_off | count > 0 }}"
+  actions:
+    - action: homeassistant.turn_off
+      target:
+        entity_id: "{{ to_off }}"
+- id: bath_mirror_on
+  alias: 'Ванная: зеркало и свет'
+  description: >-
+    Дверь ванной открыли или движение: подсветка зеркала — всегда; основной свет — только 9:00–22:00.
+    5 мин без движения: гаснет зеркало, а 9:00–22:00 и основной свет (ночью основной — общее правило 30 мин).
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.vannaia_dver_contact
+      from: "off"
+      to: "on"
+      id: door
+    # Без to/from: и на повторные события датчика, пока он уже в «on».
+    - trigger: state
+      entity_id: binary_sensor.vannaia_motion
+      id: motion
+    - trigger: state
+      entity_id: binary_sensor.vannaia_motion
+      to: "off"
+      for: "00:05:00"
+      id: quiet
+  conditions:
+    - condition: template
+      value_template: >-
+        {% if trigger.id == 'motion' %}
+          {{ trigger.to_state is not none and trigger.to_state.state == 'on'
+             and trigger.from_state is not none
+             and trigger.from_state.state not in ['unavailable', 'unknown'] }}
+        {% else %}true{% endif %}
+  actions:
+    - choose:
+        - conditions: [{condition: trigger, id: quiet}]
+          sequence:
+            - action: switch.turn_off
+              target: {entity_id: switch.light_bath_mirror}
+            - if: [{condition: time, after: "09:00:00", before: "22:00:00"}]
+              then:
+                - action: switch.turn_off
+                  target: {entity_id: switch.light_bath}
+      default:
+        - action: switch.turn_on
+          target: {entity_id: switch.light_bath_mirror}
+        - if: [{condition: time, after: "09:00:00", before: "22:00:00"}]
+          then:
+            - action: switch.turn_on
+              target: {entity_id: switch.light_bath}
+- id: wc_light_motion
+  alias: 'Туалет: свет по движению'
+  description: >-
+    Движение в туалете — свет WC включается (всегда). 5 мин без движения — выключается.
+  mode: single
+  triggers:
+    # Без to/from: и на повторные события датчика, пока он уже в «on».
+    - trigger: state
+      entity_id: binary_sensor.tualet_motion
+      id: motion
+    - trigger: state
+      entity_id: binary_sensor.tualet_motion
+      to: "off"
+      for: "00:05:00"
+      id: quiet
+  conditions:
+    - condition: template
+      value_template: >-
+        {% if trigger.id == 'motion' %}
+          {{ trigger.to_state is not none and trigger.to_state.state == 'on'
+             and trigger.from_state is not none
+             and trigger.from_state.state not in ['unavailable', 'unknown']
+             and is_state('switch.light_wc', 'off') }}
+        {% else %}{{ is_state('switch.light_wc', 'on') }}{% endif %}
+  actions:
+    - choose:
+        - conditions: [{condition: trigger, id: quiet}]
+          sequence:
+            - action: switch.turn_off
+              target: {entity_id: switch.light_wc}
+      default:
+        - action: switch.turn_on
+          target: {entity_id: switch.light_wc}
+- id: entrance_door_telegram_photo
+  alias: 'Входная дверь: фото и видео в Telegram'
+  description: >-
+    Входная дверь открылась — в группу Telegram «Home»: фото с камеры C700 (готово ~через 7 с) и видео ~10 с
+    (go2rtc stream.mp4, duration=15, начинается с опорного кадра; приходит ~через 17 с). Оба запроса стартуют сразу.
+  mode: single
+  max_exceeded: silent
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.prikhozhaia_dver_contact
+      from: "off"
+      to: "on"
+  variables:
+    when: "{{ now().strftime('%H:%M:%S') }}"
+  actions:
+    - action: script.turn_on
+      target: {entity_id: script.tg_camera_photo}
+      data:
+        variables: {caption: "🚪 Открыта входная дверь, {{ when }}"}
+    - action: telegram_bot.send_video
+      continue_on_error: true
+      data:
+        config_entry_id: 01M7TCDWR6QKZ4YC6JWJ4VQD4P
+        chat_id: -5154704279
+        url: "http://127.0.0.1:1985/api/stream.mp4?src=c700&duration=15"
+        caption: "🎥 Входная дверь, {{ when }}"
+- id: bath_fan_humidity
+  alias: 'Ванная: вытяжка по влажности'
+  description: >-
+    ВКЛ: включился основной свет ванной (выключателем или по движению); или ванная влажнее квартиры на 8+
+    (sensor.vannaia_humidity_delta), или рост 4+ между показаниями датчика, или влажность 65%+.
+    Пока свет горит — работает; после выключения света — ещё 5+ мин и до нормальной влажности. ВЫКЛ (если включила автоматика): разница ≤ 3 и влажность < 65 и проработала 10+ мин.
+    Включили рукой — выкл через 20 мин, если влажность в норме. Предохранитель — 90 мин.
+    Выключили, пока влажно (рукой или предохранитель), — пауза 30 мин (input_boolean.vytiazhka_pauza_avtomatiki). Датчик ванной шлёт данные раз в ~8 мин.
+  mode: queued
+  max: 5
+  triggers:
+    - trigger: state
+      entity_id: [sensor.vannaia_humidity, sensor.vannaia_humidity_delta]
+      id: hum
+    - trigger: time_pattern
+      minutes: /2
+      id: tick
+    - trigger: state
+      entity_id: switch.vannaia_vytiazhka
+      to: "off"
+      id: fan_off
+    - trigger: state
+      entity_id: switch.light_bath
+      from: "off"
+      to: "on"
+      id: light_on
+  variables:
+    fan: switch.vannaia_vytiazhka
+    flag: input_boolean.vytiazhka_vkliuchena_avtomatikoi
+    pause: input_boolean.vytiazhka_pauza_avtomatiki
+    h: "{{ states('sensor.vannaia_humidity') | float(0) }}"
+    d: "{{ states('sensor.vannaia_humidity_delta') | float(0) }}"
+    rise: >-
+      {% if trigger.id == 'hum' and trigger.entity_id == 'sensor.vannaia_humidity'
+            and trigger.from_state is not none and trigger.from_state.state | is_number
+            and trigger.to_state.state | is_number %}
+        {{ trigger.to_state.state | float - trigger.from_state.state | float }}
+      {% else %}0{% endif %}
+    fan_on: "{{ is_state(fan, 'on') }}"
+    minutes: "{{ ((now() - states[fan].last_changed).total_seconds() / 60) | round(1) if states[fan] else 0 }}"
+    auto: "{{ is_state(flag, 'on') }}"
+    humid: "{{ d >= 8 or rise | float >= 4 or h >= 65 }}"
+    normal: "{{ d <= 3 and h < 65 }}"
+    light_on: "{{ is_state('switch.light_bath', 'on') }}"
+    light_off_min: >-
+      {{ 0 if light_on else ((now() - states.switch.light_bath.last_changed).total_seconds() / 60) | round(1) }}
+  actions:
+    - choose:
+        # Вытяжку выключили — сбросить признак «включено автоматикой»; если выключили, пока ещё влажно
+        # (рукой или предохранитель 90 мин), — пауза автоматики на 30 мин.
+        - conditions: "{{ trigger.id == 'fan_off' }}"
+          sequence:
+            - action: input_boolean.turn_off
+              target: {entity_id: "{{ flag }}"}
+            - if: "{{ d >= 5 or h >= 65 }}"
+              then:
+                - action: input_boolean.turn_on
+                  target: {entity_id: "{{ pause }}"}
+        # Пауза закончилась (вытяжка выключена 30+ мин) — снять.
+        - conditions: "{{ is_state(pause, 'on') and not fan_on and minutes >= 30 }}"
+          sequence:
+            - action: input_boolean.turn_off
+              target: {entity_id: "{{ pause }}"}
+        # Включить: влажно, вытяжка выключена, нет паузы.
+        - conditions: "{{ not fan_on and (humid or trigger.id == 'light_on') and is_state(pause, 'off') }}"
+          sequence:
+            - action: switch.turn_on
+              target: {entity_id: "{{ fan }}"}
+            - action: input_boolean.turn_on
+              target: {entity_id: "{{ flag }}"}
+        # Выключить: включила автоматика и влажность в норме 10+ мин работы; включили рукой — 20 мин и норма;
+        # или предохранитель 90 мин.
+        - conditions: >-
+            {{ fan_on and ((auto and normal and minutes >= 10 and not light_on and light_off_min >= 5)
+                           or (not auto and normal and d < 5 and minutes >= 20)
+                           or minutes >= 90) }}
+          sequence:
+            - action: switch.turn_off
+              target: {entity_id: "{{ fan }}"}
+- id: koridor_night_light
+  alias: 'Коридор: ночник у лотка'
+  description: >-
+    21:00–09:00, если в обоих коридорах не горит ни один свет: движение у лотка (binary_sensor.koridor_motion) —
+    ночник вкл; 2 мин без движения — выкл. Включили основной/доп. свет коридора — ночник (включённый автоматикой) выкл.
+    Включили вручную (Алиса, кнопка розетки, HA) — выкл через 2 часа.
+  mode: queued
+  max: 5
+  triggers:
+    # Без to/from: и на повторные события датчика, пока он уже в «on».
+    - trigger: state
+      entity_id: binary_sensor.koridor_motion
+      id: motion
+    - trigger: state
+      entity_id: binary_sensor.koridor_motion
+      to: "off"
+      for: "00:02:00"
+      id: quiet
+    - trigger: state
+      entity_id: [switch.light_corridor, switch.light_hall_main, switch.light_hall_perimeter]
+      to: "on"
+      id: main_on
+    # Раз в 5 мин: ручное включение старше 2 ч (по last_changed — переживает перезапуск HA).
+    - trigger: time_pattern
+      minutes: /5
+      id: manual_timeout
+    - trigger: state
+      entity_id: switch.koridor_nochnik
+      to: "off"
+      id: lamp_off
+  variables:
+    lamp: switch.koridor_nochnik
+    flag: input_boolean.nochnik_vkliuchen_avtomatikoi
+    dark: >-
+      {{ is_state('switch.light_corridor', 'off') and is_state('switch.light_hall_main', 'off')
+         and is_state('switch.light_hall_perimeter', 'off') }}
+  actions:
+    - choose:
+        - conditions: "{{ trigger.id == 'lamp_off' }}"
+          sequence:
+            - action: input_boolean.turn_off
+              target: {entity_id: "{{ flag }}"}
+        - conditions:
+            - "{{ trigger.id == 'motion' and trigger.to_state is not none and trigger.to_state.state == 'on' }}"
+            - "{{ trigger.from_state is not none and trigger.from_state.state not in ['unavailable', 'unknown'] }}"
+            - condition: time
+              after: "21:00:00"
+              before: "09:00:00"
+            - "{{ dark and is_state(lamp, 'off') }}"
+          sequence:
+            - action: input_boolean.turn_on
+              target: {entity_id: "{{ flag }}"}
+            - action: switch.turn_on
+              target: {entity_id: "{{ lamp }}"}
+        - conditions: "{{ trigger.id in ['quiet', 'main_on'] and is_state(flag, 'on') and is_state(lamp, 'on') }}"
+          sequence:
+            - action: switch.turn_off
+              target: {entity_id: "{{ lamp }}"}
+        - conditions: >-
+            {{ trigger.id == 'manual_timeout' and is_state(flag, 'off') and is_state(lamp, 'on')
+               and (now() - states[lamp].last_changed).total_seconds() >= 7200 }}
+          sequence:
+            - action: switch.turn_off
+              target: {entity_id: "{{ lamp }}"}
+- id: miot_cloud_watchdog
+  alias: 'Xiaomi Miot: перезагрузка облачной записи при недоступности'
+  description: >-
+    Облачная запись Xiaomi Miot (камера C700) при старте берёт список устройств из облака Xiaomi; если облако не
+    ответило — камера недоступна, пока запись не перезагрузить. Камера недоступна 15+ мин — перезагрузить запись
+    (не чаще раза в час). Пылесос S5 вынесен в отдельную локальную запись (IP + токен) и от облака не зависит.
+  mode: single
+  max_exceeded: silent
+  triggers:
+    - trigger: state
+      entity_id: camera.chuangmi_81ac1_63f6_camera_control
+      to: unavailable
+      for: "00:15:00"
+    - trigger: time_pattern
+      minutes: "/30"
+  conditions:
+    - condition: state
+      entity_id: camera.chuangmi_81ac1_63f6_camera_control
+      state: unavailable
+      for: "00:15:00"
+    - "{{ this.attributes.last_triggered is none or (now() - this.attributes.last_triggered).total_seconds() > 3600 }}"
+  actions:
+    - action: homeassistant.reload_config_entry
+      data:
+        entry_id: 01M3JGZPZZ28HTARNZTS895GZ1
